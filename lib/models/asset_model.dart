@@ -1,0 +1,3 @@
+class AssetModel {
+  const AssetModel();
+}

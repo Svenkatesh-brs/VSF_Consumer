@@ -1,0 +1,3 @@
+class BorrowerModel {
+  const BorrowerModel();
+}

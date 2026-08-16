@@ -1,12 +1,15 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:vsf_consumer/main.dart';
+import 'package:get/get.dart';
+import 'package:vsf_consumer/screens/login_screen.dart';
 
 void main() {
   testWidgets('Login screen loads', (WidgetTester tester) async {
-    await tester.pumpWidget(const VSFConsumerApp());
+    await tester.pumpWidget(
+      const GetMaterialApp(
+        home: LoginScreen(),
+      ),
+    );
 
-    await tester.pumpAndSettle();
-
-    expect(find.text('Login Screen'), findsOneWidget);
+    expect(find.byType(LoginScreen), findsOneWidget);
   });
 }

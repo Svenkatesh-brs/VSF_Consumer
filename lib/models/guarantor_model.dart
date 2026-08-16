@@ -1,0 +1,3 @@
+class GuarantorModel {
+  const GuarantorModel();
+}
