@@ -1,0 +1,12 @@
+[1mdiff --git a/pubspec.yaml b/pubspec.yaml[m
+[1mindex 26cd322..ce9efee 100644[m
+[1m--- a/pubspec.yaml[m
+[1m+++ b/pubspec.yaml[m
+[36m@@ -60,6 +60,7 @@[m [mflutter:[m
+   uses-material-design: true[m
+   assets:[m
+     - assets/bg.png[m
+[32m+[m[32m    - assets/appbg.png[m
+     - assets/vsf.png[m
+     - assets/animations/splash_animation.json[m
+ [m

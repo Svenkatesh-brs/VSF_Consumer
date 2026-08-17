@@ -1,39 +1,35 @@
 import 'package:flutter/material.dart';
 
-import '../utils/app_constants.dart';
-
 class AppBackground extends StatelessWidget {
   const AppBackground({
     super.key,
     required this.child,
     this.showWatermark = true,
     this.watermarkHeroTag,
+    this.showBottomImage = false,
   });
 
   final Widget child;
   final bool showWatermark;
   final String? watermarkHeroTag;
-
-  Widget get _watermark => Center(
-        child: IgnorePointer(
-          child: Image.asset(
-            AppConstants.watermarkAsset,
-            width: AppConstants.watermarkWidth,
-            opacity: const AlwaysStoppedAnimation(
-              AppConstants.watermarkOpacity,
-            ),
-          ),
-        ),
-      );
+  final bool showBottomImage;
 
   @override
   Widget build(BuildContext context) {
-    final fullSize = MediaQuery.of(context).size;
+    final size = MediaQuery.of(context).size;
 
     Widget? watermark;
 
     if (showWatermark) {
-      watermark = _watermark;
+      watermark = Center(
+        child: IgnorePointer(
+          child: Image.asset(
+            'assets/vsf.png',
+            width: 260,
+            opacity: const AlwaysStoppedAnimation(0.06),
+          ),
+        ),
+      );
 
       if (watermarkHeroTag != null) {
         watermark = Hero(
@@ -43,41 +39,50 @@ class AppBackground extends StatelessWidget {
       }
     }
 
-    Widget fixedLayer(Widget widget) {
-      return Positioned.fill(
-        child: OverflowBox(
-          minWidth: fullSize.width,
-          maxWidth: fullSize.width,
-          minHeight: fullSize.height,
-          maxHeight: fullSize.height,
-          alignment: Alignment.topCenter,
-          child: widget,
-        ),
-      );
-    }
-
     return Stack(
       fit: StackFit.expand,
       children: [
-        fixedLayer(
-          Container(
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              image: DecorationImage(
-                image: AssetImage(
-                  AppConstants.backgroundAsset,
-                ),
-                fit: BoxFit.cover,
-              ),
-            ),
+        // --------------------------------------------------------
+        // BASE BACKGROUND
+        // --------------------------------------------------------
+        Positioned.fill(
+          child: Image.asset(
+            'assets/bg.png',
+            fit: BoxFit.cover,
           ),
         ),
+
+        // --------------------------------------------------------
+        // OPTIONAL WATERMARK
+        // --------------------------------------------------------
         if (watermark != null)
-          fixedLayer(
-            IgnorePointer(
+          Positioned.fill(
+            child: IgnorePointer(
               child: watermark,
             ),
           ),
+
+        // --------------------------------------------------------
+        // APP BOTTOM DECORATION
+        // --------------------------------------------------------
+        if (showBottomImage)
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: IgnorePointer(
+              child: Image.asset(
+                'assets/appbg.png',
+                width: size.width,
+                fit: BoxFit.fitWidth,
+                alignment: Alignment.bottomCenter,
+              ),
+            ),
+          ),
+
+        // --------------------------------------------------------
+        // SCREEN CONTENT
+        // --------------------------------------------------------
         child,
       ],
     );

@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 
 import '../routes/app_routes.dart';
-import '../widgets/app_background.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -47,26 +46,15 @@ class _SplashScreenState extends State<SplashScreen>
         tween: Tween<double>(
           begin: 0.0,
           end: 1.0,
-        ).chain(
-          CurveTween(
-            curve: Curves.easeOut,
-          ),
-        ),
+        ).chain(CurveTween(curve: Curves.easeOut)),
         weight: 25,
       ),
-      TweenSequenceItem(
-        tween: ConstantTween<double>(1.0),
-        weight: 50,
-      ),
+      TweenSequenceItem(tween: ConstantTween<double>(1.0), weight: 50),
       TweenSequenceItem(
         tween: Tween<double>(
           begin: 1.0,
           end: 0.0,
-        ).chain(
-          CurveTween(
-            curve: Curves.easeIn,
-          ),
-        ),
+        ).chain(CurveTween(curve: Curves.easeIn)),
         weight: 25,
       ),
     ]).animate(_logoController);
@@ -80,33 +68,21 @@ class _SplashScreenState extends State<SplashScreen>
         tween: Tween<double>(
           begin: 0.75,
           end: 1.05,
-        ).chain(
-          CurveTween(
-            curve: Curves.easeOutBack,
-          ),
-        ),
+        ).chain(CurveTween(curve: Curves.easeOutBack)),
         weight: 30,
       ),
       TweenSequenceItem(
         tween: Tween<double>(
           begin: 1.05,
           end: 1.0,
-        ).chain(
-          CurveTween(
-            curve: Curves.easeInOut,
-          ),
-        ),
+        ).chain(CurveTween(curve: Curves.easeInOut)),
         weight: 45,
       ),
       TweenSequenceItem(
         tween: Tween<double>(
           begin: 1.0,
           end: 0.90,
-        ).chain(
-          CurveTween(
-            curve: Curves.easeIn,
-          ),
-        ),
+        ).chain(CurveTween(curve: Curves.easeIn)),
         weight: 25,
       ),
     ]).animate(_logoController);
@@ -118,19 +94,10 @@ class _SplashScreenState extends State<SplashScreen>
         tween: Tween<Offset>(
           begin: const Offset(0.0, 0.15),
           end: Offset.zero,
-        ).chain(
-          CurveTween(
-            curve: Curves.easeOutCubic,
-          ),
-        ),
+        ).chain(CurveTween(curve: Curves.easeOutCubic)),
         weight: 30,
       ),
-      TweenSequenceItem(
-        tween: ConstantTween<Offset>(
-          Offset.zero,
-        ),
-        weight: 70,
-      ),
+      TweenSequenceItem(tween: ConstantTween<Offset>(Offset.zero), weight: 70),
     ]).animate(_logoController);
 
     _logoController.forward();
@@ -139,9 +106,7 @@ class _SplashScreenState extends State<SplashScreen>
     // LOTTIE ANIMATION
     // ------------------------------------------------------------
 
-    _lottieController = AnimationController(
-      vsync: this,
-    );
+    _lottieController = AnimationController(vsync: this);
 
     _lottieController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
@@ -186,8 +151,8 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: AppBackground(
-        showWatermark: false,
+      body: ColoredBox(
+        color: Colors.white,
         child: SafeArea(
           child: Center(
             child: Column(
@@ -231,9 +196,9 @@ class _SplashScreenState extends State<SplashScreen>
                         ..forward();
 
                       // Ensure the splash doesn't finish too quickly.
-                      final minimumDuration = composition.duration > const Duration(
-                        milliseconds: 2400,
-                      )
+                      final minimumDuration =
+                          composition.duration >
+                              const Duration(milliseconds: 2400)
                           ? composition.duration
                           : const Duration(milliseconds: 2400);
 
