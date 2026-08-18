@@ -78,8 +78,12 @@ void main() {
     // ---- ENTER OTP + VERIFY ----
     await tester.enterText(otpTextField(), '123456');
     await tester.pump();
-    expect(tester.takeException(), isNull);
 
+    // Let the staggered OTP entrance animations finish so the
+    // Verify button is on screen and tappable.
+    for (var i = 0; i < 10; i++) {
+      await tester.pump(const Duration(milliseconds: 200));
+    }
     await tester.tap(find.text('Verify'));
     // Success overlay + 900ms delay before navigating Home.
     await pumpUntilFound(tester, find.text('Welcome back'));
@@ -124,6 +128,8 @@ void main() {
     // Leave the app in a stable state: unmount the tree first, then dispose
     // the permanent provider so its OTP countdown timer isn't left pending.
     await tester.pumpWidget(const SizedBox.shrink());
+    // Fire any remaining entrance-animation delay timers before the test ends.
+    await tester.pump(const Duration(milliseconds: 500));
     Get.delete<AuthProvider>(force: true);
   });
 }

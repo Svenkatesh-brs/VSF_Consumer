@@ -23,6 +23,17 @@ class _SplashScreenState extends State<SplashScreen>
   bool _lottieCompleted = false;
   bool _minimumDurationCompleted = false;
   bool _navigated = false;
+  bool _animationsStarted = false;
+
+  /// True once the first frame has actually been drawn. On a cold launch the
+  /// first frame can be delayed (engine warm-up, shader/JIT compilation)
+  /// behind the native launch screen; starting the animations in initState
+  /// would let them tick while nothing is visible yet, so the user would only
+  /// ever see the tail end of the logo/Lottie animation.
+  bool _firstFramePresented = false;
+
+  /// The Lottie composition duration, set when the asset finishes loading.
+  Duration? _compositionDuration;
 
   @override
   void initState() {
@@ -100,8 +111,6 @@ class _SplashScreenState extends State<SplashScreen>
       TweenSequenceItem(tween: ConstantTween<Offset>(Offset.zero), weight: 70),
     ]).animate(_logoController);
 
-    _logoController.forward();
-
     // ------------------------------------------------------------
     // LOTTIE ANIMATION
     // ------------------------------------------------------------
@@ -113,6 +122,46 @@ class _SplashScreenState extends State<SplashScreen>
         _lottieCompleted = true;
         _tryNavigateToLogin();
       }
+    });
+
+    // ------------------------------------------------------------
+    // Don't start the animations until the first frame is actually
+    // drawn. On a cold launch the engine may still be warming up
+    // behind the native launch screen; if the tickers start here they
+    // run while nothing is visible, so the user only sees the tail.
+    // ------------------------------------------------------------
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _firstFramePresented = true;
+      _tryStartAnimations();
+    });
+  }
+
+  void _tryStartAnimations() {
+    if (_animationsStarted ||
+        !_firstFramePresented ||
+        _compositionDuration == null ||
+        _navigated) {
+      return;
+    }
+
+    _animationsStarted = true;
+
+    _logoController.forward();
+
+    _lottieController.forward();
+
+    // Ensure the splash doesn't finish too quickly.
+    final minimumDuration =
+        _compositionDuration! > const Duration(milliseconds: 2400)
+        ? _compositionDuration!
+        : const Duration(milliseconds: 2400);
+
+    Future.delayed(minimumDuration, () {
+      if (!mounted) return;
+
+      _minimumDurationCompleted = true;
+      _tryNavigateToLogin();
     });
   }
 
@@ -191,23 +240,13 @@ class _SplashScreenState extends State<SplashScreen>
                     fit: BoxFit.contain,
                     repeat: false,
                     onLoaded: (composition) {
-                      _lottieController
-                        ..duration = composition.duration
-                        ..forward();
+                      _compositionDuration = composition.duration;
+                      _lottieController.duration = composition.duration;
 
-                      // Ensure the splash doesn't finish too quickly.
-                      final minimumDuration =
-                          composition.duration >
-                              const Duration(milliseconds: 2400)
-                          ? composition.duration
-                          : const Duration(milliseconds: 2400);
-
-                      Future.delayed(minimumDuration, () {
-                        if (!mounted) return;
-
-                        _minimumDurationCompleted = true;
-                        _tryNavigateToLogin();
-                      });
+                      // Start both animations only once the first frame has
+                      // actually been drawn, so the full logo/Lottie animation
+                      // is visible from the beginning (cold launch included).
+                      _tryStartAnimations();
                     },
                   ),
                 ),

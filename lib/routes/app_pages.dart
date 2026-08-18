@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
 
-import '../bindings/splash_binding.dart';
 import '../bindings/auth_binding.dart';
 import '../bindings/home_binding.dart';
 import '../bindings/loan_binding.dart';
@@ -16,7 +15,6 @@ abstract class AppPages {
     GetPage(
       name: AppRoutes.splash,
       page: () => const SplashScreen(),
-      binding: SplashBinding(),
     ),
     GetPage(
       name: AppRoutes.login,
