@@ -193,6 +193,7 @@ class _OtpScreenState extends State<OtpScreen> with TickerProviderStateMixin {
         : mobileNumber;
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: AppBackground(
         showWatermark: false,
         showBottomImage: true,

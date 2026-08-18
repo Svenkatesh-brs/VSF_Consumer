@@ -16,7 +16,14 @@ class AppBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+    final mediaQuery = MediaQuery.of(context);
+
+    // Remove keyboard insets from the background layer.
+    // This keeps the background decorations fixed when
+    // the keyboard opens.
+    final backgroundMediaQuery = mediaQuery.copyWith(
+      viewInsets: EdgeInsets.zero,
+    );
 
     Widget? watermark;
 
@@ -39,52 +46,57 @@ class AppBackground extends StatelessWidget {
       }
     }
 
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        // --------------------------------------------------------
-        // BASE BACKGROUND
-        // --------------------------------------------------------
-        Positioned.fill(
-          child: Image.asset(
-            'assets/bg.png',
-            fit: BoxFit.cover,
-          ),
-        ),
-
-        // --------------------------------------------------------
-        // OPTIONAL WATERMARK
-        // --------------------------------------------------------
-        if (watermark != null)
+    return MediaQuery(
+      data: backgroundMediaQuery,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          // --------------------------------------------------------
+          // BASE BACKGROUND
+          // --------------------------------------------------------
           Positioned.fill(
             child: IgnorePointer(
-              child: watermark,
-            ),
-          ),
-
-        // --------------------------------------------------------
-        // APP BOTTOM DECORATION
-        // --------------------------------------------------------
-        if (showBottomImage)
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: IgnorePointer(
               child: Image.asset(
-                'assets/appbg.png',
-                width: size.width,
-                fit: BoxFit.fitWidth,
-                alignment: Alignment.bottomCenter,
+                'assets/bg.png',
+                fit: BoxFit.cover,
               ),
             ),
           ),
 
-        // --------------------------------------------------------
-        // SCREEN CONTENT
-        // --------------------------------------------------------
-        child,
-      ],
+          // --------------------------------------------------------
+          // OPTIONAL WATERMARK
+          // --------------------------------------------------------
+          if (watermark != null)
+            Positioned.fill(
+              child: IgnorePointer(
+                child: watermark,
+              ),
+            ),
+
+          // --------------------------------------------------------
+          // APP BOTTOM DECORATION
+          // --------------------------------------------------------
+          if (showBottomImage)
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: IgnorePointer(
+                child: Image.asset(
+                  'assets/appbg.png',
+                  width: mediaQuery.size.width,
+                  fit: BoxFit.fitWidth,
+                  alignment: Alignment.bottomCenter,
+                ),
+              ),
+            ),
+
+          // --------------------------------------------------------
+          // SCREEN CONTENT
+          // --------------------------------------------------------
+          child,
+        ],
+      ),
     );
   }
 }

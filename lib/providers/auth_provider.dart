@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../routes/app_routes.dart';
+
 import 'dart:async';
 
 class AuthProvider extends GetxController {
@@ -124,6 +126,24 @@ class AuthProvider extends GetxController {
   void clearError() {
     errorMessage.value = null;
   }
+
+  // ------------------------------------------------------------
+  // LOGOUT
+  // ------------------------------------------------------------
+
+  void logout() {
+  clearError();
+
+  _otpTimer?.cancel();
+
+  // Destroy this AuthProvider instance explicitly (permanent providers are
+  // never removed by route disposal). The next login flow then creates a
+  // fresh instance with new controllers. Doing this BEFORE navigating means
+  // no screen can ever grab a reference to a disposed provider.
+  Get.delete<AuthProvider>(force: true);
+
+  Get.offAllNamed(AppRoutes.login);
+}
 
   // ------------------------------------------------------------
   // DISPOSE

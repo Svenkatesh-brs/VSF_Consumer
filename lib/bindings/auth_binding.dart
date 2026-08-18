@@ -5,8 +5,10 @@ import '../providers/auth_provider.dart';
 class AuthBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut<AuthProvider>(
+    GetInstance().lazyPut<AuthProvider>(
       () => AuthProvider(),
+      fenix: true,
+      permanent: true,
     );
   }
 }

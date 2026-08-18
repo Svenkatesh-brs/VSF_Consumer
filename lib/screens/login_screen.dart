@@ -22,6 +22,7 @@ class LoginScreen extends GetView<AuthProvider> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: AppBackground(
         showWatermark: false,
         showBottomImage: true,
