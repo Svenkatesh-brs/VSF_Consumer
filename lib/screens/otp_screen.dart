@@ -202,12 +202,26 @@ class _OtpScreenState extends State<OtpScreen>
   // BACK
   // ------------------------------------------------------------
 
-  void _goBack() {
+  void _goBack() async {
     if (_isExiting) {
       return;
     }
 
     FocusManager.instance.primaryFocus?.unfocus();
+
+    setState(() {
+      _isExiting = true;
+    });
+
+    // Wait for the staggered OTP exit animation.
+    await Future.delayed(
+      const Duration(milliseconds: 450),
+    );
+
+    if (!mounted) {
+      return;
+    }
+
     Get.back();
   }
 
