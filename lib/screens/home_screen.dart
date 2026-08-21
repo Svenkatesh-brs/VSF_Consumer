@@ -147,7 +147,7 @@ class _HomeScreenState extends State<HomeScreen> {
     // ----------------------------------------------------------
 
     await Get.toNamed(
-      AppRoutes.loanDetails,
+      AppRoutes.loanDashboard,
       arguments: loan,
     );
 

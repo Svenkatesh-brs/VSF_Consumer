@@ -1,3 +1,0 @@
-class LoanDetailsModel {
-  const LoanDetailsModel();
-}

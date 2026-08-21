@@ -1,3 +1,0 @@
-class BorrowerModel {
-  const BorrowerModel();
-}

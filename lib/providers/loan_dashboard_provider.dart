@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 
-class LoanProvider extends GetxController {
+class LoanDashboardProvider extends GetxController {
   // ------------------------------------------------------------
   // SELECTED LOAN
   // ------------------------------------------------------------
