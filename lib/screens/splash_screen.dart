@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 
+import '../services/storage_service.dart';
 import '../routes/app_routes.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -13,6 +14,28 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with TickerProviderStateMixin {
+  Future<void> _checkSessionAndNavigate() async {
+    if (_navigated || !mounted) {
+      return;
+    }
+
+    final storageService = Get.find<StorageService>();
+
+    final hasToken = await storageService.hasToken();
+
+    if (!mounted || _navigated) {
+      return;
+    }
+
+    _navigated = true;
+
+    if (hasToken) {
+      Get.offNamed(AppRoutes.home);
+    } else {
+      Get.offNamed(AppRoutes.login);
+    }
+  }
+
   late final AnimationController _logoController;
   late final AnimationController _lottieController;
 
@@ -168,7 +191,6 @@ class _SplashScreenState extends State<SplashScreen>
   // ------------------------------------------------------------
   // NAVIGATION
   // ------------------------------------------------------------
-
   void _tryNavigateToLogin() {
     if (!_lottieCompleted ||
         !_minimumDurationCompleted ||
@@ -177,9 +199,7 @@ class _SplashScreenState extends State<SplashScreen>
       return;
     }
 
-    _navigated = true;
-
-    Get.offNamed(AppRoutes.login);
+    _checkSessionAndNavigate();
   }
 
   // ------------------------------------------------------------
