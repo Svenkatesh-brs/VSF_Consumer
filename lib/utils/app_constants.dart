@@ -28,14 +28,26 @@ abstract class AppConstants {
   static const double submitButtonRadius = 100.0;
 
   // ============================================================
-  // API ENDPOINTS
+  // API
   // ============================================================
 
-static const String baseUrl =
-      'http://10.209.147.117:3000';
+  static const String baseUrl =
+      'http://10.163.147.117:3000';
+
+  // ============================================================
+  // AUTH API
+  // ============================================================
+
   static const String verifyOtp =
       '/api/v1/consumer/otp/verify';
 
-      static const String requestOtp =
-    '/api/v1/consumer/otp/request';
+  static const String requestOtp =
+      '/api/v1/consumer/otp/request';
+
+  // ============================================================
+  // HOME API
+  // ============================================================
+
+  static const String home =
+      '/api/v1/consumer/customer';
 }

@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
 
-import '../bindings/auth_binding.dart';
 import '../bindings/home_binding.dart';
 import '../bindings/loan_dashboard_binding.dart';
 import '../screens/home_screen.dart';
@@ -28,7 +27,6 @@ abstract class AppPages {
     GetPage(
       name: AppRoutes.login,
       page: () => const LoginScreen(),
-      binding: AuthBinding(),
     ),
 
     // ==========================================================
@@ -38,7 +36,6 @@ abstract class AppPages {
     GetPage(
       name: AppRoutes.otp,
       page: () => const OtpScreen(),
-      binding: AuthBinding(),
     ),
 
     // ==========================================================

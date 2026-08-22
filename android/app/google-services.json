@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "983309681927",
+    "project_id": "vsf-consumer",
+    "storage_bucket": "vsf-consumer.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:983309681927:android:73bb50c11593d7ef3071a2",
+        "android_client_info": {
+          "package_name": "com.example.vsf_consumer"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAte_IOYCs0BfHmXzQCwfvGZYEQm-oXfP4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
