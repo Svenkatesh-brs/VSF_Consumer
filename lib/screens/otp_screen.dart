@@ -17,8 +17,7 @@ class OtpScreen extends StatefulWidget {
   State<OtpScreen> createState() => _OtpScreenState();
 }
 
-class _OtpScreenState extends State<OtpScreen>
-    with TickerProviderStateMixin {
+class _OtpScreenState extends State<OtpScreen> with TickerProviderStateMixin {
   late final AuthProvider controller;
 
   late final AnimationController _shakeController;
@@ -42,8 +41,6 @@ class _OtpScreenState extends State<OtpScreen>
 
     controller = Get.find<AuthProvider>();
 
-    controller.startOtpTimer();
-
     // ------------------------------------------------------------
     // OTP SHAKE ANIMATION
     // ------------------------------------------------------------
@@ -53,37 +50,17 @@ class _OtpScreenState extends State<OtpScreen>
       duration: const Duration(milliseconds: 450),
     );
 
-    _shakeAnimation = TweenSequence<double>([
-      TweenSequenceItem(
-        tween: Tween(begin: 0.0, end: -10.0),
-        weight: 1,
-      ),
-      TweenSequenceItem(
-        tween: Tween(begin: -10.0, end: 10.0),
-        weight: 2,
-      ),
-      TweenSequenceItem(
-        tween: Tween(begin: 10.0, end: -8.0),
-        weight: 2,
-      ),
-      TweenSequenceItem(
-        tween: Tween(begin: -8.0, end: 6.0),
-        weight: 2,
-      ),
-      TweenSequenceItem(
-        tween: Tween(begin: 6.0, end: -3.0),
-        weight: 2,
-      ),
-      TweenSequenceItem(
-        tween: Tween(begin: -3.0, end: 0.0),
-        weight: 1,
-      ),
-    ]).animate(
-      CurvedAnimation(
-        parent: _shakeController,
-        curve: Curves.easeInOut,
-      ),
-    );
+    _shakeAnimation =
+        TweenSequence<double>([
+          TweenSequenceItem(tween: Tween(begin: 0.0, end: -10.0), weight: 1),
+          TweenSequenceItem(tween: Tween(begin: -10.0, end: 10.0), weight: 2),
+          TweenSequenceItem(tween: Tween(begin: 10.0, end: -8.0), weight: 2),
+          TweenSequenceItem(tween: Tween(begin: -8.0, end: 6.0), weight: 2),
+          TweenSequenceItem(tween: Tween(begin: 6.0, end: -3.0), weight: 2),
+          TweenSequenceItem(tween: Tween(begin: -3.0, end: 0.0), weight: 1),
+        ]).animate(
+          CurvedAnimation(parent: _shakeController, curve: Curves.easeInOut),
+        );
 
     _otpFocusNode.addListener(() {
       if (mounted) {
@@ -100,57 +77,95 @@ class _OtpScreenState extends State<OtpScreen>
       duration: const Duration(milliseconds: 500),
     );
 
-    _successScale = Tween<double>(
-      begin: 0.5,
-      end: 1.0,
-    ).animate(
-      CurvedAnimation(
-        parent: _successController,
-        curve: Curves.elasticOut,
-      ),
+    _successScale = Tween<double>(begin: 0.5, end: 1.0).animate(
+      CurvedAnimation(parent: _successController, curve: Curves.elasticOut),
     );
 
-    _successFade = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(
-      CurvedAnimation(
-        parent: _successController,
-        curve: Curves.easeIn,
-      ),
+    _successFade = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _successController, curve: Curves.easeIn),
     );
   }
 
   // ------------------------------------------------------------
   // VERIFY OTP
   // ------------------------------------------------------------
-
-  void _verifyOtp() {
+  Future<void> _verifyOtp() async {
     FocusManager.instance.primaryFocus?.unfocus();
 
-    if (_isExiting) {
+    if (_isExiting || controller.isLoading.value) {
       return;
     }
+
+    // ------------------------------------------------------------
+    // LOCAL OTP VALIDATION
+    // ------------------------------------------------------------
 
     final isValid = controller.validateOtp();
 
-    if (isValid) {
-      setState(() {
-        _verificationSuccessful = true;
-      });
-
-      _successController
+    if (!isValid) {
+      _shakeController
         ..reset()
         ..forward();
-
-      _startHomeTransition();
 
       return;
     }
 
-    _shakeController
+    // ------------------------------------------------------------
+    // GET PHONE NUMBER
+    // ------------------------------------------------------------
+
+    final phone = controller.mobileController.text.trim();
+
+    if (phone.isEmpty) {
+      controller.errorMessage.value = 'Mobile number is required.';
+
+      _shakeController
+        ..reset()
+        ..forward();
+
+      return;
+    }
+
+    // ------------------------------------------------------------
+    // VERIFY OTP WITH BACKEND
+    // ------------------------------------------------------------
+
+    final success = await controller.verifyOtp(
+      countryCode: '+91',
+      phone: phone,
+      otp: controller.otpController.text.trim(),
+    );
+
+    if (!mounted) {
+      return;
+    }
+
+    // ------------------------------------------------------------
+    // API FAILURE
+    // ------------------------------------------------------------
+
+    if (!success) {
+      _shakeController
+        ..reset()
+        ..forward();
+
+      return;
+    }
+
+    // ------------------------------------------------------------
+    // API SUCCESS
+    // JWT HAS BEEN SAVED TO HIVE
+    // ------------------------------------------------------------
+
+    setState(() {
+      _verificationSuccessful = true;
+    });
+
+    _successController
       ..reset()
       ..forward();
+
+    _startHomeTransition();
   }
 
   // ------------------------------------------------------------
@@ -159,9 +174,7 @@ class _OtpScreenState extends State<OtpScreen>
 
   Future<void> _startHomeTransition() async {
     // Give the success animation time to complete.
-    await Future.delayed(
-      const Duration(milliseconds: 400),
-    );
+    await Future.delayed(const Duration(milliseconds: 400));
 
     if (!mounted) {
       return;
@@ -175,9 +188,7 @@ class _OtpScreenState extends State<OtpScreen>
     });
 
     // Wait for the staggered OTP exit animation.
-    await Future.delayed(
-      const Duration(milliseconds: 450),
-    );
+    await Future.delayed(const Duration(milliseconds: 450));
 
     if (!mounted) {
       return;
@@ -214,9 +225,7 @@ class _OtpScreenState extends State<OtpScreen>
     });
 
     // Wait for the staggered OTP exit animation.
-    await Future.delayed(
-      const Duration(milliseconds: 450),
-    );
+    await Future.delayed(const Duration(milliseconds: 450));
 
     if (!mounted) {
       return;
@@ -229,13 +238,14 @@ class _OtpScreenState extends State<OtpScreen>
   // RESEND
   // ------------------------------------------------------------
 
-  void _resendOtp() {
-    if (_isExiting) {
+  Future<void> _resendOtp() async {
+    if (_isExiting || controller.isLoading.value) {
       return;
     }
 
     FocusManager.instance.primaryFocus?.unfocus();
-    controller.resendOtp();
+
+    await controller.resendOtp();
   }
 
   @override
@@ -250,99 +260,75 @@ class _OtpScreenState extends State<OtpScreen>
   // OTP BOXES
   // ------------------------------------------------------------
 
-  Widget _buildOtpBoxes({
-    required bool hasError,
-  }) {
+  Widget _buildOtpBoxes({required bool hasError}) {
     final otp = controller.otpController.text;
 
     return AnimatedBuilder(
       animation: _shakeAnimation,
       builder: (context, child) {
         return Transform.translate(
-          offset: Offset(
-            _shakeAnimation.value,
-            0,
-          ),
+          offset: Offset(_shakeAnimation.value, 0),
           child: child,
         );
       },
       child: Row(
-        children: List.generate(
-          6,
-          (index) {
-            final hasValue = index < otp.length;
+        children: List.generate(6, (index) {
+          final hasValue = index < otp.length;
 
-            final isFocused =
-                _otpFocusNode.hasFocus &&
-                index == otp.length &&
-                otp.length < 6;
+          final isFocused =
+              _otpFocusNode.hasFocus && index == otp.length && otp.length < 6;
 
-            Color borderColor;
+          Color borderColor;
 
-            if (hasError) {
-              borderColor = Colors.red;
-            } else if (isFocused) {
-              borderColor = Colors.blue;
-            } else {
-              borderColor =
-                  Colors.black.withValues(alpha: 0.18);
-            }
+          if (hasError) {
+            borderColor = Colors.red;
+          } else if (isFocused) {
+            borderColor = Colors.blue;
+          } else {
+            borderColor = Colors.black.withValues(alpha: 0.18);
+          }
 
-            return Expanded(
-              child: Padding(
-                padding: EdgeInsets.only(
-                  right: index == 5 ? 0 : 6,
-                ),
-                child: AnimatedContainer(
-                  duration:
-                      const Duration(milliseconds: 180),
-                  height: 52,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: hasError
-                        ? Colors.red.withValues(alpha: 0.08)
-                        : Colors.white.withValues(
-                            alpha: 0.65,
-                          ),
-                    borderRadius:
-                        BorderRadius.circular(10),
-                    border: Border.all(
-                      color: borderColor,
-                      width:
-                          hasError || isFocused
-                              ? 1.8
-                              : 1,
-                    ),
+          return Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(right: index == 5 ? 0 : 6),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                height: 52,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: hasError
+                      ? Colors.red.withValues(alpha: 0.08)
+                      : Colors.white.withValues(alpha: 0.65),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: borderColor,
+                    width: hasError || isFocused ? 1.8 : 1,
                   ),
-                  child: Text(
-                    hasValue ? otp[index] : '',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                      color: hasError
-                          ? Colors.red
-                          : Colors.black,
-                    ),
+                ),
+                child: Text(
+                  hasValue ? otp[index] : '',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    color: hasError ? Colors.red : Colors.black,
                   ),
                 ),
               ),
-            );
-          },
-        ),
+            ),
+          );
+        }),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final mobileNumber =
-        controller.mobileController.text.trim();
+    final mobileNumber = controller.mobileController.text.trim();
 
-    final maskedMobile =
-        mobileNumber.length == 10
-            ? '${mobileNumber.substring(0, 2)}******'
-                '${mobileNumber.substring(8)}'
-            : mobileNumber;
+    final maskedMobile = mobileNumber.length == 10
+        ? '${mobileNumber.substring(0, 2)}******'
+              '${mobileNumber.substring(8)}'
+        : mobileNumber;
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -354,8 +340,7 @@ class _OtpScreenState extends State<OtpScreen>
             children: [
               GestureDetector(
                 onTap: () {
-                  FocusManager.instance.primaryFocus
-                      ?.unfocus();
+                  FocusManager.instance.primaryFocus?.unfocus();
                 },
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.symmetric(
@@ -363,8 +348,7 @@ class _OtpScreenState extends State<OtpScreen>
                     vertical: 20,
                   ),
                   child: Column(
-                    crossAxisAlignment:
-                        CrossAxisAlignment.stretch,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       const SizedBox(height: 20),
 
@@ -372,25 +356,18 @@ class _OtpScreenState extends State<OtpScreen>
                       // BACK BUTTON
                       // EXIT RIGHT - FIRST
                       // ==================================================
-
                       ScreenContentExit(
                         isExiting: _isExiting,
-                        direction:
-                            ContentExitDirection.toRight,
+                        direction: ContentExitDirection.toRight,
                         delay: Duration.zero,
                         child: Align(
-                          alignment:
-                              Alignment.centerLeft,
+                          alignment: Alignment.centerLeft,
                           child: ScreenContentTransition(
-                            direction:
-                                ContentTransitionDirection
-                                    .fromLeft,
+                            direction: ContentTransitionDirection.fromLeft,
                             delay: Duration.zero,
                             child: IconButton(
                               onPressed: _goBack,
-                              icon: const Icon(
-                                Icons.arrow_back,
-                              ),
+                              icon: const Icon(Icons.arrow_back),
                               tooltip: 'Back',
                             ),
                           ),
@@ -403,32 +380,22 @@ class _OtpScreenState extends State<OtpScreen>
                       // LOGO
                       // EXIT RIGHT - 70ms
                       // ==================================================
-
                       ScreenContentExit(
                         isExiting: _isExiting,
-                        direction:
-                            ContentExitDirection.toRight,
-                        delay: const Duration(
-                          milliseconds: 70,
-                        ),
+                        direction: ContentExitDirection.toRight,
+                        delay: const Duration(milliseconds: 70),
                         child: ScreenContentTransition(
-                          direction:
-                              ContentTransitionDirection
-                                  .fromLeft,
-                          delay: const Duration(
-                            milliseconds: 70,
-                          ),
+                          direction: ContentTransitionDirection.fromLeft,
+                          delay: const Duration(milliseconds: 70),
                           child: Center(
                             child: Container(
                               width: 120,
                               height: 120,
-                              decoration:
-                                  const BoxDecoration(
+                              decoration: const BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: Colors.white,
                               ),
-                              padding:
-                                  const EdgeInsets.all(8),
+                              padding: const EdgeInsets.all(8),
                               child: ClipOval(
                                 child: Image.asset(
                                   'assets/vsf.png',
@@ -448,27 +415,18 @@ class _OtpScreenState extends State<OtpScreen>
                       // TITLE
                       // EXIT RIGHT - 140ms
                       // ==================================================
-
                       ScreenContentExit(
                         isExiting: _isExiting,
-                        direction:
-                            ContentExitDirection.toRight,
-                        delay: const Duration(
-                          milliseconds: 140,
-                        ),
+                        direction: ContentExitDirection.toRight,
+                        delay: const Duration(milliseconds: 140),
                         child: ScreenContentTransition(
-                          direction:
-                              ContentTransitionDirection
-                                  .fromLeft,
-                          delay: const Duration(
-                            milliseconds: 140,
-                          ),
+                          direction: ContentTransitionDirection.fromLeft,
+                          delay: const Duration(milliseconds: 140),
                           child: const Text(
                             'Verify OTP',
                             style: TextStyle(
                               fontSize: 28,
-                              fontWeight:
-                                  FontWeight.w700,
+                              fontWeight: FontWeight.w700,
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -481,26 +439,18 @@ class _OtpScreenState extends State<OtpScreen>
                       // DESCRIPTION
                       // EXIT RIGHT - 200ms
                       // ==================================================
-
                       ScreenContentExit(
                         isExiting: _isExiting,
-                        direction:
-                            ContentExitDirection.toRight,
-                        delay: const Duration(
-                          milliseconds: 200,
-                        ),
+                        direction: ContentExitDirection.toRight,
+                        delay: const Duration(milliseconds: 200),
                         child: ScreenContentTransition(
-                          direction:
-                              ContentTransitionDirection
-                                  .fromLeft,
-                          delay: const Duration(
-                            milliseconds: 200,
-                          ),
+                          direction: ContentTransitionDirection.fromLeft,
+                          delay: const Duration(milliseconds: 200),
                           child: Text(
                             maskedMobile.isEmpty
                                 ? 'Enter the 6-digit OTP to continue'
                                 : 'Enter the 6-digit OTP sent to +91 '
-                                    '$maskedMobile',
+                                      '$maskedMobile',
                             style: const TextStyle(
                               fontSize: 14,
                               color: Colors.black54,
@@ -516,32 +466,22 @@ class _OtpScreenState extends State<OtpScreen>
                       // OTP CARD
                       // EXIT RIGHT - 280ms
                       // ==================================================
-
                       ScreenContentExit(
                         isExiting: _isExiting,
-                        direction:
-                            ContentExitDirection.toRight,
-                        delay: const Duration(
-                          milliseconds: 280,
-                        ),
+                        direction: ContentExitDirection.toRight,
+                        delay: const Duration(milliseconds: 280),
                         child: ScreenContentTransition(
-                          direction:
-                              ContentTransitionDirection
-                                  .fromLeft,
-                          delay: const Duration(
-                            milliseconds: 280,
-                          ),
+                          direction: ContentTransitionDirection.fromLeft,
+                          delay: const Duration(milliseconds: 280),
                           child: AppFormCard(
                             child: Column(
-                              crossAxisAlignment:
-                                  CrossAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const Text(
                                   'OTP',
                                   style: TextStyle(
                                     fontSize: 14,
-                                    fontWeight:
-                                        FontWeight.w600,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
 
@@ -550,23 +490,16 @@ class _OtpScreenState extends State<OtpScreen>
                                 // ------------------------------------------
                                 // OTP INPUT
                                 // ------------------------------------------
-
                                 Stack(
                                   children: [
                                     Obx(
                                       () => GestureDetector(
-                                        onTap:
-                                            _focusOtpField,
-                                        behavior:
-                                            HitTestBehavior
-                                                .opaque,
-                                        child:
-                                            _buildOtpBoxes(
+                                        onTap: _focusOtpField,
+                                        behavior: HitTestBehavior.opaque,
+                                        child: _buildOtpBoxes(
                                           hasError:
-                                              controller
-                                                      .errorMessage
-                                                      .value !=
-                                                  null,
+                                              controller.errorMessage.value !=
+                                              null,
                                         ),
                                       ),
                                     ),
@@ -575,45 +508,28 @@ class _OtpScreenState extends State<OtpScreen>
                                       child: Opacity(
                                         opacity: 0.01,
                                         child: TextField(
-                                          controller:
-                                              controller
-                                                  .otpController,
-                                          focusNode:
-                                              _otpFocusNode,
-                                          keyboardType:
-                                              TextInputType
-                                                  .number,
-                                          textInputAction:
-                                              TextInputAction
-                                                  .done,
+                                          controller: controller.otpController,
+                                          focusNode: _otpFocusNode,
+                                          keyboardType: TextInputType.number,
+                                          textInputAction: TextInputAction.done,
                                           maxLength: 6,
                                           inputFormatters: [
                                             FilteringTextInputFormatter
                                                 .digitsOnly,
-                                            LengthLimitingTextInputFormatter(
-                                              6,
-                                            ),
+                                            LengthLimitingTextInputFormatter(6),
                                           ],
                                           onChanged: (_) {
                                             setState(() {});
-                                            controller
-                                                .clearError();
+                                            controller.clearError();
                                           },
                                           onSubmitted: (_) {
                                             _verifyOtp();
                                           },
-                                          decoration:
-                                              const InputDecoration(
+                                          decoration: const InputDecoration(
                                             counterText: '',
-                                            border:
-                                                InputBorder
-                                                    .none,
-                                            enabledBorder:
-                                                InputBorder
-                                                    .none,
-                                            focusedBorder:
-                                                InputBorder
-                                                    .none,
+                                            border: InputBorder.none,
+                                            enabledBorder: InputBorder.none,
+                                            focusedBorder: InputBorder.none,
                                             filled: false,
                                           ),
                                         ),
@@ -625,34 +541,24 @@ class _OtpScreenState extends State<OtpScreen>
                                 // ------------------------------------------
                                 // ERROR
                                 // ------------------------------------------
-
                                 Obx(() {
-                                  final error =
-                                      controller
-                                          .errorMessage
-                                          .value;
+                                  final error = controller.errorMessage.value;
 
-                                  if (error == null ||
-                                      error.isEmpty) {
-                                    return const SizedBox
-                                        .shrink();
+                                  if (error == null || error.isEmpty) {
+                                    return const SizedBox.shrink();
                                   }
 
                                   return Padding(
-                                    padding:
-                                        const EdgeInsets
-                                            .only(
+                                    padding: const EdgeInsets.only(
                                       top: 8,
                                       left: 4,
                                     ),
                                     child: Text(
                                       error,
-                                      style:
-                                          const TextStyle(
+                                      style: const TextStyle(
                                         color: Colors.red,
                                         fontSize: 12,
-                                        fontWeight:
-                                            FontWeight.w500,
+                                        fontWeight: FontWeight.w500,
                                       ),
                                     ),
                                   );
@@ -663,20 +569,15 @@ class _OtpScreenState extends State<OtpScreen>
                                 // ------------------------------------------
                                 // VERIFY
                                 // ------------------------------------------
-
                                 Obx(
                                   () => AppSubmitButton(
                                     label: 'Verify',
                                     isLoading:
-                                        controller
-                                            .isLoading
-                                            .value ||
-                                            _isExiting,
-                                    onTap:
-                                        _verificationSuccessful ||
-                                                _isExiting
-                                            ? null
-                                            : _verifyOtp,
+                                        controller.isLoading.value ||
+                                        _isExiting,
+                                    onTap: _verificationSuccessful || _isExiting
+                                        ? null
+                                        : _verifyOtp,
                                   ),
                                 ),
 
@@ -685,36 +586,25 @@ class _OtpScreenState extends State<OtpScreen>
                                 // ------------------------------------------
                                 // RESEND
                                 // ------------------------------------------
-
                                 Obx(() {
                                   final countdown =
-                                      controller
-                                          .otpCountdown
-                                          .value;
+                                      controller.otpCountdown.value;
 
                                   final canResend =
-                                      controller
-                                          .canResendOtp
-                                          .value;
+                                      controller.canResendOtp.value;
 
                                   return Center(
                                     child: canResend
                                         ? TextButton(
-                                            onPressed:
-                                                _resendOtp,
-                                            child:
-                                                const Text(
-                                              'Resend OTP',
-                                            ),
+                                            onPressed: _resendOtp,
+                                            child: const Text('Resend OTP'),
                                           )
                                         : Text(
                                             'Resend OTP in '
                                             '${countdown}s',
-                                            style:
-                                                const TextStyle(
+                                            style: const TextStyle(
                                               fontSize: 14,
-                                              color:
-                                                  Colors.black54,
+                                              color: Colors.black54,
                                             ),
                                           ),
                                   );
@@ -734,7 +624,6 @@ class _OtpScreenState extends State<OtpScreen>
               // ==================================================
               // SUCCESS OVERLAY
               // ==================================================
-
               if (_verificationSuccessful)
                 Positioned.fill(
                   child: IgnorePointer(
@@ -744,39 +633,28 @@ class _OtpScreenState extends State<OtpScreen>
                         child: ScaleTransition(
                           scale: _successScale,
                           child: Container(
-                            padding:
-                                const EdgeInsets.symmetric(
+                            padding: const EdgeInsets.symmetric(
                               horizontal: 28,
                               vertical: 24,
                             ),
-                            decoration:
-                                BoxDecoration(
-                              color: Colors.white.withValues(
-                                alpha: 0.94,
-                              ),
-                              borderRadius:
-                                  BorderRadius.circular(20),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.94),
+                              borderRadius: BorderRadius.circular(20),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black
-                                      .withValues(
-                                    alpha: 0.12,
-                                  ),
+                                  color: Colors.black.withValues(alpha: 0.12),
                                   blurRadius: 20,
-                                  offset:
-                                      const Offset(0, 8),
+                                  offset: const Offset(0, 8),
                                 ),
                               ],
                             ),
                             child: Column(
-                              mainAxisSize:
-                                  MainAxisSize.min,
+                              mainAxisSize: MainAxisSize.min,
                               children: [
                                 Container(
                                   width: 80,
                                   height: 80,
-                                  decoration:
-                                      const BoxDecoration(
+                                  decoration: const BoxDecoration(
                                     shape: BoxShape.circle,
                                     color: Colors.green,
                                   ),
@@ -791,12 +669,10 @@ class _OtpScreenState extends State<OtpScreen>
                                   'Verification successful',
                                   style: TextStyle(
                                     fontSize: 18,
-                                    fontWeight:
-                                        FontWeight.w600,
+                                    fontWeight: FontWeight.w600,
                                     color: Colors.green,
                                   ),
-                                  textAlign:
-                                      TextAlign.center,
+                                  textAlign: TextAlign.center,
                                 ),
                               ],
                             ),

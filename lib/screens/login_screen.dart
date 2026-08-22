@@ -25,29 +25,68 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
+
     controller = Get.find<AuthProvider>();
   }
 
   // ============================================================
-  // CONTINUE → OTP
+  // CONTINUE → REQUEST OTP → OTP SCREEN
   // ============================================================
 
   Future<void> _continue() async {
     FocusManager.instance.primaryFocus?.unfocus();
 
-    if (_isExiting) {
+    if (_isExiting || controller.isLoading.value) {
       return;
     }
 
-    if (!controller.validateMobileNumber()) {
+    // ----------------------------------------------------------
+    // VALIDATE MOBILE NUMBER
+    // ----------------------------------------------------------
+
+    controller.clearError();
+
+    final isValid =
+        controller.validateMobileNumber();
+
+    if (!isValid) {
       return;
     }
+
+    final phone =
+        controller.mobileController.text.trim();
+
+    // ----------------------------------------------------------
+    // REQUEST OTP FROM BACKEND
+    // ----------------------------------------------------------
+
+    final success =
+        await controller.requestOtp(
+      countryCode: '+91',
+      phone: phone,
+    );
+
+    if (!mounted) {
+      return;
+    }
+
+    // ----------------------------------------------------------
+    // API FAILED
+    // ----------------------------------------------------------
+
+    if (!success) {
+      return;
+    }
+
+    // ----------------------------------------------------------
+    // API SUCCESS
+    // ----------------------------------------------------------
 
     setState(() {
       _isExiting = true;
     });
 
-    // Wait for Login exit animation.
+    // Give the login exit animation time to complete.
     await Future.delayed(
       const Duration(milliseconds: 400),
     );
@@ -56,14 +95,18 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    await Get.toNamed(AppRoutes.otp);
+    await Get.toNamed(
+      AppRoutes.otp,
+    );
 
     if (!mounted) {
       return;
     }
 
-    // When returning from OTP → Login,
-    // allow Login content to animate in again.
+    // ----------------------------------------------------------
+    // RETURNED FROM OTP SCREEN
+    // ----------------------------------------------------------
+
     setState(() {
       _isExiting = false;
     });
@@ -91,34 +134,39 @@ class _LoginScreenState extends State<LoginScreen> {
                 vertical: 20,
               ),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+                crossAxisAlignment:
+                    CrossAxisAlignment.stretch,
                 children: [
                   const SizedBox(height: 20),
 
                   // ==================================================
                   // VSF LOGO
-                  // ENTRY: FROM LEFT
-                  // EXIT: TO RIGHT
                   // ==================================================
 
                   ScreenContentTransition(
-                    direction: ContentTransitionDirection.fromLeft,
-                    duration: const Duration(milliseconds: 400),
+                    direction:
+                        ContentTransitionDirection.fromLeft,
+                    duration:
+                        const Duration(milliseconds: 400),
                     delay: Duration.zero,
                     child: ScreenContentExit(
                       isExiting: _isExiting,
-                      direction: ContentExitDirection.toRight,
-                      duration: const Duration(milliseconds: 400),
+                      direction:
+                          ContentExitDirection.toRight,
+                      duration:
+                          const Duration(milliseconds: 400),
                       delay: Duration.zero,
                       child: Center(
                         child: Container(
                           width: 120,
                           height: 120,
-                          decoration: const BoxDecoration(
+                          decoration:
+                              const BoxDecoration(
                             shape: BoxShape.circle,
                             color: Colors.white,
                           ),
-                          padding: const EdgeInsets.all(8),
+                          padding:
+                              const EdgeInsets.all(8),
                           child: ClipOval(
                             child: Image.asset(
                               'assets/vsf.png',
@@ -136,24 +184,29 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   // ==================================================
                   // WELCOME TEXT
-                  // ENTRY: FROM LEFT
-                  // EXIT: TO RIGHT
                   // ==================================================
 
                   ScreenContentTransition(
-                    direction: ContentTransitionDirection.fromLeft,
-                    duration: const Duration(milliseconds: 400),
-                    delay: const Duration(milliseconds: 80),
+                    direction:
+                        ContentTransitionDirection.fromLeft,
+                    duration:
+                        const Duration(milliseconds: 400),
+                    delay:
+                        const Duration(milliseconds: 80),
                     child: ScreenContentExit(
                       isExiting: _isExiting,
-                      direction: ContentExitDirection.toRight,
-                      duration: const Duration(milliseconds: 400),
-                      delay: const Duration(milliseconds: 80),
+                      direction:
+                          ContentExitDirection.toRight,
+                      duration:
+                          const Duration(milliseconds: 400),
+                      delay:
+                          const Duration(milliseconds: 80),
                       child: const Text(
                         'Welcome Back',
                         style: TextStyle(
                           fontSize: 28,
-                          fontWeight: FontWeight.w700,
+                          fontWeight:
+                              FontWeight.w700,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -164,19 +217,23 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   // ==================================================
                   // DESCRIPTION
-                  // ENTRY: FROM LEFT
-                  // EXIT: TO RIGHT
                   // ==================================================
 
                   ScreenContentTransition(
-                    direction: ContentTransitionDirection.fromLeft,
-                    duration: const Duration(milliseconds: 400),
-                    delay: const Duration(milliseconds: 140),
+                    direction:
+                        ContentTransitionDirection.fromLeft,
+                    duration:
+                        const Duration(milliseconds: 400),
+                    delay:
+                        const Duration(milliseconds: 140),
                     child: ScreenContentExit(
                       isExiting: _isExiting,
-                      direction: ContentExitDirection.toRight,
-                      duration: const Duration(milliseconds: 400),
-                      delay: const Duration(milliseconds: 140),
+                      direction:
+                          ContentExitDirection.toRight,
+                      duration:
+                          const Duration(milliseconds: 400),
+                      delay:
+                          const Duration(milliseconds: 140),
                       child: const Text(
                         'Access your vehicle loan information',
                         style: TextStyle(
@@ -192,19 +249,23 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   // ==================================================
                   // LOGIN CARD
-                  // ENTRY: FROM LEFT
-                  // EXIT: TO RIGHT
                   // ==================================================
 
                   ScreenContentTransition(
-                    direction: ContentTransitionDirection.fromLeft,
-                    duration: const Duration(milliseconds: 400),
-                    delay: const Duration(milliseconds: 200),
+                    direction:
+                        ContentTransitionDirection.fromLeft,
+                    duration:
+                        const Duration(milliseconds: 400),
+                    delay:
+                        const Duration(milliseconds: 200),
                     child: ScreenContentExit(
                       isExiting: _isExiting,
-                      direction: ContentExitDirection.toRight,
-                      duration: const Duration(milliseconds: 400),
-                      delay: const Duration(milliseconds: 200),
+                      direction:
+                          ContentExitDirection.toRight,
+                      duration:
+                          const Duration(milliseconds: 400),
+                      delay:
+                          const Duration(milliseconds: 200),
                       child: AppFormCard(
                         child: Column(
                           crossAxisAlignment:
@@ -214,16 +275,22 @@ class _LoginScreenState extends State<LoginScreen> {
                               'Mobile Number',
                               style: TextStyle(
                                 fontSize: 14,
-                                fontWeight: FontWeight.w600,
+                                fontWeight:
+                                    FontWeight.w600,
                               ),
                             ),
 
                             const SizedBox(height: 8),
 
+                            // ========================================
+                            // MOBILE NUMBER
+                            // ========================================
+
                             Obx(
                               () => TextField(
                                 controller:
-                                    controller.mobileController,
+                                    controller
+                                        .mobileController,
                                 keyboardType:
                                     TextInputType.phone,
                                 textInputAction:
@@ -237,33 +304,48 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ),
                                 ],
                                 onChanged: (_) {
-                                  controller.clearError();
+                                  controller
+                                      .clearError();
                                 },
                                 onSubmitted: (_) {
                                   _continue();
                                 },
-                                decoration: InputDecoration(
+                                decoration:
+                                    InputDecoration(
                                   hintText:
                                       'Enter 10-digit mobile number',
                                   counterText: '',
-                                  prefixText: '+91 ',
+                                  prefixText:
+                                      '+91 ',
                                   errorText:
-                                      controller.errorMessage.value,
+                                      controller
+                                          .errorMessage
+                                          .value,
                                 ),
                               ),
                             ),
 
                             const SizedBox(height: 20),
 
+                            // ========================================
+                            // CONTINUE BUTTON
+                            // ========================================
+
                             Obx(
                               () => AppSubmitButton(
                                 label: 'Continue',
                                 isLoading:
-                                    controller.isLoading.value ||
-                                    _isExiting,
-                                onTap: _isExiting
-                                    ? null
-                                    : _continue,
+                                    controller
+                                            .isLoading
+                                            .value ||
+                                        _isExiting,
+                                onTap:
+                                    _isExiting ||
+                                            controller
+                                                .isLoading
+                                                .value
+                                        ? null
+                                        : _continue,
                               ),
                             ),
                           ],
