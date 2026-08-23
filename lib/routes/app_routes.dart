@@ -14,4 +14,6 @@ abstract class AppRoutes {
   static const transactions = '/transactions';
 
   static const emiSchedule = '/emi-schedule';
+
+  static const complaint = '/complaint';
 }

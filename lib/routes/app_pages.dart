@@ -1,7 +1,9 @@
 import 'package:get/get.dart';
 
+import '../bindings/complaint_binding.dart';
 import '../bindings/home_binding.dart';
 import '../bindings/loan_dashboard_binding.dart';
+import '../screens/complaint_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/emi_schedule_screen.dart';
 import '../screens/loan_dashboard_screen.dart';
@@ -64,10 +66,8 @@ abstract class AppPages {
     // ==========================================================
     // LOAN DETAILS
     //
-    // No binding on purpose: the screen reuses the live
-    // LoanDashboardProvider (and its already-fetched models)
-    // from the Loan Dashboard route still on the stack, so no
-    // additional API call is made.
+    // Reuses the live LoanDashboardProvider and its already
+    // fetched loan data. No additional API call.
     // ==========================================================
 
     GetPage(
@@ -78,10 +78,8 @@ abstract class AppPages {
     // ==========================================================
     // TRANSACTIONS
     //
-    // No binding on purpose: the screen reuses the live
-    // LoanDashboardProvider (and its already-fetched models)
-    // from the Loan Dashboard route still on the stack, so no
-    // additional API call is made.
+    // Reuses the live LoanDashboardProvider and its already
+    // fetched transaction data. No additional API call.
     // ==========================================================
 
     GetPage(
@@ -92,15 +90,24 @@ abstract class AppPages {
     // ==========================================================
     // EMI SCHEDULE
     //
-    // No binding on purpose: the screen reuses the live
-    // LoanDashboardProvider (and its already-fetched models)
-    // from the Loan Dashboard route still on the stack, so no
-    // additional API call is made.
+    // Reuses the live LoanDashboardProvider and its already
+    // fetched EMI schedule data. No additional API call.
     // ==========================================================
 
     GetPage(
       name: AppRoutes.emiSchedule,
       page: () => const EmiScheduleScreen(),
     ),
+
+    // ==========================================================
+    // COMPLAINT
+    // ==========================================================
+
+    GetPage(
+      name: AppRoutes.complaint,
+      page: () => const ComplaintScreen(),
+      binding: ComplaintBinding(),
+    ),
+    
   ];
 }
