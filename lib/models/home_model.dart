@@ -497,16 +497,25 @@ class HomeLoan {
   // HOME UI HELPERS
   // ------------------------------------------------------------
 
-  String get vehicleNumber {
-    return lead?.borrowers.isNotEmpty == true
-        ? lead!.borrowers.first.id
-        : loanNo;
+  /// Complete loan number exactly as returned by the API.
+  String get loanNumber {
+    return loanNo;
   }
 
-  String get borrowerName {
-    return lead?.borrowers.isNotEmpty == true
-        ? lead!.borrowers.first.relation
-        : '';
+  /// Complete borrower names, resolved from each borrower's
+  /// nested consumer record (firstName/lastName). Borrowers
+  /// without a usable name are skipped.
+  List<String> get borrowerNames {
+    final borrowers = lead?.borrowers;
+
+    if (borrowers == null || borrowers.isEmpty) {
+      return const <String>[];
+    }
+
+    return borrowers
+        .map((borrower) => borrower.name)
+        .where((name) => name.isNotEmpty)
+        .toList();
   }
 
   double get amount {
@@ -516,9 +525,9 @@ class HomeLoan {
   String get displayStatus {
     switch (status) {
       case 5:
-        return 'Completed';
+        return 'Inactive';
       default:
-        return 'Pending';
+        return 'Active';
     }
   }
 }
@@ -889,20 +898,49 @@ class HomeLoanType {
 class HomeBorrowerReference {
   final String id;
   final String relation;
+  final String firstName;
+  final String lastName;
 
   const HomeBorrowerReference({
     required this.id,
     required this.relation,
+    required this.firstName,
+    required this.lastName,
   });
 
   factory HomeBorrowerReference.fromJson(
     Map<String, dynamic> json,
   ) {
+    // --------------------------------------------------------
+    // NESTED CONSUMER OBJECT
+    //
+    // Each borrower entry carries the borrower's own consumer
+    // record with firstName/lastName (same consumer shape as
+    // the top-level customer payload).
+    //
+    // Parsed defensively: the nested object itself and every
+    // name field may be absent or null in the API response.
+    // --------------------------------------------------------
+
+    final consumer = _firstMapOf(
+      json,
+      const ['consumer', 'customer'],
+    );
+
     return HomeBorrowerReference(
       id: _toString(json['id']),
       relation: _toString(json['relation']),
+      firstName: consumer == null
+          ? ''
+          : _toString(consumer['firstName']),
+      lastName: consumer == null
+          ? ''
+          : _toString(consumer['lastName']),
     );
   }
+
+  /// Complete borrower name. Empty when the API provides none.
+  String get name => '$firstName $lastName'.trim();
 }
 
 // ============================================================
@@ -948,6 +986,21 @@ String? _nullableString(dynamic value) {
   final stringValue = value.toString();
 
   return stringValue.isEmpty ? null : stringValue;
+}
+
+Map<String, dynamic>? _firstMapOf(
+  Map<String, dynamic> json,
+  List<String> keys,
+) {
+  for (final key in keys) {
+    final value = json[key];
+
+    if (value is Map) {
+      return Map<String, dynamic>.from(value);
+    }
+  }
+
+  return null;
 }
 
 int _toInt(dynamic value) {

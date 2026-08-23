@@ -26,9 +26,9 @@ class HomeProvider extends GetxController {
 
   final totalLoans = 0.obs;
 
-  final pendingLoans = 0.obs;
+  final activeLoans = 0.obs;
 
-  final completedLoans = 0.obs;
+  final inactiveLoans = 0.obs;
 
   final loggedInUserName = ''.obs;
 
@@ -38,8 +38,8 @@ class HomeProvider extends GetxController {
 
   // Possible values:
   // Total
-  // Pending
-  // Completed
+  // Active
+  // Inactive
 
   final selectedFilter = 'Total'.obs;
 
@@ -65,17 +65,17 @@ class HomeProvider extends GetxController {
 
   List<Map<String, dynamic>> get filteredLoans {
     switch (selectedFilter.value) {
-      case 'Pending':
+      case 'Active':
         return loans
             .where(
-              (loan) => loan['status'] == 'Pending',
+              (loan) => loan['status'] == 'Active',
             )
             .toList();
 
-      case 'Completed':
+      case 'Inactive':
         return loans
             .where(
-              (loan) => loan['status'] == 'Completed',
+              (loan) => loan['status'] == 'Inactive',
             )
             .toList();
 
@@ -158,10 +158,23 @@ class HomeProvider extends GetxController {
       // --------------------------------------------------------
 
       final mappedLoans = homeData.loans.map(
-        (loan) => _mapLoanToHomeCard(
-          loan: loan,
-          borrowerName: homeData.fullName,
-        ),
+        (loan) {
+          // ------------------------------------------------------
+          // Borrower names come from each borrower's nested
+          // consumer record. If the API returns no usable names,
+          // fall back to the consumer's own full name so the
+          // card never renders an empty value.
+          // ------------------------------------------------------
+
+          final borrowerNames = loan.borrowerNames;
+
+          return _mapLoanToHomeCard(
+            loan: loan,
+            borrowerNames: borrowerNames.isEmpty
+                ? <String>[homeData.fullName]
+                : borrowerNames,
+          );
+        },
       ).toList();
 
       loans.assignAll(mappedLoans);
@@ -188,29 +201,20 @@ class HomeProvider extends GetxController {
 
   Map<String, dynamic> _mapLoanToHomeCard({
     required HomeLoan loan,
-    required String borrowerName,
+    required List<String> borrowerNames,
   }) {
     return {
       // --------------------------------------------------------
-      // Vehicle Number
+      // Loan Number (complete, exactly as returned by the API)
       // --------------------------------------------------------
-      //
-      // The documented Home API response does not currently
-      // expose a dedicated vehicleNumber field.
-      //
-      // Until the backend provides the exact vehicle field,
-      // loanNo is used as the display identifier.
-      //
-      'vehicleNumber': loan.loanNo,
+
+      'loanNumber': loan.loanNumber,
 
       // --------------------------------------------------------
-      // Borrower Name
+      // Borrowers (complete borrower names)
       // --------------------------------------------------------
-      //
-      // The Home API returns the consumer's firstName/lastName
-      // at HomeData level.
-      //
-      'borrowerName': borrowerName,
+
+      'borrowers': borrowerNames,
 
       // --------------------------------------------------------
       // Loan Amount
@@ -240,15 +244,15 @@ class HomeProvider extends GetxController {
   void _calculateSummary() {
     totalLoans.value = loans.length;
 
-    pendingLoans.value = loans
+    activeLoans.value = loans
         .where(
-          (loan) => loan['status'] == 'Pending',
+          (loan) => loan['status'] == 'Active',
         )
         .length;
 
-    completedLoans.value = loans
+    inactiveLoans.value = loans
         .where(
-          (loan) => loan['status'] == 'Completed',
+          (loan) => loan['status'] == 'Inactive',
         )
         .length;
   }
@@ -259,8 +263,8 @@ class HomeProvider extends GetxController {
 
   void _clearSummary() {
     totalLoans.value = 0;
-    pendingLoans.value = 0;
-    completedLoans.value = 0;
+    activeLoans.value = 0;
+    inactiveLoans.value = 0;
   }
 
   // ============================================================

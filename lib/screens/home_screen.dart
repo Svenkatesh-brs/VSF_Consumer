@@ -404,7 +404,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         children: [
                           Expanded(
                             child: HomeSummaryCard(
-                              title: 'Total Loans',
+                              title: 'Total',
                               value:
                                   controller.totalLoans.value,
                               icon: Icons
@@ -418,9 +418,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
                           Expanded(
                             child: HomeSummaryCard(
-                              title: 'Pending',
+                              title: 'Active',
                               value:
-                                  controller.pendingLoans.value,
+                                  controller.activeLoans.value,
                               icon: Icons
                                   .pending_actions_outlined,
                               iconColor:
@@ -432,9 +432,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
                           Expanded(
                             child: HomeSummaryCard(
-                              title: 'Completed',
+                              title: 'Inactive',
                               value:
-                                  controller.completedLoans.value,
+                                  controller.inactiveLoans.value,
                               icon: Icons
                                   .check_circle_outline,
                               iconColor:
@@ -541,7 +541,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               ),
                               PopupMenuItem<String>(
-                                value: 'Pending',
+                                value: 'Active',
                                 child: Row(
                                   children: [
                                     Icon(
@@ -553,7 +553,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                     SizedBox(width: 10),
                                     Text(
-                                      'Pending',
+                                      'Active',
                                       style: TextStyle(
                                         fontSize: 13,
                                         fontWeight:
@@ -564,7 +564,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               ),
                               PopupMenuItem<String>(
-                                value: 'Completed',
+                                value: 'Inactive',
                                 child: Row(
                                   children: [
                                     Icon(
@@ -576,7 +576,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                     SizedBox(width: 10),
                                     Text(
-                                      'Completed',
+                                      'Inactive',
                                       style: TextStyle(
                                         fontSize: 13,
                                         fontWeight:
@@ -894,17 +894,19 @@ class _HomeScreenState extends State<HomeScreen> {
                                   320 + (index * 80),
                             ),
                             child: HomeLoanCard(
-                              vehicleNumber:
-                                  loan['vehicleNumber']
-                                      as String,
-                              borrowerName:
-                                  loan['borrowerName']
-                                      as String,
+                              loanNumber: loan['loanNumber']
+                                      ?.toString() ??
+                                  '',
+                              borrowers: List<String>.from(
+                                loan['borrowers'] as List? ??
+                                    const <String>[],
+                              ),
                               amount:
                                   (loan['amount'] as num)
                                       .toDouble(),
                               status:
-                                  loan['status'] as String,
+                                  loan['status']?.toString() ??
+                                      '',
                               onTap: () =>
                                   _openLoanDetails(
                                 loan: loan,

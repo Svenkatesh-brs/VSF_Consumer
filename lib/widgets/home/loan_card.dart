@@ -5,27 +5,27 @@ import '../../utils/app_colors.dart';
 class HomeLoanCard extends StatelessWidget {
   const HomeLoanCard({
     super.key,
-    required this.vehicleNumber,
-    required this.borrowerName,
+    required this.loanNumber,
+    required this.borrowers,
     required this.amount,
     required this.status,
     this.onTap,
   });
 
-  final String vehicleNumber;
-  final String borrowerName;
+  final String loanNumber;
+  final List<String> borrowers;
   final double amount;
   final String status;
   final VoidCallback? onTap;
 
-  bool get isCompleted => status.toLowerCase() == 'completed';
+  bool get isInactive => status.toLowerCase() == 'inactive';
 
   Color get statusColor {
-    return isCompleted ? AppColors.primary : AppColors.buttonEnd;
+    return isInactive ? AppColors.primary : AppColors.buttonEnd;
   }
 
   IconData get statusIcon {
-    return isCompleted
+    return isInactive
         ? Icons.check_circle_outline
         : Icons.pending_actions_outlined;
   }
@@ -93,7 +93,7 @@ class HomeLoanCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'Vehicle Number',
+                        'Loan Number',
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w500,
@@ -102,8 +102,8 @@ class HomeLoanCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 3),
                       Text(
-                        vehicleNumber,
-                        maxLines: 1,
+                        loanNumber,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           fontSize: 15,
@@ -176,8 +176,8 @@ class HomeLoanCard extends StatelessWidget {
                 Expanded(
                   child: _InfoItem(
                     icon: Icons.person_outline,
-                    label: 'Borrower',
-                    value: borrowerName,
+                    label: 'Borrowers',
+                    value: borrowers.join(', '),
                   ),
                 ),
 
@@ -270,7 +270,7 @@ class _InfoItem extends StatelessWidget {
               const SizedBox(height: 3),
               Text(
                 value,
-                maxLines: 1,
+                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: 13,

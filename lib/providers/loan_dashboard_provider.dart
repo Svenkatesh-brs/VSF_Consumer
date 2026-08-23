@@ -24,10 +24,21 @@ class LoanDashboardProvider extends GetxController {
   // ------------------------------------------------------------
 
   String get vehicleNumber =>
-      selectedLoan.value?['vehicleNumber']?.toString() ?? '';
+      selectedLoan.value?['loanNumber']?.toString() ?? '';
 
-  String get borrowerName =>
-      selectedLoan.value?['borrowerName']?.toString() ?? '';
+  String get borrowerName {
+    final borrowers =
+        selectedLoan.value?['borrowers'] as List?;
+
+    if (borrowers == null || borrowers.isEmpty) {
+      return '';
+    }
+
+    return borrowers
+        .map((borrower) => borrower?.toString() ?? '')
+        .where((borrower) => borrower.isNotEmpty)
+        .join(', ');
+  }
 
   String get status => selectedLoan.value?['status']?.toString() ?? '';
 
