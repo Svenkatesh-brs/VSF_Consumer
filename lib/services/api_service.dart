@@ -128,6 +128,28 @@ class ApiService {
   }
 
   // ============================================================
+  // PATCH
+  // ============================================================
+
+  Future<Response<dynamic>> patch(
+    String endpoint, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    Map<String, dynamic>? headers,
+  }) async {
+    try {
+      return await _dio.patch(
+        endpoint,
+        data: data,
+        queryParameters: queryParameters,
+        options: Options(headers: headers),
+      );
+    } on DioException catch (e) {
+      throw _handleDioException(e);
+    }
+  }
+
+  // ============================================================
   // DELETE
   // ============================================================
 

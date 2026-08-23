@@ -1,9 +1,11 @@
 import 'package:get/get.dart';
 
 import '../bindings/complaint_binding.dart';
+import '../bindings/contact_update_binding.dart';
 import '../bindings/home_binding.dart';
 import '../bindings/loan_dashboard_binding.dart';
 import '../screens/complaint_screen.dart';
+import '../screens/contact_update_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/emi_schedule_screen.dart';
 import '../screens/loan_dashboard_screen.dart';
@@ -108,6 +110,19 @@ abstract class AppPages {
       page: () => const ComplaintScreen(),
       binding: ComplaintBinding(),
     ),
-    
+
+    // ==========================================================
+    // CONTACT UPDATE
+    //
+    // Reuses the live LoanDashboardProvider and its already
+    // fetched address data. No additional API call.
+    // ==========================================================
+
+    GetPage(
+      name: AppRoutes.contactUpdate,
+      page: () => const ContactUpdateScreen(),
+      binding: ContactUpdateBinding(),
+    ),
+
   ];
 }

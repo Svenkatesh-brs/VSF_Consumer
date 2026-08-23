@@ -62,6 +62,16 @@ abstract class AppConstants {
       '/api/v1/consumer/loan/';
 
   // ============================================================
+  // CONTACT UPDATE API
+  // ============================================================
+
+  static const String updatePhone =
+      '/api/v1/consumer/customer/me/phone';
+
+  static const String updateAddress =
+      '/api/v1/consumer/customer/address/';
+
+  // ============================================================
 // NOTIFICATION API
 // ============================================================
 

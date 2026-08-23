@@ -172,10 +172,9 @@ class LoanBorrowerDetail {
   final String gender;
   final String relation;
 
-  final String addressLine1;
-  final String city;
-  final String state;
-  final String pincode;
+  // Full nested address object, preserved as-is for the
+  // Contact Update flow (id / cid + every editable field).
+  final LoanAddress? address;
 
   final String bankName;
   final String accountNumber;
@@ -189,10 +188,7 @@ class LoanBorrowerDetail {
     required this.dob,
     required this.gender,
     required this.relation,
-    required this.addressLine1,
-    required this.city,
-    required this.state,
-    required this.pincode,
+    required this.address,
     required this.bankName,
     required this.accountNumber,
     required this.ifscCode,
@@ -201,8 +197,8 @@ class LoanBorrowerDetail {
   factory LoanBorrowerDetail.fromJson(
     Map<String, dynamic> json,
   ) {
-    // Address and bank blocks may be missing entirely.
-    final address = _asMap(json['address']);
+    // Bank block may be missing entirely; the address is
+    // parsed into its own model below.
     final bank = _asMap(json['bank']);
 
     return LoanBorrowerDetail(
@@ -215,22 +211,103 @@ class LoanBorrowerDetail {
       dob: _toStr(json['dob']),
       gender: _toStr(json['gender']),
       relation: _toStr(json['relation']),
-      addressLine1: address == null
-          ? ''
-          : _toStr(address['addressLine1']),
-      city:
-          address == null ? '' : _toStr(address['city']),
-      state:
-          address == null ? '' : _toStr(address['state']),
-      pincode: address == null
-          ? ''
-          : _toStr(address['pincode']),
+      address: LoanAddress.tryParse(json['address']),
       bankName:
           bank == null ? '' : _toStr(bank['bankName']),
       accountNumber:
           bank == null ? '' : _toStr(bank['accountNo']),
       ifscCode:
           bank == null ? '' : _toStr(bank['ifscCode']),
+    );
+  }
+}
+
+// ============================================================
+// ADDRESS DETAIL
+//
+// Complete address object of lead.borrowers[0].address from:
+//
+//   GET /api/v1/consumer/loan/:id
+//
+// Backend contract for Contact Update:
+//   id  -> PUT /api/v1/consumer/customer/address/:id
+//   cid -> request body "cid"
+//
+// Both are parsed verbatim; never invented or derived. The
+// whole object is optional and every field degrades to ''.
+// ============================================================
+
+class LoanAddress {
+  final String id;
+  final String cid;
+
+  final String addressLine1;
+  final String addressLine2;
+  final String landmark;
+  final String pincode;
+  final String state;
+  final String city;
+  final String country;
+  final String district;
+  final String village;
+  final String houseNumber;
+  final String floorNumber;
+  final String streetName;
+  final String apartmentName;
+  final String buildingName;
+  final String addressType;
+
+  const LoanAddress({
+    required this.id,
+    required this.cid,
+    required this.addressLine1,
+    required this.addressLine2,
+    required this.landmark,
+    required this.pincode,
+    required this.state,
+    required this.city,
+    required this.country,
+    required this.district,
+    required this.village,
+    required this.houseNumber,
+    required this.floorNumber,
+    required this.streetName,
+    required this.apartmentName,
+    required this.buildingName,
+    required this.addressType,
+  });
+
+  static LoanAddress? tryParse(dynamic value) {
+    if (value is! Map) {
+      return null;
+    }
+
+    return LoanAddress.fromJson(
+      Map<String, dynamic>.from(value),
+    );
+  }
+
+  factory LoanAddress.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return LoanAddress(
+      id: _toStr(json['id']),
+      cid: _toStr(json['cid']),
+      addressLine1: _toStr(json['addressLine1']),
+      addressLine2: _toStr(json['addressLine2']),
+      landmark: _toStr(json['landmark']),
+      pincode: _toStr(json['pincode']),
+      state: _toStr(json['state']),
+      city: _toStr(json['city']),
+      country: _toStr(json['country']),
+      district: _toStr(json['district']),
+      village: _toStr(json['village']),
+      houseNumber: _toStr(json['houseNumber']),
+      floorNumber: _toStr(json['floorNumber']),
+      streetName: _toStr(json['streetName']),
+      apartmentName: _toStr(json['apartmentName']),
+      buildingName: _toStr(json['buildingName']),
+      addressType: _toStr(json['addressType']),
     );
   }
 }

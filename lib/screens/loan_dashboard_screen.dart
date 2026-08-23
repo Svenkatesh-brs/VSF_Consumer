@@ -130,6 +130,14 @@ class _LoanDashboardScreenState extends State<LoanDashboardScreen> {
   }
 
   // ============================================================
+  // OPEN CONTACT UPDATE
+  // ============================================================
+
+  Future<void> _openContactUpdate() {
+    return _navigateTo(AppRoutes.contactUpdate);
+  }
+
+  // ============================================================
   // QUICK ACTION
   // ============================================================
 
@@ -685,7 +693,7 @@ class _LoanDashboardScreenState extends State<LoanDashboardScreen> {
                               _openTransactions();
                             },
                             onContactUpdateTap: () {
-                              _onQuickActionTap('Contact Update');
+                              _openContactUpdate();
                             },
                             onComplaintsTap: () {
                               _openComplaint();

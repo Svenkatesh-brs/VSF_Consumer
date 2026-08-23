@@ -16,4 +16,6 @@ abstract class AppRoutes {
   static const emiSchedule = '/emi-schedule';
 
   static const complaint = '/complaint';
+
+  static const contactUpdate = '/contact-update';
 }

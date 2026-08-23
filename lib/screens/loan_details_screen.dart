@@ -423,17 +423,18 @@ class _LoanDetailsScreenState
   ) {
     final borrower = details.borrower;
 
+    final address = borrower?.address;
+
     final addressParts = <String>[
-      if (borrower != null &&
-          borrower.addressLine1.isNotEmpty)
-        borrower.addressLine1,
-      if (borrower != null && borrower.city.isNotEmpty)
-        borrower.city,
-      if (borrower != null && borrower.state.isNotEmpty)
-        borrower.state,
-      if (borrower != null &&
-          borrower.pincode.isNotEmpty)
-        borrower.pincode,
+      if (address != null &&
+          address.addressLine1.isNotEmpty)
+        address.addressLine1,
+      if (address != null && address.city.isNotEmpty)
+        address.city,
+      if (address != null && address.state.isNotEmpty)
+        address.state,
+      if (address != null && address.pincode.isNotEmpty)
+        address.pincode,
     ];
 
     return _buildSectionCard(
