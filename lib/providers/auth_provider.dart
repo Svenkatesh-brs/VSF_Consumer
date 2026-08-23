@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../services/notification_service.dart';
 import '../models/request_otp_model.dart';
 import '../models/verify_otp_model.dart';
 import '../routes/app_routes.dart';
@@ -12,22 +13,23 @@ import '../services/storage_service.dart';
 class AuthProvider extends GetxController {
   final AuthService _authService;
   final StorageService _storageService;
+  final NotificationService _notificationService;
 
   AuthProvider({
     required AuthService authService,
     required StorageService storageService,
+    required NotificationService notificationService,
   }) : _authService = authService,
-       _storageService = storageService;
+       _storageService = storageService,
+       _notificationService = notificationService;
 
   // ============================================================
   // CONTROLLERS
   // ============================================================
 
-  final TextEditingController mobileController =
-      TextEditingController();
+  final TextEditingController mobileController = TextEditingController();
 
-  final TextEditingController otpController =
-      TextEditingController();
+  final TextEditingController otpController = TextEditingController();
 
   // ============================================================
   // REACTIVE STATE
@@ -47,8 +49,7 @@ class AuthProvider extends GetxController {
 
   VerifyOtpResponse? _verifyOtpResponse;
 
-  VerifyOtpResponse? get verifyOtpResponse =>
-      _verifyOtpResponse;
+  VerifyOtpResponse? get verifyOtpResponse => _verifyOtpResponse;
 
   // ============================================================
   // OTP TIMER
@@ -62,17 +63,14 @@ class AuthProvider extends GetxController {
     otpCountdown.value = 30;
     canResendOtp.value = false;
 
-    _otpTimer = Timer.periodic(
-      const Duration(seconds: 1),
-      (timer) {
-        if (otpCountdown.value > 0) {
-          otpCountdown.value--;
-        } else {
-          canResendOtp.value = true;
-          timer.cancel();
-        }
-      },
-    );
+    _otpTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (otpCountdown.value > 0) {
+        otpCountdown.value--;
+      } else {
+        canResendOtp.value = true;
+        timer.cancel();
+      }
+    });
   }
 
   // ============================================================
@@ -80,24 +78,20 @@ class AuthProvider extends GetxController {
   // ============================================================
 
   bool validateMobileNumber() {
-    final mobileNumber =
-        mobileController.text.trim();
+    final mobileNumber = mobileController.text.trim();
 
     if (mobileNumber.isEmpty) {
-      errorMessage.value =
-          'Please enter your mobile number.';
+      errorMessage.value = 'Please enter your mobile number.';
       return false;
     }
 
     if (mobileNumber.length != 10) {
-      errorMessage.value =
-          'Please enter a valid 10-digit mobile number.';
+      errorMessage.value = 'Please enter a valid 10-digit mobile number.';
       return false;
     }
 
     if (!RegExp(r'^[0-9]{10}$').hasMatch(mobileNumber)) {
-      errorMessage.value =
-          'Please enter a valid mobile number.';
+      errorMessage.value = 'Please enter a valid mobile number.';
       return false;
     }
 
@@ -114,14 +108,12 @@ class AuthProvider extends GetxController {
     final otp = otpController.text.trim();
 
     if (otp.isEmpty) {
-      errorMessage.value =
-          'Please enter the OTP.';
+      errorMessage.value = 'Please enter the OTP.';
       return false;
     }
 
     if (!RegExp(r'^[0-9]{6}$').hasMatch(otp)) {
-      errorMessage.value =
-          'Please enter the 6-digit OTP.';
+      errorMessage.value = 'Please enter the 6-digit OTP.';
       return false;
     }
 
@@ -154,15 +146,9 @@ class AuthProvider extends GetxController {
     errorMessage.value = null;
 
     try {
-      final request = RequestOtpRequest(
-        countryCode: countryCode,
-        phone: phone,
-      );
+      final request = RequestOtpRequest(countryCode: countryCode, phone: phone);
 
-      final response =
-          await _authService.requestOtp(
-        request,
-      );
+      final response = await _authService.requestOtp(request);
 
       // --------------------------------------------------------
       // SUCCESS
@@ -180,20 +166,15 @@ class AuthProvider extends GetxController {
       // API FAILURE
       // --------------------------------------------------------
 
-      errorMessage.value =
-          _getRequestOtpErrorMessage(
-        response.message,
-      );
+      errorMessage.value = _getRequestOtpErrorMessage(response.message);
 
       isLoading.value = false;
 
       return false;
     } catch (e) {
-      errorMessage.value =
-          _getApiErrorMessage(
+      errorMessage.value = _getApiErrorMessage(
         e,
-        defaultMessage:
-            'Unable to send OTP. Please try again.',
+        defaultMessage: 'Unable to send OTP. Please try again.',
       );
 
       isLoading.value = false;
@@ -207,26 +188,20 @@ class AuthProvider extends GetxController {
   // ============================================================
 
   Future<bool> resendOtp() async {
-    if (!canResendOtp.value ||
-        isLoading.value) {
+    if (!canResendOtp.value || isLoading.value) {
       return false;
     }
 
     clearError();
 
-    final phone =
-        mobileController.text.trim();
+    final phone = mobileController.text.trim();
 
     if (phone.isEmpty) {
-      errorMessage.value =
-          'Mobile number is required.';
+      errorMessage.value = 'Mobile number is required.';
       return false;
     }
 
-    final success = await requestOtp(
-      countryCode: '+91',
-      phone: phone,
-    );
+    final success = await requestOtp(countryCode: '+91', phone: phone);
 
     if (success) {
       otpController.clear();
@@ -258,10 +233,7 @@ class AuthProvider extends GetxController {
         otp: otp,
       );
 
-      final response =
-          await _authService.verifyOtp(
-        request,
-      );
+      final response = await _authService.verifyOtp(request);
 
       _verifyOtpResponse = response;
 
@@ -272,9 +244,16 @@ class AuthProvider extends GetxController {
       if (response.success &&
           response.token != null &&
           response.token!.isNotEmpty) {
-        await _storageService.saveToken(
-          response.token!,
-        );
+        await _storageService.saveToken(response.token!);
+
+        // Register this device for push notifications.
+        // Notification registration failure should not prevent login.
+        try {
+          await _notificationService.registerDevice();
+        } catch (_) {
+          // Ignore notification registration errors.
+          // The user can still continue using the application.
+        }
 
         isLoading.value = false;
 
@@ -285,20 +264,15 @@ class AuthProvider extends GetxController {
       // API FAILURE
       // --------------------------------------------------------
 
-      errorMessage.value =
-          _getOtpErrorMessage(
-        response.message,
-      );
+      errorMessage.value = _getOtpErrorMessage(response.message);
 
       isLoading.value = false;
 
       return false;
     } catch (e) {
-      errorMessage.value =
-          _getApiErrorMessage(
+      errorMessage.value = _getApiErrorMessage(
         e,
-        defaultMessage:
-            'Unable to verify OTP. Please try again.',
+        defaultMessage: 'Unable to verify OTP. Please try again.',
       );
 
       isLoading.value = false;
@@ -311,9 +285,7 @@ class AuthProvider extends GetxController {
   // REQUEST OTP ERROR
   // ============================================================
 
-  String _getRequestOtpErrorMessage(
-    String message,
-  ) {
+  String _getRequestOtpErrorMessage(String message) {
     if (message.trim().isEmpty) {
       return 'Unable to send OTP. Please try again.';
     }
@@ -325,14 +297,10 @@ class AuthProvider extends GetxController {
   // OTP RESPONSE ERROR
   // ============================================================
 
-  String _getOtpErrorMessage(
-    String message,
-  ) {
-    final lowerMessage =
-        message.toLowerCase();
+  String _getOtpErrorMessage(String message) {
+    final lowerMessage = message.toLowerCase();
 
-    if (lowerMessage.contains('invalid') &&
-        lowerMessage.contains('otp')) {
+    if (lowerMessage.contains('invalid') && lowerMessage.contains('otp')) {
       return 'Invalid or expired OTP';
     }
 
@@ -351,12 +319,8 @@ class AuthProvider extends GetxController {
   // GENERAL API ERROR
   // ============================================================
 
-  String _getApiErrorMessage(
-    Object error, {
-    required String defaultMessage,
-  }) {
-    final message =
-        error.toString().toLowerCase();
+  String _getApiErrorMessage(Object error, {required String defaultMessage}) {
+    final message = error.toString().toLowerCase();
 
     if (message.contains('timeout')) {
       return 'Request timed out. Please try again.';
@@ -401,12 +365,9 @@ class AuthProvider extends GetxController {
       isLoading.value = false;
 
       // Go back to login and remove previous routes.
-      Get.offAllNamed(
-        AppRoutes.login,
-      );
+      Get.offAllNamed(AppRoutes.login);
     } catch (e) {
-      errorMessage.value =
-          'Unable to logout. Please try again.';
+      errorMessage.value = 'Unable to logout. Please try again.';
     }
   }
 

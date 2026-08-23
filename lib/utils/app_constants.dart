@@ -32,7 +32,7 @@ abstract class AppConstants {
   // ============================================================
 
   static const String baseUrl =
-      'http://10.163.147.117:3000';
+      'http://192.168.31.71:3000';
 
   // ============================================================
   // AUTH API
@@ -57,4 +57,11 @@ abstract class AppConstants {
 
   static const String loanById =
       '/api/v1/consumer/loan/';
+
+  // ============================================================
+// NOTIFICATION API
+// ============================================================
+
+static const String registerNotificationDevice =
+    '/api/v1/consumer/notifications/device';
 }
