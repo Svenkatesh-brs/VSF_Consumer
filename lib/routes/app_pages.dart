@@ -3,10 +3,13 @@ import 'package:get/get.dart';
 import '../bindings/home_binding.dart';
 import '../bindings/loan_dashboard_binding.dart';
 import '../screens/home_screen.dart';
+import '../screens/emi_schedule_screen.dart';
 import '../screens/loan_dashboard_screen.dart';
+import '../screens/loan_details_screen.dart';
 import '../screens/login_screen.dart';
 import '../screens/otp_screen.dart';
 import '../screens/splash_screen.dart';
+import '../screens/transactions_screen.dart';
 import 'app_routes.dart';
 
 abstract class AppPages {
@@ -56,6 +59,48 @@ abstract class AppPages {
       name: AppRoutes.loanDashboard,
       page: () => const LoanDashboardScreen(),
       binding: LoanDashboardBinding(),
+    ),
+
+    // ==========================================================
+    // LOAN DETAILS
+    //
+    // No binding on purpose: the screen reuses the live
+    // LoanDashboardProvider (and its already-fetched models)
+    // from the Loan Dashboard route still on the stack, so no
+    // additional API call is made.
+    // ==========================================================
+
+    GetPage(
+      name: AppRoutes.loanDetails,
+      page: () => const LoanDetailsScreen(),
+    ),
+
+    // ==========================================================
+    // TRANSACTIONS
+    //
+    // No binding on purpose: the screen reuses the live
+    // LoanDashboardProvider (and its already-fetched models)
+    // from the Loan Dashboard route still on the stack, so no
+    // additional API call is made.
+    // ==========================================================
+
+    GetPage(
+      name: AppRoutes.transactions,
+      page: () => const TransactionsScreen(),
+    ),
+
+    // ==========================================================
+    // EMI SCHEDULE
+    //
+    // No binding on purpose: the screen reuses the live
+    // LoanDashboardProvider (and its already-fetched models)
+    // from the Loan Dashboard route still on the stack, so no
+    // additional API call is made.
+    // ==========================================================
+
+    GetPage(
+      name: AppRoutes.emiSchedule,
+      page: () => const EmiScheduleScreen(),
     ),
   ];
 }

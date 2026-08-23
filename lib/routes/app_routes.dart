@@ -8,4 +8,10 @@ abstract class AppRoutes {
   static const home = '/home';
 
   static const loanDashboard = '/loan-dashboard';
+
+  static const loanDetails = '/loan-details';
+
+  static const transactions = '/transactions';
+
+  static const emiSchedule = '/emi-schedule';
 }

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../widgets/loan_dashboard/pay_emi_button.dart';
 import '../providers/loan_dashboard_provider.dart';
+import '../routes/app_routes.dart';
 import '../utils/app_colors.dart';
 import '../widgets/app_background.dart';
 import '../widgets/common/screen_content_exit.dart';
@@ -51,6 +52,73 @@ class _LoanDashboardScreenState extends State<LoanDashboardScreen> {
     }
 
     Get.back();
+  }
+
+  // ============================================================
+  // NAVIGATE WITH EXIT WAVE
+  //
+  // Shared by every forward navigation from this screen so the
+  // exit/enter waves stay identical.
+  // ============================================================
+
+  Future<void> _navigateTo(String route) async {
+    if (_isExiting) {
+      return;
+    }
+
+    FocusManager.instance.primaryFocus?.unfocus();
+
+    setState(() {
+      _isExiting = true;
+    });
+
+    // ----------------------------------------------------------
+    // Wait for the dashboard exit wave to complete.
+    // ----------------------------------------------------------
+
+    await Future.delayed(
+      const Duration(milliseconds: 400),
+    );
+
+    if (!mounted) {
+      return;
+    }
+
+    await Get.toNamed(route);
+
+    if (!mounted) {
+      return;
+    }
+
+    // Reset the exit state so the content slides back in
+    // when the user returns from the next screen.
+    setState(() {
+      _isExiting = false;
+    });
+  }
+
+  // ============================================================
+  // OPEN LOAN DETAILS
+  // ============================================================
+
+  Future<void> _openLoanDetails() {
+    return _navigateTo(AppRoutes.loanDetails);
+  }
+
+  // ============================================================
+  // OPEN TRANSACTIONS
+  // ============================================================
+
+  Future<void> _openTransactions() {
+    return _navigateTo(AppRoutes.transactions);
+  }
+
+  // ============================================================
+  // OPEN EMI SCHEDULE
+  // ============================================================
+
+  Future<void> _openEmiSchedule() {
+    return _navigateTo(AppRoutes.emiSchedule);
   }
 
   // ============================================================
@@ -569,14 +637,25 @@ class _LoanDashboardScreenState extends State<LoanDashboardScreen> {
                         child: ScreenContentTransition(
                           direction: ContentTransitionDirection.fromLeft,
                           delay: const Duration(milliseconds: 80),
-                          child: LoanOverviewCard(
-                            status: controller.status,
-                            vehicleNumber: controller.vehicleNumber,
-                            borrowerName: controller.borrowerName,
-                            loanAmount: controller.amount,
-                            outstandingAmount: controller.amount,
-                            emiAmount: 8500,
-                            nextEmiDate: '05 Sep 2026',
+                          child: GestureDetector(
+                            onTap: _openLoanDetails,
+                            behavior: HitTestBehavior.opaque,
+                            child: LoanOverviewCard(
+                              status: controller.status,
+                              vehicleNumber:
+                                  controller.vehicleNumber,
+                              borrowerName:
+                                  controller.borrowerName,
+                              loanAmount: controller.amount,
+                              outstandingAmount: controller
+                                  .outstandingAmount,
+                              emiAmount:
+                                  controller.emiAmount,
+                              nextEmiDate: controller
+                                  .nextEmiDueDate,
+                              repaymentProgress: controller
+                                  .repaymentProgress,
+                            ),
                           ),
                         ),
                       ),
@@ -595,7 +674,7 @@ class _LoanDashboardScreenState extends State<LoanDashboardScreen> {
                           delay: const Duration(milliseconds: 220),
                           child: LoanQuickActions(
                             onTransactionsTap: () {
-                              _onQuickActionTap('Transactions');
+                              _openTransactions();
                             },
                             onContactUpdateTap: () {
                               _onQuickActionTap('Contact Update');
@@ -607,7 +686,7 @@ class _LoanDashboardScreenState extends State<LoanDashboardScreen> {
                               _onQuickActionTap('Help');
                             },
                             onEmiScheduleTap: () {
-                              _onQuickActionTap('EMI Schedule');
+                              _openEmiSchedule();
                             },
                             onReceiptsTap: () {
                               _onQuickActionTap('Receipts');
@@ -629,9 +708,15 @@ class _LoanDashboardScreenState extends State<LoanDashboardScreen> {
                   right: 20,
                   bottom: 18,
                   child: SafeArea(
-                    child: PayEmiButton(
+                    child:                     PayEmiButton(
+                      // Disabled only for Inactive
+                      // loans (no EMI due). Every
+                      // other backend status maps
+                      // to Active per the shared
+                      // display convention.
                       isCompleted:
-                          controller.status.toLowerCase() == 'completed',
+                          controller.status.toLowerCase() ==
+                              'inactive',
                       onTap: () {
                         _showTemporaryMessage(
                           'Pay EMI',

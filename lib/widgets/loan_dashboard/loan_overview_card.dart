@@ -13,6 +13,12 @@ class LoanOverviewCard extends StatefulWidget {
   final double emiAmount;
   final String nextEmiDate;
 
+  // Authoritative progress from the API
+  // (totalEMIPaid / totalEMI) as a 0.0 - 1.0 fraction.
+  // When null the card falls back to deriving progress
+  // from the amounts.
+  final double? repaymentProgress;
+
   const LoanOverviewCard({
     super.key,
     required this.status,
@@ -22,6 +28,7 @@ class LoanOverviewCard extends StatefulWidget {
     required this.outstandingAmount,
     required this.emiAmount,
     required this.nextEmiDate,
+    this.repaymentProgress,
   });
 
   @override
@@ -44,6 +51,10 @@ class _LoanOverviewCardState
   // ============================================================
 
   double get _repaymentProgress {
+    if (widget.repaymentProgress != null) {
+      return widget.repaymentProgress!.clamp(0.0, 1.0);
+    }
+
     if (widget.loanAmount <= 0) {
       return 0.0;
     }

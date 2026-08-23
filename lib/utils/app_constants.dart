@@ -50,4 +50,11 @@ abstract class AppConstants {
 
   static const String home =
       '/api/v1/consumer/customer';
+
+  // ============================================================
+  // LOAN DASHBOARD API
+  // ============================================================
+
+  static const String loanById =
+      '/api/v1/consumer/loan/';
 }
