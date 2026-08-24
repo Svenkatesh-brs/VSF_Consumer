@@ -72,8 +72,8 @@ class _TransactionsScreenState
   // ============================================================
   // TYPE BADGE
   //
-  // 'EMI Receipt' or 'VAS Receipt' exactly as parsed from the
-  // payment record.
+  // Derived from the merged voucher components: 'EMI Receipt',
+  // 'VAS Receipt', 'Mixed Receipt' or 'Charges Receipt'.
   // ============================================================
 
   Widget _buildTypeBadge(String type) {
@@ -105,6 +105,40 @@ class _TransactionsScreenState
           fontWeight: FontWeight.w800,
           letterSpacing: 0.5,
           color: badgeColor,
+        ),
+      ),
+    );
+  }
+
+  // ============================================================
+  // COMPONENT PILL
+  //
+  // Shows one collected component (EMI / VAS / LPC /
+  // Collection / Seize) of the merged voucher receipt.
+  // ============================================================
+
+  Widget _buildComponentPill(
+    String label,
+    double amount,
+  ) {
+    return Flexible(
+      child: Container(
+        padding:
+            const EdgeInsets.symmetric(horizontal: 9,
+                vertical: 4),
+        decoration: BoxDecoration(
+          color: Colors.black.withValues(alpha: 0.04),
+          borderRadius: BorderRadius.circular(100),
+        ),
+        child: Text(
+          '$label ${_formatAmount(amount)}',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            fontSize: 9,
+            fontWeight: FontWeight.w600,
+            color: Colors.black54,
+          ),
         ),
       ),
     );
@@ -216,8 +250,8 @@ class _TransactionsScreenState
                     CrossAxisAlignment.end,
                 children: [
                   Text(
-                    _formatAmount(
-                        transaction.amount),
+                    _formatAmount(transaction
+                        .amountCollected),
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w800,
@@ -242,10 +276,11 @@ class _TransactionsScreenState
           ),
 
           // ------------------------------------------------------
-          // BOTTOM ROW: TYPE + OPTIONAL EXTRAS
+          // BOTTOM ROW: TYPE + COLLECTED COMPONENTS
           //
-          // LPC and collection charges appear only when the
-          // payment record actually carries them.
+          // Every component actually collected on this voucher
+          // appears as its own pill; the headline amount above is
+          // amountCollected (sum of all components).
           // ------------------------------------------------------
 
           if (transaction.type.isNotEmpty ||
@@ -258,37 +293,30 @@ class _TransactionsScreenState
                   _buildTypeBadge(
                       transaction.type),
 
+                  if (transaction.emiAmount > 0)
+                    ...[
+                      const SizedBox(width: 6),
+                      _buildComponentPill(
+                        'EMI',
+                        transaction.emiAmount,
+                      ),
+                    ],
+
+                  if (transaction.vasAmount > 0)
+                    ...[
+                      const SizedBox(width: 6),
+                      _buildComponentPill(
+                        'VAS',
+                        transaction.vasAmount,
+                      ),
+                    ],
+
                   if (transaction.lpcAmount > 0)
                     ...[
                       const SizedBox(width: 6),
-                      Flexible(
-                        child: Container(
-                          padding: const EdgeInsets
-                              .symmetric(
-                            horizontal: 9,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.black
-                                .withValues(
-                                    alpha: 0.04),
-                            borderRadius:
-                                BorderRadius
-                                    .circular(100),
-                          ),
-                          child: Text(
-                            'LPC ${_formatAmount(transaction.lpcAmount)}',
-                            maxLines: 1,
-                            overflow: TextOverflow
-                                .ellipsis,
-                            style: const TextStyle(
-                              fontSize: 9,
-                              fontWeight:
-                                  FontWeight.w600,
-                              color: Colors.black54,
-                            ),
-                          ),
-                        ),
+                      _buildComponentPill(
+                        'LPC',
+                        transaction.lpcAmount,
                       ),
                     ],
 
@@ -296,34 +324,19 @@ class _TransactionsScreenState
                       0)
                     ...[
                       const SizedBox(width: 6),
-                      Flexible(
-                        child: Container(
-                          padding: const EdgeInsets
-                              .symmetric(
-                            horizontal: 9,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.black
-                                .withValues(
-                                    alpha: 0.04),
-                            borderRadius:
-                                BorderRadius
-                                    .circular(100),
-                          ),
-                          child: Text(
-                            'Collection ${_formatAmount(transaction.collectionCharge)}',
-                            maxLines: 1,
-                            overflow: TextOverflow
-                                .ellipsis,
-                            style: const TextStyle(
-                              fontSize: 9,
-                              fontWeight:
-                                  FontWeight.w600,
-                              color: Colors.black54,
-                            ),
-                          ),
-                        ),
+                      _buildComponentPill(
+                        'Collection',
+                        transaction
+                            .collectionCharge,
+                      ),
+                    ],
+
+                  if (transaction.seizeCharge > 0)
+                    ...[
+                      const SizedBox(width: 6),
+                      _buildComponentPill(
+                        'Seize',
+                        transaction.seizeCharge,
                       ),
                     ],
                 ],
