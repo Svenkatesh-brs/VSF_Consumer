@@ -12,6 +12,7 @@ import '../screens/loan_dashboard_screen.dart';
 import '../screens/loan_details_screen.dart';
 import '../screens/login_screen.dart';
 import '../screens/otp_screen.dart';
+import '../screens/receipt_preview_screen.dart';
 import '../screens/splash_screen.dart';
 import '../screens/transactions_screen.dart';
 import 'app_routes.dart';
@@ -87,6 +88,20 @@ abstract class AppPages {
     GetPage(
       name: AppRoutes.transactions,
       page: () => const TransactionsScreen(),
+    ),
+
+    // ==========================================================
+    // RECEIPT PREVIEW
+    //
+    // Receives the tapped merged LoanTransaction through
+    // navigation arguments and reuses the live
+    // LoanDashboardProvider for loan/customer context.
+    // No additional API call.
+    // ==========================================================
+
+    GetPage(
+      name: AppRoutes.receiptPreview,
+      page: () => const ReceiptPreviewScreen(),
     ),
 
     // ==========================================================

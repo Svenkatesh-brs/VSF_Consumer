@@ -146,6 +146,7 @@ class TransactionsModel {
     final paymentIds = <String>[];
     String? voucherId;
     String? voucherNo;
+    String? instrumentNo;
 
     for (final record in records) {
       emiAmount += record.emiAmount;
@@ -163,6 +164,7 @@ class TransactionsModel {
       paymentIds.add(record.id);
       voucherId ??= record.voucherId;
       voucherNo ??= record.voucherNo;
+      instrumentNo ??= record.instrumentNo;
     }
 
     final amountCollected = emiAmount +
@@ -189,6 +191,7 @@ class TransactionsModel {
       collectionCharge: collectionCharge,
       seizeCharge: seizeCharge,
       amountCollected: amountCollected,
+      instrumentNo: instrumentNo ?? '',
       dateMs: latestDateMs,
       paymentIds: paymentIds,
     );
@@ -282,6 +285,10 @@ class LoanTransaction {
   // emi + vas + lpc + collection charges + seize charges.
   final double amountCollected;
 
+  // First non-empty instrument number found on the grouped
+  // payment records' components. Empty when none was captured.
+  final String instrumentNo;
+
   // Latest valid payment date within the merged group.
   // Epoch milliseconds. Null when no usable date exists.
   final int? dateMs;
@@ -300,6 +307,7 @@ class LoanTransaction {
     required this.collectionCharge,
     required this.seizeCharge,
     required this.amountCollected,
+    required this.instrumentNo,
     required this.dateMs,
     required this.paymentIds,
   });
@@ -337,6 +345,10 @@ class _RawPayment {
   final double collectionCharge;
   final double seizeCharge;
 
+  // First non-empty instrument number across this record's
+  // components ('' when none carry one).
+  final String instrumentNo;
+
   final List<String> componentDescriptions;
 
   // Existing fallback chain: voucher.createdAt -> record
@@ -354,6 +366,7 @@ class _RawPayment {
     required this.lpcAmount,
     required this.collectionCharge,
     required this.seizeCharge,
+    required this.instrumentNo,
     required this.componentDescriptions,
     required this.dateMs,
   });
@@ -411,6 +424,13 @@ class _RawPayment {
       lpcAmount: _componentAmount(lpcComponent),
       collectionCharge: _componentAmount(chargesComponent),
       seizeCharge: _componentAmount(seizeComponent),
+      instrumentNo: _firstNonEmpty([
+        emiComponent?['instrumentNo'],
+        vasComponent?['instrumentNo'],
+        lpcComponent?['instrumentNo'],
+        chargesComponent?['instrumentNo'],
+        seizeComponent?['instrumentNo'],
+      ]),
       componentDescriptions: componentDescriptions,
       dateMs: _toMillis(voucher?['createdAt']) ??
           _toMillis(json['createdAt']) ??
@@ -501,6 +521,18 @@ Map<String, dynamic>? _asMap(dynamic value) {
   }
 
   return null;
+}
+
+String _firstNonEmpty(List<dynamic> values) {
+  for (final value in values) {
+    final text = _toStr(value).trim();
+
+    if (text.isNotEmpty) {
+      return text;
+    }
+  }
+
+  return '';
 }
 
 List<T> _mapList<T>(

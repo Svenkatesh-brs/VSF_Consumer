@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../models/transactions_model.dart';
 import '../providers/loan_dashboard_provider.dart';
+import '../routes/app_routes.dart';
 import '../utils/app_colors.dart';
 import '../widgets/app_background.dart';
 import '../widgets/common/screen_content_exit.dart';
@@ -151,19 +152,24 @@ class _TransactionsScreenState
   Widget _buildTransactionCard(
     LoanTransaction transaction,
   ) {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Colors.white.withValues(alpha: 0.80),
-            Colors.white.withValues(alpha: 0.48),
-          ],
-        ),
+    return GestureDetector(
+      onTap: () => Get.toNamed(
+        AppRoutes.receiptPreview,
+        arguments: transaction,
+      ),
+      child: Container(
+        width: double.infinity,
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.white.withValues(alpha: 0.80),
+              Colors.white.withValues(alpha: 0.48),
+            ],
+          ),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: Colors.white.withValues(alpha: 0.60),
@@ -343,6 +349,7 @@ class _TransactionsScreenState
               ),
             ),
         ],
+        ),
       ),
     );
   }

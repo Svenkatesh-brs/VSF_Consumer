@@ -13,6 +13,8 @@ abstract class AppRoutes {
 
   static const transactions = '/transactions';
 
+  static const receiptPreview = '/receipt-preview';
+
   static const emiSchedule = '/emi-schedule';
 
   static const complaint = '/complaint';

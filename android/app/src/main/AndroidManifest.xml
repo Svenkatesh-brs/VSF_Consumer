@@ -1,4 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Legacy-only (Android 9 / API 28 and below) permission for
+         writing receipt PDFs into the public Downloads folder.
+         Android 10+ uses MediaStore.Downloads, which needs no
+         storage permission. No MANAGE_EXTERNAL_STORAGE is used. -->
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
     <application
         android:label="vsf_consumer"
         android:name="${applicationName}"
