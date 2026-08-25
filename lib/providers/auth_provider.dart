@@ -23,6 +23,13 @@ class AuthProvider extends GetxController {
        _storageService = storageService,
        _notificationService = notificationService;
 
+  @override
+  void onInit() {
+    super.onInit();
+
+    _notificationService.initializeNotifications();
+  }
+
   // ============================================================
   // CONTROLLERS
   // ============================================================
