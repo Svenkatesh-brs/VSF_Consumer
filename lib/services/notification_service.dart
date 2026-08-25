@@ -11,6 +11,18 @@ class NotificationService {
   }) : _apiService = apiService;
 
   // ============================================================
+// REQUEST NOTIFICATION PERMISSION
+// ============================================================
+
+Future<void> requestNotificationPermission() async {
+  await FirebaseMessaging.instance.requestPermission(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
+}
+
+  // ============================================================
   // REGISTER FCM DEVICE
   // ============================================================
 

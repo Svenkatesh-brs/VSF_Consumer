@@ -249,9 +249,10 @@ class AuthProvider extends GetxController {
         // Register this device for push notifications.
         // Notification registration failure should not prevent login.
         try {
+          await _notificationService.requestNotificationPermission();
           await _notificationService.registerDevice();
         } catch (_) {
-          // Ignore notification registration errors.
+          // Ignore notification errors.
           // The user can still continue using the application.
         }
 
