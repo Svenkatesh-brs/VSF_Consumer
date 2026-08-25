@@ -8,6 +8,7 @@ import '../screens/complaint_screen.dart';
 import '../screens/contact_update_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/emi_schedule_screen.dart';
+import '../screens/help_screen.dart';
 import '../screens/loan_dashboard_screen.dart';
 import '../screens/loan_details_screen.dart';
 import '../screens/login_screen.dart';
@@ -137,6 +138,18 @@ abstract class AppPages {
       name: AppRoutes.contactUpdate,
       page: () => const ContactUpdateScreen(),
       binding: ContactUpdateBinding(),
+    ),
+
+    // ==========================================================
+    // HELP & SUPPORT
+    //
+    // Purely informational screen. Offers Call / WhatsApp
+    // support via url_launcher. No API call.
+    // ==========================================================
+
+    GetPage(
+      name: AppRoutes.help,
+      page: () => const HelpScreen(),
     ),
 
   ];

@@ -28,11 +28,28 @@ abstract class AppConstants {
   static const double submitButtonRadius = 100.0;
 
   // ============================================================
+  // SUPPORT
+  //
+  // Single source of truth for the support phone number.
+  // Call actions use [supportPhone]; WhatsApp actions use the
+  // India-prefixed [supportPhoneIntl] derived from it.
+  // ============================================================
+
+  static const String supportPhone = '7799886625';
+
+  static const String supportPhoneCountryCode = '91';
+
+  static const String supportPhoneIntl =
+      '$supportPhoneCountryCode$supportPhone';
+
+  // ============================================================
   // API
   // ============================================================
 
   static const String baseUrl =
   'http://192.168.0.109:3000';
+  
+  
       
       
 

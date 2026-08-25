@@ -138,6 +138,14 @@ class _LoanDashboardScreenState extends State<LoanDashboardScreen> {
   }
 
   // ============================================================
+  // OPEN HELP & SUPPORT
+  // ============================================================
+
+  Future<void> _openHelp() {
+    return _navigateTo(AppRoutes.help);
+  }
+
+  // ============================================================
   // QUICK ACTION
   // ============================================================
 
@@ -334,10 +342,7 @@ class _LoanDashboardScreenState extends State<LoanDashboardScreen> {
                   onTap: () {
                     Get.back();
 
-                    _showTemporaryMessage(
-                      'Help & Support',
-                      'Support will be available soon.',
-                    );
+                    _openHelp();
                   },
                 ),
 
@@ -698,9 +703,7 @@ class _LoanDashboardScreenState extends State<LoanDashboardScreen> {
                             onComplaintsTap: () {
                               _openComplaint();
                             },
-                            onHelpTap: () {
-                              _onQuickActionTap('Help');
-                            },
+                            onHelpTap: _openHelp,
                             onEmiScheduleTap: () {
                               _openEmiSchedule();
                             },

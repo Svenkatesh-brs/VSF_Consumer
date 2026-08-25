@@ -20,4 +20,6 @@ abstract class AppRoutes {
   static const complaint = '/complaint';
 
   static const contactUpdate = '/contact-update';
+
+  static const help = '/help';
 }
