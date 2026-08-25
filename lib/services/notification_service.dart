@@ -1,8 +1,19 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:firebase_core/firebase_core.dart';
 
+import '../firebase_options.dart';
 import '../utils/app_constants.dart';
 import 'api_service.dart';
+
+@pragma('vm:entry-point')
+Future<void> firebaseMessagingBackgroundHandler(
+  RemoteMessage message,
+) async {
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+}
 
 class NotificationService {
   final ApiService _apiService;
@@ -102,7 +113,7 @@ class NotificationService {
     if (fcmToken == null || fcmToken.isEmpty) {
       throw Exception('Unable to get FCM token');
     }
-    print('FCM TOKEN: $fcmToken');
+    // print('FCM TOKEN: $fcmToken');
 
     await _apiService.post(
       AppConstants.registerNotificationDevice,
