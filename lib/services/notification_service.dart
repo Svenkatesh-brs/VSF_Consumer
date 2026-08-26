@@ -17,8 +17,9 @@ class NotificationService {
   // ============================================================
 
   void _handleNotificationTap(RemoteMessage message) {
-    print('Notification tapped: ${message.messageId}');
-  }
+  print('Notification tapped: ${message.messageId}');
+  print('Notification data: ${message.data}');
+}
 
   final ApiService _apiService;
 
@@ -66,7 +67,7 @@ class NotificationService {
     // Listen when the user taps a notification while the
     // app is in the background.
     FirebaseMessaging.onMessageOpenedApp.listen(_handleNotificationTap);
-    
+
     // Check whether the app was opened by tapping a notification
     // while it was completely terminated.
     final initialMessage = await FirebaseMessaging.instance.getInitialMessage();
@@ -105,6 +106,8 @@ class NotificationService {
         ),
       ),
     );
+
+    print('FCM data: ${message.data}');
   }
 
   // ============================================================
