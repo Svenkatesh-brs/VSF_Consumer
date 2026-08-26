@@ -76,9 +76,7 @@ class _LoanDashboardScreenState extends State<LoanDashboardScreen> {
     // Wait for the dashboard exit wave to complete.
     // ----------------------------------------------------------
 
-    await Future.delayed(
-      const Duration(milliseconds: 400),
-    );
+    await Future.delayed(const Duration(milliseconds: 400));
 
     if (!mounted) {
       return;
@@ -663,19 +661,13 @@ class _LoanDashboardScreenState extends State<LoanDashboardScreen> {
                             behavior: HitTestBehavior.opaque,
                             child: LoanOverviewCard(
                               status: controller.status,
-                              vehicleNumber:
-                                  controller.vehicleNumber,
-                              borrowerName:
-                                  controller.borrowerName,
+                              vehicleNumber: controller.vehicleNumber,
+                              borrowerName: controller.borrowerName,
                               loanAmount: controller.amount,
-                              outstandingAmount: controller
-                                  .outstandingAmount,
-                              emiAmount:
-                                  controller.emiAmount,
-                              nextEmiDate: controller
-                                  .nextEmiDueDate,
-                              repaymentProgress: controller
-                                  .repaymentProgress,
+                              outstandingAmount: controller.outstandingAmount,
+                              emiAmount: controller.emiAmount,
+                              nextEmiDate: controller.nextEmiDueDate,
+                              repaymentProgress: controller.repaymentProgress,
                             ),
                           ),
                         ),
@@ -727,20 +719,16 @@ class _LoanDashboardScreenState extends State<LoanDashboardScreen> {
                   right: 20,
                   bottom: 18,
                   child: SafeArea(
-                    child:                     PayEmiButton(
+                    child: PayEmiButton(
                       // Disabled only for Inactive
                       // loans (no EMI due). Every
                       // other backend status maps
                       // to Active per the shared
                       // display convention.
                       isCompleted:
-                          controller.status.toLowerCase() ==
-                              'inactive',
+                          controller.status.toLowerCase() == 'inactive',
                       onTap: () {
-                        _showTemporaryMessage(
-                          'Pay EMI',
-                          'Payment will be available soon.',
-                        );
+                        _navigateTo(AppRoutes.payEmi);
                       },
                     ),
                   ),

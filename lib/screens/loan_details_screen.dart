@@ -607,77 +607,6 @@ class _LoanDetailsScreenState
     );
   }
 
-  // ============================================================
-  // BUILD DISBURSEMENT SECTION
-  // ============================================================
-
-  Widget _buildDisbursementSection(
-    LoanDetailsModel details,
-  ) {
-    final disbursement =
-        details.disbursementSummary;
-
-    return _buildSectionCard(
-      icon: Icons.payments_outlined,
-      title: 'Disbursement',
-      children: [
-        _buildInfoRow(
-          label: 'Total Loan Amount',
-          value: disbursement == null
-              ? ''
-              : _formatAmount(
-                  disbursement.totalLoanAmount,
-                ),
-        ),
-        _buildInfoRow(
-          label: 'Adjustments',
-          value: disbursement == null
-              ? ''
-              : _formatAmount(
-                  disbursement.adjustmentsAmount,
-                ),
-        ),
-        _buildInfoRow(
-          label: 'Advance EMI',
-          value: disbursement == null
-              ? ''
-              : _formatAmount(
-                  disbursement.advanceEmiAmount,
-                ),
-        ),
-        _buildInfoRow(
-          label: 'Deduction',
-          value: disbursement == null
-              ? ''
-              : _formatAmount(
-                  disbursement.deductionAmount,
-                ),
-        ),
-        _buildInfoRow(
-          label: 'Charges',
-          value: disbursement == null
-              ? ''
-              : _formatAmount(disbursement.chargeAmount),
-        ),
-        _buildInfoRow(
-          label: 'Down Payment',
-          value: disbursement == null
-              ? ''
-              : _formatAmount(
-                  disbursement.downPaymentAmount,
-                ),
-        ),
-        _buildInfoRow(
-          label: 'Amount to be Paid',
-          value: disbursement == null
-              ? ''
-              : _formatAmount(
-                  disbursement.amountToBePaid,
-                ),
-        ),
-      ],
-    );
-  }
 
   // ============================================================
   // ERROR / RETRY VIEW
@@ -876,13 +805,6 @@ class _LoanDetailsScreenState
           _wrapAnimated(
             delayMs: 480,
             child: _buildVehicleSection(details),
-          ),
-
-          const SizedBox(height: 16),
-
-          _wrapAnimated(
-            delayMs: 560,
-            child: _buildDisbursementSection(details),
           ),
         ],
       ),

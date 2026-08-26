@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 
+import '../screens/pay_emi_screen.dart';
 import '../bindings/complaint_binding.dart';
 import '../bindings/contact_update_binding.dart';
 import '../bindings/home_binding.dart';
@@ -24,33 +25,21 @@ abstract class AppPages {
     // SPLASH
     // ==========================================================
 
-    GetPage(
-      name: AppRoutes.splash,
-      page: () => const SplashScreen(),
-    ),
+    GetPage(name: AppRoutes.splash, page: () => const SplashScreen()),
 
     // ==========================================================
     // LOGIN
     // ==========================================================
-
-    GetPage(
-      name: AppRoutes.login,
-      page: () => const LoginScreen(),
-    ),
+    GetPage(name: AppRoutes.login, page: () => const LoginScreen()),
 
     // ==========================================================
     // OTP
     // ==========================================================
-
-    GetPage(
-      name: AppRoutes.otp,
-      page: () => const OtpScreen(),
-    ),
+    GetPage(name: AppRoutes.otp, page: () => const OtpScreen()),
 
     // ==========================================================
     // HOME
     // ==========================================================
-
     GetPage(
       name: AppRoutes.home,
       page: () => const HomeScreen(),
@@ -60,7 +49,6 @@ abstract class AppPages {
     // ==========================================================
     // LOAN DASHBOARD
     // ==========================================================
-
     GetPage(
       name: AppRoutes.loanDashboard,
       page: () => const LoanDashboardScreen(),
@@ -73,11 +61,7 @@ abstract class AppPages {
     // Reuses the live LoanDashboardProvider and its already
     // fetched loan data. No additional API call.
     // ==========================================================
-
-    GetPage(
-      name: AppRoutes.loanDetails,
-      page: () => const LoanDetailsScreen(),
-    ),
+    GetPage(name: AppRoutes.loanDetails, page: () => const LoanDetailsScreen()),
 
     // ==========================================================
     // TRANSACTIONS
@@ -85,7 +69,6 @@ abstract class AppPages {
     // Reuses the live LoanDashboardProvider and its already
     // fetched transaction data. No additional API call.
     // ==========================================================
-
     GetPage(
       name: AppRoutes.transactions,
       page: () => const TransactionsScreen(),
@@ -99,7 +82,6 @@ abstract class AppPages {
     // LoanDashboardProvider for loan/customer context.
     // No additional API call.
     // ==========================================================
-
     GetPage(
       name: AppRoutes.receiptPreview,
       page: () => const ReceiptPreviewScreen(),
@@ -111,16 +93,11 @@ abstract class AppPages {
     // Reuses the live LoanDashboardProvider and its already
     // fetched EMI schedule data. No additional API call.
     // ==========================================================
-
-    GetPage(
-      name: AppRoutes.emiSchedule,
-      page: () => const EmiScheduleScreen(),
-    ),
+    GetPage(name: AppRoutes.emiSchedule, page: () => const EmiScheduleScreen()),
 
     // ==========================================================
     // COMPLAINT
     // ==========================================================
-
     GetPage(
       name: AppRoutes.complaint,
       page: () => const ComplaintScreen(),
@@ -133,7 +110,6 @@ abstract class AppPages {
     // Reuses the live LoanDashboardProvider and its already
     // fetched address data. No additional API call.
     // ==========================================================
-
     GetPage(
       name: AppRoutes.contactUpdate,
       page: () => const ContactUpdateScreen(),
@@ -146,11 +122,13 @@ abstract class AppPages {
     // Purely informational screen. Offers Call / WhatsApp
     // support via url_launcher. No API call.
     // ==========================================================
+    GetPage(name: AppRoutes.help, page: () => const HelpScreen()),
 
-    GetPage(
-      name: AppRoutes.help,
-      page: () => const HelpScreen(),
-    ),
-
+    //    // ==========================================================
+    //    // PAY EMI
+    //    // Reuses the live LoanDashboardProvider and its already
+    //    // fetched EMI schedule data. No additional API call.
+    //    // ==========================================================
+    GetPage(name: AppRoutes.payEmi, page: () => const PayEmiScreen()),
   ];
 }

@@ -22,4 +22,5 @@ abstract class AppRoutes {
   static const contactUpdate = '/contact-update';
 
   static const help = '/help';
+  static const payEmi = '/pay-emi';
 }

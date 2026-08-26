@@ -38,7 +38,6 @@ class LoanDetailsModel {
   final LoanBorrowerDetail? borrower;
   final List<LoanGuarantorDetail> guarantors;
   final LoanAssetDetail? asset;
-  final LoanDisbursementSummary? disbursementSummary;
 
   const LoanDetailsModel({
     required this.loanId,
@@ -59,7 +58,6 @@ class LoanDetailsModel {
     required this.borrower,
     required this.guarantors,
     required this.asset,
-    required this.disbursementSummary,
   });
 
   factory LoanDetailsModel.fromJson(
@@ -139,9 +137,7 @@ class LoanDetailsModel {
       asset: lead == null
           ? null
           : _parseAsset(lead['asset']),
-      disbursementSummary: LoanDisbursementSummary.tryParse(
-        json['disbursementSummary'],
-      ),
+      
     );
   }
 
@@ -412,63 +408,6 @@ class LoanAssetDetail {
           type == null ? '' : _toStr(type['name']),
       invoiceAmount: _toDouble(json['invoiceAmount']),
       onRoadPrice: _toDouble(json['onRoadPrice']),
-    );
-  }
-}
-
-// ============================================================
-// DISBURSEMENT SUMMARY
-//
-// Authoritative source for displayed amounts
-// (data.loanAmount is 0 in the real payload).
-// ============================================================
-
-class LoanDisbursementSummary {
-  final double totalLoanAmount;
-  final double adjustmentsAmount;
-  final double advanceEmiAmount;
-  final double deductionAmount;
-  final double chargeAmount;
-  final double downPaymentAmount;
-  final double amountToBePaid;
-
-  const LoanDisbursementSummary({
-    required this.totalLoanAmount,
-    required this.adjustmentsAmount,
-    required this.advanceEmiAmount,
-    required this.deductionAmount,
-    required this.chargeAmount,
-    required this.downPaymentAmount,
-    required this.amountToBePaid,
-  });
-
-  static LoanDisbursementSummary? tryParse(dynamic value) {
-    if (value is! Map) {
-      return null;
-    }
-
-    return LoanDisbursementSummary.fromJson(
-      Map<String, dynamic>.from(value),
-    );
-  }
-
-  factory LoanDisbursementSummary.fromJson(
-    Map<String, dynamic> json,
-  ) {
-    return LoanDisbursementSummary(
-      totalLoanAmount:
-          _toDouble(json['totalLoanAmount']),
-      adjustmentsAmount:
-          _toDouble(json['adjustmentsAmount']),
-      advanceEmiAmount:
-          _toDouble(json['advanceEMIAmount']),
-      deductionAmount:
-          _toDouble(json['deductionAmount']),
-      chargeAmount: _toDouble(json['chargeAmount']),
-      downPaymentAmount:
-          _toDouble(json['downPaymentAmount']),
-      amountToBePaid:
-          _toDouble(json['amountToBePaid']),
     );
   }
 }

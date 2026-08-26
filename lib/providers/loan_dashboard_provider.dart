@@ -9,25 +9,6 @@ import '../services/loan_dashboard_service.dart';
 
 class LoanDashboardProvider extends GetxController {
   // ============================================================
-  // DATE FORMAT HELPERS
-  // ============================================================
-
-  static const List<String> _monthNames = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
-
-  // ============================================================
   // DEPENDENCIES
   //
   // The service is resolved from the locator because this
@@ -38,8 +19,7 @@ class LoanDashboardProvider extends GetxController {
   final LoanDashboardService _loanDashboardService;
 
   LoanDashboardProvider()
-      : _loanDashboardService =
-            Get.find<LoanDashboardService>();
+    : _loanDashboardService = Get.find<LoanDashboardService>();
 
   // ============================================================
   // UI STATE
@@ -95,11 +75,9 @@ class LoanDashboardProvider extends GetxController {
       final loanId = _resolveLoanId(arguments);
 
       if (loanId.isEmpty) {
-        selectedLoan.value =
-            _selectedLoanFromArguments(arguments);
+        selectedLoan.value = _selectedLoanFromArguments(arguments);
 
-        errorMessage.value =
-            'No loan information was found.';
+        errorMessage.value = 'No loan information was found.';
 
         return;
       }
@@ -108,10 +86,7 @@ class LoanDashboardProvider extends GetxController {
       // API CALL
       // --------------------------------------------------------
 
-      final response =
-          await _loanDashboardService.getLoanById(
-        loanId,
-      );
+      final response = await _loanDashboardService.getLoanById(loanId);
 
       // --------------------------------------------------------
       // API FAILURE
@@ -122,8 +97,7 @@ class LoanDashboardProvider extends GetxController {
             ? response.message
             : 'Unable to load your loan information.';
 
-        selectedLoan.value =
-            _selectedLoanFromArguments(arguments);
+        selectedLoan.value = _selectedLoanFromArguments(arguments);
 
         return;
       }
@@ -135,11 +109,9 @@ class LoanDashboardProvider extends GetxController {
       final dashboardData = response.dashboard;
 
       if (dashboardData == null) {
-        errorMessage.value =
-            'No loan information was found.';
+        errorMessage.value = 'No loan information was found.';
 
-        selectedLoan.value =
-            _selectedLoanFromArguments(arguments);
+        selectedLoan.value = _selectedLoanFromArguments(arguments);
 
         return;
       }
@@ -165,11 +137,10 @@ class LoanDashboardProvider extends GetxController {
 
         // Registration number with loan-number fallback,
         // mirroring the Home card structure.
-        'loanNumber': dashboardData.vehicleNumber,
+        'loanNumber': dashboardData.loanNo,
 
         'borrowers': <String>[
-          if (dashboardData.borrowerName.isNotEmpty)
-            dashboardData.borrowerName,
+          if (dashboardData.borrowerName.isNotEmpty) dashboardData.borrowerName,
         ],
 
         'amount': dashboardData.loanAmount,
@@ -183,8 +154,7 @@ class LoanDashboardProvider extends GetxController {
     } catch (e) {
       errorMessage.value = _getErrorMessage(e);
 
-      selectedLoan.value =
-          _selectedLoanFromArguments(arguments);
+      selectedLoan.value = _selectedLoanFromArguments(arguments);
     } finally {
       isLoading.value = false;
     }
@@ -233,9 +203,7 @@ class LoanDashboardProvider extends GetxController {
   // spinning forever.
   // ============================================================
 
-  Map<String, dynamic> _selectedLoanFromArguments(
-    dynamic arguments,
-  ) {
+  Map<String, dynamic> _selectedLoanFromArguments(dynamic arguments) {
     if (arguments is Map<String, dynamic>) {
       return arguments;
     }
@@ -251,8 +219,7 @@ class LoanDashboardProvider extends GetxController {
       selectedLoan.value?['loanNumber']?.toString() ?? '';
 
   String get borrowerName {
-    final borrowers =
-        selectedLoan.value?['borrowers'] as List?;
+    final borrowers = selectedLoan.value?['borrowers'] as List?;
 
     if (borrowers == null || borrowers.isEmpty) {
       return '';
@@ -284,48 +251,40 @@ class LoanDashboardProvider extends GetxController {
   // business values.
   // ------------------------------------------------------------
 
-  double get outstandingAmount =>
-      dashboard.value?.outstandingAmount ?? 0;
+  double get outstandingAmount => dashboard.value?.outstandingAmount ?? 0;
 
   double get emiAmount => dashboard.value?.emiAmount ?? 0;
 
   /// Repayment progress as a 0.0 - 1.0 fraction
   /// (totalEMIPaid / totalEMI).
-  double get repaymentProgress =>
-      dashboard.value?.repaymentProgress ?? 0;
+  double get repaymentProgress => dashboard.value?.repaymentProgress ?? 0;
 
-  int? get nextEmiDueDateMs =>
-      dashboard.value?.nextEmiDueDateMs;
+  int? get nextEmiDueDateMs => dashboard.value?.nextEmiDueDateMs;
 
   /// Formatted "dd MMM yyyy"; a dash when no upcoming EMI
   /// exists (all paid or not provided by the API).
-  String get nextEmiDueDate =>
-      formatDateMs(nextEmiDueDateMs);
+  String get nextEmiDueDate => formatDateMs(nextEmiDueDateMs);
 
   /// Formats epoch milliseconds as "dd MMM yyyy" using
   /// [_monthNames]; returns a dash when the value is null.
   String formatDateMs(int? ms) {
-    if (ms == null) {
-      return '-';
-    }
-
-    final date =
-        DateTime.fromMillisecondsSinceEpoch(ms);
-
-    final day = date.day.toString().padLeft(2, '0');
-
-    return '$day ${_monthNames[date.month - 1]} '
-        '${date.year}';
+  if (ms == null) {
+    return '-';
   }
 
-  String get guarantorName =>
-      _firstGuarantor()?.name ?? '';
+  final date = DateTime.fromMillisecondsSinceEpoch(ms);
 
-  String get guarantorRelation =>
-      _firstGuarantor()?.relation ?? '';
+  final day = date.day.toString().padLeft(2, '0');
+  final month = date.month.toString().padLeft(2, '0');
 
-  String get guarantorMobile =>
-      _firstGuarantor()?.phone ?? '';
+  return '$day/$month/${date.year}';
+}
+
+  String get guarantorName => _firstGuarantor()?.name ?? '';
+
+  String get guarantorRelation => _firstGuarantor()?.relation ?? '';
+
+  String get guarantorMobile => _firstGuarantor()?.phone ?? '';
 
   LoanGuarantorDetail? _firstGuarantor() {
     final guarantors = loanDetails.value?.guarantors;
@@ -366,8 +325,7 @@ class LoanDashboardProvider extends GetxController {
       return 'Unable to connect to the server.';
     }
 
-    if (lowerMessage.contains('unauthorized') ||
-        lowerMessage.contains('401')) {
+    if (lowerMessage.contains('unauthorized') || lowerMessage.contains('401')) {
       return 'Your session has expired. Please login again.';
     }
 

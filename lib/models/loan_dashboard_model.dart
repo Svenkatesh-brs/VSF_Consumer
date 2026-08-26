@@ -36,26 +36,16 @@ class LoanDashboardResponse {
     required this.emiSchedule,
   });
 
-  factory LoanDashboardResponse.fromJson(
-    Map<String, dynamic> json,
-  ) {
+  factory LoanDashboardResponse.fromJson(Map<String, dynamic> json) {
     final data = _asMap(json['data']);
 
     return LoanDashboardResponse(
       success: json['success'] == true,
       message: _toStr(json['message']),
-      dashboard: data == null
-          ? null
-          : LoanDashboardModel.fromJson(data),
-      details: data == null
-          ? null
-          : LoanDetailsModel.fromJson(data),
-      transactions: data == null
-          ? null
-          : TransactionsModel.fromJson(data),
-      emiSchedule: data == null
-          ? null
-          : EmiScheduleModel.fromJson(data),
+      dashboard: data == null ? null : LoanDashboardModel.fromJson(data),
+      details: data == null ? null : LoanDetailsModel.fromJson(data),
+      transactions: data == null ? null : TransactionsModel.fromJson(data),
+      emiSchedule: data == null ? null : EmiScheduleModel.fromJson(data),
     );
   }
 
@@ -68,9 +58,9 @@ class LoanDashboardResponse {
 // Data required by the Loan Dashboard Overview Card.
 //
 // Field sources (actual payload):
-//   loanAmount        <- disbursementSummary.totalLoanAmount
-//                        (fallback principalAmount; the raw
-//                        data.loanAmount is 0 and is ignored)
+//   loanAmount        <- Financial Details
+//   outstandingAmount <- installmentDues
+//   emiAmount         <- loanSchemes[0].emi
 //   outstandingAmount <- installmentDues
 //   emiAmount         <- loanSchemes[0].emi
 //   vehicleNumber     <- lead.asset.registrationNumber
@@ -91,6 +81,7 @@ class LoanDashboardModel {
   final double loanAmount;
   final double outstandingAmount;
   final double emiAmount;
+  final int numberOfInstallments;
 
   // Epoch milliseconds of the earliest Pending installment.
   // Null when no installment is Pending (the UI renders '-').
@@ -111,55 +102,28 @@ class LoanDashboardModel {
     required this.loanAmount,
     required this.outstandingAmount,
     required this.emiAmount,
+    required this.numberOfInstallments,
     required this.nextEmiDueDateMs,
     required this.totalEmiCount,
     required this.totalEmiPaidCount,
     required this.statusRaw,
   });
 
-  factory LoanDashboardModel.fromJson(
-    Map<String, dynamic> json,
-  ) {
+  factory LoanDashboardModel.fromJson(Map<String, dynamic> json) {
     // --------------------------------------------------------
     // NESTED OBJECTS (all optional)
     // --------------------------------------------------------
 
     final lead = _asMap(json['lead']);
-    final asset =
-        lead == null ? null : _asMap(lead['asset']);
+    final asset = lead == null ? null : _asMap(lead['asset']);
 
     final borrowers = lead == null
         ? <Map<String, dynamic>>[]
         : _mapList(lead['borrowers'], (m) => m);
 
-    final schemes = _mapList(
-      json['loanSchemes'],
-      (m) => m,
-    );
+    final schemes = _mapList(json['loanSchemes'], (m) => m);
 
-    final installments = _mapList(
-      json['installments'],
-      (m) => m,
-    );
-
-    // --------------------------------------------------------
-    // DISPLAYED LOAN AMOUNT
-    //
-    // data.loanAmount is 0 in the real payload and must not be
-    // used. Prefer disbursementSummary.totalLoanAmount, then
-    // fall back to principalAmount.
-    // --------------------------------------------------------
-
-    final disbursement =
-        _asMap(json['disbursementSummary']);
-
-    final totalFromDisbursement = disbursement == null
-        ? 0.0
-        : _toDouble(disbursement['totalLoanAmount']);
-
-    final double loanAmount = totalFromDisbursement > 0
-        ? totalFromDisbursement
-        : _toDouble(json['principalAmount']);
+    final installments = _mapList(json['installments'], (m) => m);
 
     // --------------------------------------------------------
     // EMI AMOUNT: scheme first, then first installment
@@ -168,8 +132,25 @@ class LoanDashboardModel {
     final double emiAmount = schemes.isNotEmpty
         ? _toDouble(schemes.first['emi'])
         : installments.isEmpty
-            ? 0
-            : _toDouble(installments.first['emi']);
+        ? 0
+        : _toDouble(installments.first['emi']);
+
+    // --------------------------------------------------------
+    // NUMBER OF INSTALLMENTS
+    // --------------------------------------------------------
+
+    final int numberOfInstallments = schemes.isNotEmpty
+        ? _toInt(schemes.first['noOfInstallments'])
+        : 0;
+
+    // --------------------------------------------------------
+    // DISPLAYED LOAN AMOUNT
+    //
+    // Total scheduled repayment = EMI amount × number of
+    // installments.
+    // --------------------------------------------------------
+
+    final double loanAmount = emiAmount * numberOfInstallments;
 
     // --------------------------------------------------------
     // BORROWER NAME: first borrower with a usable name
@@ -197,19 +178,17 @@ class LoanDashboardModel {
       ]),
       borrowerName: borrowerName,
       loanAmount: loanAmount,
-      outstandingAmount:
-          _toDouble(json['installmentDues']),
+      outstandingAmount: _toDouble(json['installmentDues']),
       emiAmount: emiAmount,
-      nextEmiDueDateMs:
-          _resolveNextEmiDueDateMs(installments),
+      numberOfInstallments: numberOfInstallments,
+      nextEmiDueDateMs: _resolveNextEmiDueDateMs(installments),
       totalEmiCount: _toInt(json['totalEMI']),
       totalEmiPaidCount: _toInt(json['totalEMIPaid']),
       statusRaw: _toInt(json['status']),
     );
   }
 
-  String get displayStatus =>
-      statusRaw == 5 ? 'Inactive' : 'Active';
+  String get displayStatus => statusRaw == 5 ? 'Inactive' : 'Active';
 
   /// Repayment progress as a 0.0 - 1.0 fraction.
   double get repaymentProgress {
@@ -217,9 +196,7 @@ class LoanDashboardModel {
       return 0;
     }
 
-    return (totalEmiPaidCount / totalEmiCount)
-        .clamp(0.0, 1.0)
-        .toDouble();
+    return (totalEmiPaidCount / totalEmiCount).clamp(0.0, 1.0).toDouble();
   }
 
   /// Earliest due date among Pending installments.
@@ -353,20 +330,13 @@ String _firstNonEmpty(List<dynamic> values) {
   return '';
 }
 
-List<T> _mapList<T>(
-  dynamic value,
-  T Function(Map<String, dynamic>) fromJson,
-) {
+List<T> _mapList<T>(dynamic value, T Function(Map<String, dynamic>) fromJson) {
   if (value is! List) {
     return <T>[];
   }
 
   return value
       .whereType<Map>()
-      .map(
-        (item) => fromJson(
-          Map<String, dynamic>.from(item),
-        ),
-      )
+      .map((item) => fromJson(Map<String, dynamic>.from(item)))
       .toList();
 }
