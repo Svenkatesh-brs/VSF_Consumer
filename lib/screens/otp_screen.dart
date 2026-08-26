@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:sms_autofill/sms_autofill.dart';
 
 import '../widgets/common/screen_transition.dart';
 import '../widgets/common/screen_content_exit.dart';
@@ -17,7 +18,25 @@ class OtpScreen extends StatefulWidget {
   State<OtpScreen> createState() => _OtpScreenState();
 }
 
-class _OtpScreenState extends State<OtpScreen> with TickerProviderStateMixin {
+class _OtpScreenState extends State<OtpScreen>
+    with TickerProviderStateMixin, CodeAutoFill {
+  @override
+  void codeUpdated() {
+    if (!mounted || code == null) {
+      return;
+    }
+
+    final otp = code!.replaceAll(RegExp(r'[^0-9]'), '');
+
+    if (otp.length == 6) {
+      controller.otpController.text = otp;
+
+      setState(() {});
+
+      controller.clearError();
+    }
+  }
+
   late final AuthProvider controller;
 
   late final AnimationController _shakeController;
@@ -40,6 +59,11 @@ class _OtpScreenState extends State<OtpScreen> with TickerProviderStateMixin {
     super.initState();
 
     controller = Get.find<AuthProvider>();
+    listenForCode();
+
+    // SmsAutoFill().getAppSignature.then((signature) {
+    //   print('SMS APP SIGNATURE: $signature');
+    // });
 
     // ------------------------------------------------------------
     // OTP SHAKE ANIMATION
@@ -250,6 +274,7 @@ class _OtpScreenState extends State<OtpScreen> with TickerProviderStateMixin {
 
   @override
   void dispose() {
+    cancel();
     _otpFocusNode.dispose();
     _shakeController.dispose();
     _successController.dispose();
