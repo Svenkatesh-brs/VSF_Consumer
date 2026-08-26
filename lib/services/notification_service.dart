@@ -7,15 +7,19 @@ import '../utils/app_constants.dart';
 import 'api_service.dart';
 
 @pragma('vm:entry-point')
-Future<void> firebaseMessagingBackgroundHandler(
-  RemoteMessage message,
-) async {
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 }
 
 class NotificationService {
+  // ============================================================
+  // HANDLE NOTIFICATION TAP
+  // ============================================================
+
+  void _handleNotificationTap(RemoteMessage message) {
+    print('Notification tapped: ${message.messageId}');
+  }
+
   final ApiService _apiService;
 
   NotificationService({required ApiService apiService})
@@ -58,6 +62,18 @@ class NotificationService {
 
     // Listen for FCM messages while the app is in the foreground.
     FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
+
+    // Listen when the user taps a notification while the
+    // app is in the background.
+    FirebaseMessaging.onMessageOpenedApp.listen(_handleNotificationTap);
+    
+    // Check whether the app was opened by tapping a notification
+    // while it was completely terminated.
+    final initialMessage = await FirebaseMessaging.instance.getInitialMessage();
+
+    if (initialMessage != null) {
+      _handleNotificationTap(initialMessage);
+    }
   }
 
   // ============================================================
