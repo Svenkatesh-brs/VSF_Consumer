@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../providers/auth_provider.dart';
 import '../../utils/app_colors.dart';
 
 class ProfileDrawer extends StatelessWidget {
   final String avatarAsset;
 
-  const ProfileDrawer({
-    super.key,
-    this.avatarAsset = 'assets/vsf.png',
-  });
+  const ProfileDrawer({super.key, this.avatarAsset = 'assets/vsf.png'});
 
   // ============================================================
   // SHOW
@@ -24,9 +22,7 @@ class ProfileDrawer extends StatelessWidget {
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (context) {
-        return ProfileDrawer(
-          avatarAsset: avatarAsset,
-        );
+        return ProfileDrawer(avatarAsset: avatarAsset);
       },
     );
   }
@@ -38,19 +34,10 @@ class ProfileDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(
-        20,
-        14,
-        20,
-        28,
-      ),
+      padding: const EdgeInsets.fromLTRB(20, 14, 20, 28),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(
-          alpha: 0.96,
-        ),
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(28),
-        ),
+        color: Colors.white.withValues(alpha: 0.96),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       ),
       child: SafeArea(
         top: false,
@@ -62,9 +49,7 @@ class ProfileDrawer extends StatelessWidget {
               height: 4,
               decoration: BoxDecoration(
                 color: Colors.black12,
-                borderRadius: BorderRadius.circular(
-                  100,
-                ),
+                borderRadius: BorderRadius.circular(100),
               ),
             ),
 
@@ -78,16 +63,10 @@ class ProfileDrawer extends StatelessWidget {
                   padding: const EdgeInsets.all(5),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: AppColors.lightBlue
-                        .withValues(
-                      alpha: 0.08,
-                    ),
+                    color: AppColors.lightBlue.withValues(alpha: 0.08),
                   ),
                   child: ClipOval(
-                    child: Image.asset(
-                      avatarAsset,
-                      fit: BoxFit.cover,
-                    ),
+                    child: Image.asset(avatarAsset, fit: BoxFit.cover),
                   ),
                 ),
 
@@ -95,16 +74,14 @@ class ProfileDrawer extends StatelessWidget {
 
                 const Expanded(
                   child: Column(
-                    crossAxisAlignment:
-                        CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         'Profile',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
-                          color:
-                              AppColors.lightBlue,
+                          color: AppColors.lightBlue,
                         ),
                       ),
                       SizedBox(height: 3),
@@ -112,8 +89,7 @@ class ProfileDrawer extends StatelessWidget {
                         'Manage your account',
                         style: TextStyle(
                           fontSize: 11,
-                          fontWeight:
-                              FontWeight.w500,
+                          fontWeight: FontWeight.w500,
                           color: Colors.black45,
                         ),
                       ),
@@ -134,10 +110,8 @@ class ProfileDrawer extends StatelessWidget {
                 Get.snackbar(
                   'My Profile',
                   'Profile will be available soon.',
-                  snackPosition:
-                      SnackPosition.BOTTOM,
-                  margin:
-                      const EdgeInsets.all(16),
+                  snackPosition: SnackPosition.BOTTOM,
+                  margin: const EdgeInsets.all(16),
                 );
               },
             ),
@@ -151,10 +125,8 @@ class ProfileDrawer extends StatelessWidget {
                 Get.snackbar(
                   'Help & Support',
                   'Support will be available soon.',
-                  snackPosition:
-                      SnackPosition.BOTTOM,
-                  margin:
-                      const EdgeInsets.all(16),
+                  snackPosition: SnackPosition.BOTTOM,
+                  margin: const EdgeInsets.all(16),
                 );
               },
             ),
@@ -162,17 +134,12 @@ class ProfileDrawer extends StatelessWidget {
             _buildDrawerItem(
               icon: Icons.logout_rounded,
               title: 'Logout',
-              onTap: () {
+              onTap: () async {
                 Navigator.pop(context);
 
-                Get.snackbar(
-                  'Logout',
-                  'Logout will be implemented later.',
-                  snackPosition:
-                      SnackPosition.BOTTOM,
-                  margin:
-                      const EdgeInsets.all(16),
-                );
+                final authProvider = Get.find<AuthProvider>();
+
+                await authProvider.logout();
               },
             ),
           ],
@@ -194,28 +161,17 @@ class ProfileDrawer extends StatelessWidget {
       borderRadius: BorderRadius.circular(16),
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-          vertical: 14,
-          horizontal: 4,
-        ),
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 4),
         child: Row(
           children: [
             Container(
               width: 42,
               height: 42,
               decoration: BoxDecoration(
-                color: AppColors.lightBlue.withValues(
-                  alpha: 0.07,
-                ),
-                borderRadius: BorderRadius.circular(
-                  13,
-                ),
+                color: AppColors.lightBlue.withValues(alpha: 0.07),
+                borderRadius: BorderRadius.circular(13),
               ),
-              child: Icon(
-                icon,
-                size: 21,
-                color: AppColors.lightBlue,
-              ),
+              child: Icon(icon, size: 21, color: AppColors.lightBlue),
             ),
 
             const SizedBox(width: 14),
