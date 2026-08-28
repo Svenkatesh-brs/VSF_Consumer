@@ -46,6 +46,12 @@ dependencies:
   url_launcher: ^6.3.1
   flutter_local_notifications: ^22.3.0
   sms_autofill: ^2.4.1
+  flutter_launcher_icons: ^0.14.4
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/vsf.png"
+  remove_alpha_ios: true
 
 dev_dependencies:
   flutter_test:
