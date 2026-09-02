@@ -22,6 +22,17 @@ class _EmiScheduleScreenState
 
   bool _isExiting = false;
 
+  // ------------------------------------------------------------
+  // EXPANSION STATE
+  //
+  // Keyed by each EMI's index in the model's list so cards expand
+  // and collapse independently. Only the next upcoming EMI is
+  // expanded initially; all others start collapsed.
+  // ------------------------------------------------------------
+
+  final Set<int> _expandedIndexes = {};
+  bool _expansionInitialized = false;
+
   @override
   void initState() {
     super.initState();
@@ -76,20 +87,26 @@ class _EmiScheduleScreenState
   // (Paid / Partial / Overdue / Pending).
   // ============================================================
 
-  Widget _buildStatusBadge(String status) {
+  Color _statusColor(String status) {
     final lowerStatus = status.toLowerCase();
 
-    final Color badgeColor;
-
     if (lowerStatus == 'paid') {
-      badgeColor = AppColors.buttonStart;
-    } else if (lowerStatus == 'partial') {
-      badgeColor = AppColors.secondary;
-    } else if (lowerStatus == 'overdue') {
-      badgeColor = AppColors.error;
-    } else {
-      badgeColor = AppColors.buttonEnd;
+      return AppColors.buttonStart;
     }
+
+    if (lowerStatus == 'partial') {
+      return AppColors.secondary;
+    }
+
+    if (lowerStatus == 'overdue') {
+      return AppColors.error;
+    }
+
+    return AppColors.buttonEnd;
+  }
+
+  Widget _buildStatusBadge(String status) {
+    final badgeColor = _statusColor(status);
 
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -122,29 +139,465 @@ class _EmiScheduleScreenState
   // invented; dates go through the shared epoch formatter.
   // ============================================================
 
-  Widget _buildEmiCard(EmiItem emi) {
+  void _toggleCard(int index) {
+    setState(() {
+      if (_expandedIndexes.contains(index)) {
+        _expandedIndexes.remove(index);
+      } else {
+        _expandedIndexes.add(index);
+      }
+    });
+  }
+
+  String _formatEmiNumber(int index) {
+    return 'EMI ${(index + 1).toString().padLeft(2, '0')}';
+  }
+
+  int? _firstUpcomingIndex(EmiScheduleModel schedule) {
+    for (var i = 0; i < schedule.emis.length; i++) {
+      if (schedule.emis[i].isUpcoming) {
+        return i;
+      }
+    }
+
+    return null;
+  }
+
+  // ============================================================
+  // TIMELINE DOT
+  // ============================================================
+
+  Widget _buildTimelineDot({
+    required String status,
+    required bool isNextUpcoming,
+  }) {
+    if (isNextUpcoming) {
+      return Container(
+        width: 18,
+        height: 18,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppColors.buttonStart,
+              AppColors.buttonEnd,
+            ],
+          ),
+          border: Border.all(
+            color: Colors.white,
+            width: 2.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.buttonEnd
+                  .withValues(alpha: 0.35),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final isPending = status.toLowerCase() == 'pending';
+    final color = _statusColor(status);
+
+    return Container(
+      width: 9,
+      height: 9,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: isPending ? Colors.white : color,
+        border: Border.all(
+          color: isPending
+              ? AppColors.tintColor
+              : color.withValues(alpha: 0.35),
+          width: 1.5,
+        ),
+      ),
+    );
+  }
+
+  // ============================================================
+  // TIMELINE ITEM
+  // ------------------------------------------------------------
+  // A dot beside the EMI card. The connector line itself lives
+  // in _buildTimelineGroup (a Stack), so cards can grow and
+  // shrink freely without constraining the rail's height.
+  // ============================================================
+
+  Widget _buildTimelineItem({
+    required EmiItem emi,
+    required int index,
+    required bool isNextUpcoming,
+  }) {
+    final isExpanded = _expandedIndexes.contains(index);
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 26,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: Align(
+              alignment: Alignment.center,
+              child: _buildTimelineDot(
+                status: emi.status,
+                isNextUpcoming: isNextUpcoming,
+              ),
+            ),
+          ),
+        ),
+
+        const SizedBox(width: 12),
+
+        Expanded(
+          child: _buildEmiCard(
+            emi: emi,
+            index: index,
+            isNextUpcoming: isNextUpcoming,
+            isExpanded: isExpanded,
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ============================================================
+  // TIMELINE GROUP
+  // ------------------------------------------------------------
+  // Renders one continuous connector down the 26px gutter and
+  // stacks the timeline items on top of it.
+  // ============================================================
+
+  Widget _buildTimelineGroup(List<Widget> items) {
+    if (items.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final content = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: items,
+    );
+
+    if (items.length < 2) {
+      return content;
+    }
+
+    return Stack(
+      children: [
+        Positioned(
+          left: 12,
+          top: 0,
+          bottom: 0,
+          child: Container(
+            width: 2,
+            decoration: BoxDecoration(
+              color: AppColors.tintColor
+                  .withValues(alpha: 0.75),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+        ),
+
+        content,
+      ],
+    );
+  }
+
+  // ============================================================
+  // EMI CARD
+  // ------------------------------------------------------------
+  // Collapsible card; tapping the card toggles the numeric
+  // break-up via AnimatedSize. The NEXT upcoming EMI carries
+  // a subtle gradient highlight.
+  // ============================================================
+
+  Widget _buildEmiCard({
+    required EmiItem emi,
+    required int index,
+    required bool isNextUpcoming,
+    required bool isExpanded,
+  }) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 240),
+      curve: Curves.easeInOut,
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: isNextUpcoming
+              ? [
+                  AppColors.buttonEnd
+                      .withValues(alpha: 0.07),
+                  Colors.white
+                      .withValues(alpha: 0.85),
+                ]
+              : [
+                  Colors.white
+                      .withValues(alpha: 0.80),
+                  Colors.white
+                      .withValues(alpha: 0.48),
+                ],
+        ),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: isNextUpcoming
+              ? AppColors.buttonEnd
+                  .withValues(alpha: 0.20)
+              : Colors.white.withValues(alpha: 0.60),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(18),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () => _toggleCard(index),
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment:
+                    CrossAxisAlignment.start,
+                children: [
+                  _buildCardHeader(
+                    emi: emi,
+                    index: index,
+                    isNextUpcoming: isNextUpcoming,
+                    isExpanded: isExpanded,
+                  ),
+                  AnimatedSize(
+                    duration: const Duration(
+                        milliseconds: 240),
+                    curve: Curves.easeInOut,
+                    alignment: Alignment.topCenter,
+                    child: isExpanded
+                        ? _buildExpandedDetails(emi)
+                        : const SizedBox(
+                            width: double.infinity,
+                            height: 0,
+                          ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCardHeader({
+    required EmiItem emi,
+    required int index,
+    required bool isNextUpcoming,
+    required bool isExpanded,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: isNextUpcoming
+                ? AppColors.buttonEnd
+                    .withValues(alpha: 0.12)
+                : AppColors.lightBlue
+                    .withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(
+            Icons.event_note_outlined,
+            size: 19,
+            color: isNextUpcoming
+                ? AppColors.buttonEnd
+                : AppColors.lightBlue,
+          ),
+        ),
+
+        const SizedBox(width: 11),
+
+        Expanded(
+          child: Column(
+            crossAxisAlignment:
+                CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    _formatEmiNumber(index),
+                    style: const TextStyle(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.lightBlue,
+                    ),
+                  ),
+
+                  if (isNextUpcoming) ...[
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets
+                          .symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                          colors: [
+                            AppColors.buttonStart,
+                            AppColors.buttonEnd,
+                          ],
+                        ),
+                        borderRadius:
+                            BorderRadius.circular(100),
+                      ),
+                      child: const Text(
+                        'NEXT',
+                        style: TextStyle(
+                          fontSize: 8.5,
+                          fontWeight:
+                              FontWeight.w800,
+                          letterSpacing: 0.8,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+
+              const SizedBox(height: 3),
+
+              Text(
+                controller.formatDateMs(emi.dueDateMs),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black45,
+                ),
+              ),
+
+              if (emi.id.isNotEmpty) ...[
+                const SizedBox(height: 2),
+                Text(
+                  emi.id,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 9.5,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black38,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+
+        const SizedBox(width: 8),
+
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(
+              _formatAmount(emi.emiAmount),
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
+                color: AppColors.lightBlue,
+              ),
+            ),
+
+            const SizedBox(height: 5),
+
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildStatusBadge(emi.status),
+
+                const SizedBox(width: 5),
+
+                AnimatedRotation(
+                  turns: isExpanded ? 0.5 : 0,
+                  duration: const Duration(
+                      milliseconds: 240),
+                  curve: Curves.easeInOut,
+                  child: const Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    size: 22,
+                    color: AppColors.lightBlack,
+                  ),
+                ),
+              ],
+            ),
+
+            if (emi.daysOverdue > 0) ...[
+              const SizedBox(height: 4),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 3,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.error
+                      .withValues(alpha: 0.08),
+                  borderRadius:
+                      BorderRadius.circular(100),
+                ),
+                child: Text(
+                  '${emi.daysOverdue} '
+                  '${emi.daysOverdue == 1 ? 'day' : 'days'} '
+                  'overdue',
+                  style: const TextStyle(
+                    fontSize: 8.5,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.error,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildExpandedDetails(EmiItem emi) {
     final detailRows = <Widget>[
       _buildInfoRow(
         label: 'Principal',
-        value:
-            _formatAmount(emi.principalComponent),
+        value: _formatAmount(emi.principalComponent),
       ),
       _buildInfoRow(
         label: 'Interest',
-        value:
-            _formatAmount(emi.interestComponent),
+        value: _formatAmount(emi.interestComponent),
       ),
       if (emi.insuranceComponent > 0)
         _buildInfoRow(
           label: 'Insurance',
-          value: _formatAmount(
-              emi.insuranceComponent),
+          value: _formatAmount(emi.insuranceComponent),
         ),
       if (emi.principalOutstanding > 0)
         _buildInfoRow(
           label: 'Outstanding',
-          value: _formatAmount(
-              emi.principalOutstanding),
+          value: _formatAmount(emi.principalOutstanding),
         ),
       _buildInfoRow(
         label: 'LPC Due',
@@ -156,174 +609,33 @@ class _EmiScheduleScreenState
       ),
       _buildInfoRow(
         label: 'Remaining',
-        value:
-            _formatAmount(emi.remainingAmount),
+        value: _formatAmount(emi.remainingAmount),
       ),
       if (emi.lastPaymentDateMs != null)
         _buildInfoRow(
           label: 'Last Payment',
-          value: controller.formatDateMs(
-              emi.lastPaymentDateMs),
+          value:
+              controller.formatDateMs(emi.lastPaymentDateMs),
         ),
     ];
 
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Colors.white.withValues(alpha: 0.80),
-            Colors.white.withValues(alpha: 0.48),
-          ],
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.fromLTRB(12, 6, 12, 10),
+        decoration: BoxDecoration(
+          color: AppColors.tintColor
+              .withValues(alpha: 0.20),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: AppColors.tintColor
+                .withValues(alpha: 0.55),
+          ),
         ),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.60),
-          width: 1,
+        child: Column(
+          children: detailRows,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 18,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ------------------------------------------------------
-          // TOP ROW
-          // ------------------------------------------------------
-
-          Row(
-            crossAxisAlignment:
-                CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 38,
-                height: 38,
-                decoration: BoxDecoration(
-                  color: AppColors.lightBlue
-                      .withValues(alpha: 0.08),
-                  borderRadius:
-                      BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.event_note_outlined,
-                  size: 19,
-                  color: AppColors.lightBlue,
-                ),
-              ),
-
-              const SizedBox(width: 11),
-
-              Expanded(
-                child: Column(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      controller.formatDateMs(
-                          emi.dueDateMs),
-                      style: const TextStyle(
-                        fontSize: 13.5,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.lightBlue,
-                      ),
-                    ),
-
-                    if (emi.id.isNotEmpty) ...[
-                      const SizedBox(height: 4),
-
-                      Text(
-                        emi.id,
-                        maxLines: 1,
-                        overflow:
-                            TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 10,
-                          fontWeight:
-                              FontWeight.w500,
-                          color: Colors.black45,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-
-              const SizedBox(width: 8),
-
-              Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    _formatAmount(emi.emiAmount),
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.lightBlue,
-                    ),
-                  ),
-
-                  const SizedBox(height: 4),
-
-                  _buildStatusBadge(emi.status),
-
-                  if (emi.daysOverdue > 0)
-                    Padding(
-                      padding: const EdgeInsets.only(
-                        top: 4,
-                      ),
-                      child: Container(
-                        padding: const EdgeInsets
-                            .symmetric(
-                          horizontal: 9,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.error
-                              .withValues(alpha: 0.08),
-                          borderRadius:
-                              BorderRadius.circular(
-                                  100),
-                        ),
-                        child: Text(
-                          '${emi.daysOverdue} '
-                                  '${emi.daysOverdue == 1 ? 'day' : 'days'} '
-                              'overdue',
-                          style: const TextStyle(
-                            fontSize: 9,
-                            fontWeight:
-                                FontWeight.w600,
-                            color: AppColors.error,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 10),
-
-          Container(
-            height: 1,
-            color: AppColors.lightBlue
-                .withValues(alpha: 0.07),
-          ),
-
-          const SizedBox(height: 4),
-
-          ...detailRows,
-        ],
       ),
     );
   }
@@ -514,14 +826,23 @@ class _EmiScheduleScreenState
   // ============================================================
 
   List<Widget> _buildScheduleSections(
-    EmiScheduleModel schedule,
-  ) {
+    EmiScheduleModel schedule, {
+    required int? nextUpcomingIndex,
+  }) {
     final pastEmis = schedule.emis
         .where((emi) => emi.isPast)
         .toList();
 
     final upcomingEmis = schedule.emis
         .where((emi) => emi.isUpcoming)
+        .toList();
+
+    final pastIndices = pastEmis
+        .map((emi) => schedule.emis.indexOf(emi))
+        .toList();
+
+    final upcomingIndices = upcomingEmis
+        .map((emi) => schedule.emis.indexOf(emi))
         .toList();
 
     final sections = <Widget>[];
@@ -531,8 +852,15 @@ class _EmiScheduleScreenState
         _buildSectionLabel('Past EMIs'),
       );
 
-      sections.addAll(
-        pastEmis.map(_buildEmiCard),
+      sections.add(
+        _buildTimelineGroup([
+          for (var i = 0; i < pastEmis.length; i++)
+            _buildTimelineItem(
+              emi: pastEmis[i],
+              index: pastIndices[i],
+              isNextUpcoming: false,
+            ),
+        ]),
       );
     }
 
@@ -547,12 +875,142 @@ class _EmiScheduleScreenState
         _buildSectionLabel('Upcoming EMIs'),
       );
 
-      sections.addAll(
-        upcomingEmis.map(_buildEmiCard),
+      sections.add(
+        _buildTimelineGroup([
+          for (var i = 0; i < upcomingEmis.length; i++)
+            _buildTimelineItem(
+              emi: upcomingEmis[i],
+              index: upcomingIndices[i],
+              isNextUpcoming:
+                  upcomingIndices[i] == nextUpcomingIndex,
+            ),
+        ]),
       );
     }
 
     return sections;
+  }
+
+  // ============================================================
+  // SCHEDULE SUMMARY
+  // ------------------------------------------------------------
+  // TOTAL / PAID / UPCOMING metrics with an overdue pill when
+  // any EMI is overdue.
+  // ============================================================
+
+  Widget _buildScheduleSummary(
+    EmiScheduleModel schedule,
+  ) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.symmetric(
+        vertical: 16,
+        horizontal: 6,
+      ),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.white.withValues(alpha: 0.85),
+            AppColors.tintColor.withValues(alpha: 0.35),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.75),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _summaryMetric(
+                value: '${schedule.totalCount}',
+                label: 'TOTAL',
+              ),
+              _summaryMetric(
+                value: '${schedule.paidCount}',
+                label: 'PAID',
+              ),
+              _summaryMetric(
+                value: '${schedule.upcomingCount}',
+                label: 'UPCOMING',
+              ),
+            ],
+          ),
+
+          if (schedule.overdueCount > 0) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 5,
+              ),
+              decoration: BoxDecoration(
+                color:
+                    AppColors.error.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(100),
+                border: Border.all(
+                  color:
+                      AppColors.error.withValues(alpha: 0.16),
+                ),
+              ),
+              child: Text(
+                '${schedule.overdueCount} '
+                '${schedule.overdueCount == 1 ? 'EMI' : 'EMIs'} '
+                'overdue',
+                style: const TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.4,
+                  color: AppColors.error,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _summaryMetric({
+    required String value,
+    required String label,
+  }) {
+    return Expanded(
+      child: Column(
+        children: [
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 19,
+              fontWeight: FontWeight.w800,
+              color: AppColors.lightBlue,
+            ),
+          ),
+          const SizedBox(height: 3),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 8.5,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1.2,
+              color: Colors.black45,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   String _buildSubtitle(EmiScheduleModel schedule) {
@@ -607,6 +1065,19 @@ class _EmiScheduleScreenState
                   color: AppColors.primary,
                 ),
               );
+            }
+
+            final nextUpcomingIndex =
+                _firstUpcomingIndex(schedule);
+
+            if (!_expansionInitialized) {
+              _expansionInitialized = true;
+
+              if (nextUpcomingIndex != null) {
+                _expandedIndexes
+                  ..clear()
+                  ..add(nextUpcomingIndex);
+              }
             }
 
             return SingleChildScrollView(
@@ -748,9 +1219,15 @@ class _EmiScheduleScreenState
                               crossAxisAlignment:
                                   CrossAxisAlignment
                                       .start,
-                              children:
-                                  _buildScheduleSections(
-                                      schedule),
+                              children: [
+                                _buildScheduleSummary(
+                                    schedule),
+                                ..._buildScheduleSections(
+                                  schedule,
+                                  nextUpcomingIndex:
+                                      nextUpcomingIndex,
+                                ),
+                              ],
                             ),
                     ),
                   ),
