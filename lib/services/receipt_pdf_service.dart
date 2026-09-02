@@ -262,16 +262,6 @@ class ReceiptPdfService {
                 ),
               ),
             ),
-
-            pw.SizedBox(height: 6),
-
-            pw.Text(
-              'CIN No.: ${receipt.cinNo}',
-              style: const pw.TextStyle(
-                fontSize: 8.5,
-                color: PdfColors.grey700,
-              ),
-            ),
           ],
         ),
       ],
@@ -407,9 +397,8 @@ class ReceiptPdfService {
       ),
       columnWidths: const {
         0: pw.FixedColumnWidth(34),
-        1: pw.FlexColumnWidth(2),
-        2: pw.FlexColumnWidth(4),
-        3: pw.FlexColumnWidth(2.4),
+        1: pw.FlexColumnWidth(4),
+        2: pw.FlexColumnWidth(2.4),
       },
       children: [
         pw.TableRow(
@@ -418,8 +407,7 @@ class ReceiptPdfService {
           ),
           children: [
             headerCell('#', alignment: pw.Alignment.center),
-            headerCell('Due Date'),
-            headerCell('Desc'),
+            headerCell('Collection Type'),
             headerCell('Amount',
                 alignment: pw.Alignment.centerRight),
           ],
@@ -445,9 +433,6 @@ class ReceiptPdfService {
                   textAlign: pw.TextAlign.center,
                 ),
               ),
-              // Per-installment due dates are not carried on
-              // the merged voucher transaction; shown as '--'.
-              bodyCell('--'),
               bodyCell(receipt.items[i].label),
               pw.Padding(
                 padding: const pw.EdgeInsets.symmetric(
@@ -479,7 +464,6 @@ class ReceiptPdfService {
               child: pw.Text(''),
             ),
             bodyCell('Total', bold: true),
-            bodyCell(''),
             pw.Padding(
               padding: const pw.EdgeInsets.symmetric(
                 horizontal: 10,
@@ -549,27 +533,6 @@ class ReceiptPdfService {
       crossAxisAlignment:
           pw.CrossAxisAlignment.stretch,
       children: [
-        pw.Row(
-          mainAxisAlignment:
-              pw.MainAxisAlignment.spaceBetween,
-          children: [
-            pw.Text(
-              'Payment Mode: ${receipt.paymentMode}',
-              style: const pw.TextStyle(
-                fontSize: 9,
-                color: PdfColors.grey800,
-              ),
-            ),
-            pw.Text(
-              'Cashier: ${receipt.cashier}',
-              style: const pw.TextStyle(
-                fontSize: 9,
-                color: PdfColors.grey800,
-              ),
-            ),
-          ],
-        ),
-
         pw.SizedBox(height: 42),
 
         pw.Row(

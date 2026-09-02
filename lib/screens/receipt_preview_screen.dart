@@ -483,17 +483,6 @@ class _ReceiptPreviewScreenState
                 ),
               ),
             ),
-
-            const SizedBox(height: 6),
-
-            Text(
-              'CIN No.: ${receipt.cinNo}',
-              style: const TextStyle(
-                fontSize: 9,
-                fontWeight: FontWeight.w500,
-                color: Colors.black45,
-              ),
-            ),
           ],
         ),
       ],
@@ -674,8 +663,7 @@ class _ReceiptPreviewScreenState
             const BoxDecoration(color: headerColor),
         children: [
           _tablePadding(_tableHeaderText('#')),
-          _tablePadding(_tableHeaderText('Due Date')),
-          _tablePadding(_tableHeaderText('Desc')),
+          _tablePadding(_tableHeaderText('Collection Type')),
           _tablePadding(
             _tableHeaderText('Amount', right: true),
           ),
@@ -694,9 +682,6 @@ class _ReceiptPreviewScreenState
             _tablePadding(
               _tableCellText('${i + 1}'),
             ),
-            // Per-installment due dates are not carried on the
-            // merged voucher transaction.
-            _tablePadding(_tableCellText('--')),
             _tablePadding(
               _tableCellText(receipt.items[i].label),
             ),
@@ -719,7 +704,6 @@ class _ReceiptPreviewScreenState
           _tablePadding(
             _tableCellText('Total', bold: true),
           ),
-          _tablePadding(const Text('')),
           _tablePadding(
             _tableCellText(
               '₹${ReceiptModel.formatAmount(receipt.totalAmount)}',
@@ -735,9 +719,8 @@ class _ReceiptPreviewScreenState
     return Table(
       columnWidths: const {
         0: FixedColumnWidth(30),
-        1: FlexColumnWidth(2),
-        2: FlexColumnWidth(4),
-        3: FlexColumnWidth(2.6),
+        1: FlexColumnWidth(4),
+        2: FlexColumnWidth(2.6),
       },
       border: TableBorder.all(
         color: Colors.black.withValues(alpha: 0.25),
@@ -830,30 +813,6 @@ class _ReceiptPreviewScreenState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          mainAxisAlignment:
-              MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Payment Mode: ${receipt.paymentMode}',
-              style: TextStyle(
-                fontSize: 9.5,
-                fontWeight: FontWeight.w500,
-                color: Colors.black.withValues(alpha: 0.60),
-              ),
-            ),
-
-            Text(
-              'Cashier: ${receipt.cashier}',
-              style: TextStyle(
-                fontSize: 9.5,
-                fontWeight: FontWeight.w500,
-                color: Colors.black.withValues(alpha: 0.60),
-              ),
-            ),
-          ],
-        ),
-
         const SizedBox(height: 38),
 
         Row(
