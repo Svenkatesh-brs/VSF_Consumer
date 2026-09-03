@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
 
+import '../bindings/in_app_notification_binding.dart';
+import '../screens/in_app_notification_screen.dart';
 import '../screens/pay_emi_screen.dart';
 import '../bindings/complaint_binding.dart';
 import '../bindings/contact_update_binding.dart';
@@ -135,5 +137,11 @@ abstract class AppPages {
     //    // fetched EMI schedule data. No additional API call.
     //    // ==========================================================
     GetPage(name: AppRoutes.payEmi, page: () => const PayEmiScreen()),
+
+    GetPage(
+      name: AppRoutes.inAppNotifications,
+      page: () => const InAppNotificationScreen(),
+      binding: InAppNotificationBinding(),
+    ),
   ];
 }

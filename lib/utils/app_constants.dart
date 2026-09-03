@@ -46,49 +46,43 @@ abstract class AppConstants {
   // API
   // ============================================================
 
-  static const String baseUrl =
-  'https://vsf-api-development.up.railway.app';  
-    // 'http://10.172.129.117:4000';    
-      
+  static const String baseUrl = 'https://vsf-api-development.up.railway.app';
+  // 'http://10.172.129.117:4000';
 
   // ============================================================
   // AUTH API
   // ============================================================
 
-  static const String verifyOtp =
-      '/api/v1/consumer/otp/verify';
+  static const String verifyOtp = '/api/v1/consumer/otp/verify';
 
-  static const String requestOtp =
-      '/api/v1/consumer/otp/request';
+  static const String requestOtp = '/api/v1/consumer/otp/request';
 
   // ============================================================
   // HOME API
   // ============================================================
 
-  static const String home =
-      '/api/v1/consumer/customer';
+  static const String home = '/api/v1/consumer/customer';
 
   // ============================================================
   // LOAN DASHBOARD API
   // ============================================================
 
-  static const String loanById =
-      '/api/v1/consumer/loan/';
+  static const String loanById = '/api/v1/consumer/loan/';
 
   // ============================================================
   // CONTACT UPDATE API
   // ============================================================
 
-  static const String updatePhone =
-      '/api/v1/consumer/customer/me/phone';
+  static const String updatePhone = '/api/v1/consumer/customer/me/phone';
 
-  static const String updateAddress =
-      '/api/v1/consumer/customer/address/';
+  static const String updateAddress = '/api/v1/consumer/customer/address/';
 
   // ============================================================
-// NOTIFICATION API
-// ============================================================
+  // NOTIFICATION API
+  // ============================================================
 
-static const String registerNotificationDevice =
-    '/api/v1/consumer/notifications/device';
+  static const String registerNotificationDevice =
+      '/api/v1/consumer/notifications/device';
+
+  static const String notifications = '/api/v1/consumer/notification';
 }

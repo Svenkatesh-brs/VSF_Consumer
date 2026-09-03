@@ -23,4 +23,5 @@ abstract class AppRoutes {
 
   static const help = '/help';
   static const payEmi = '/pay-emi';
+  static const String inAppNotifications = '/in-app-notifications';
 }
