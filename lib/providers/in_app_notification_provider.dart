@@ -24,7 +24,13 @@ class InAppNotificationProvider extends GetxController {
 
   bool get hasMore => notifications.length < total.value;
 
-  int get unreadCount => notifications.where((item) => !item.isRead).length;
+  List<InAppNotificationModel> get unreadNotifications =>
+      notifications.where((item) => !item.isRead).toList();
+
+  List<InAppNotificationModel> get seenNotifications =>
+      notifications.where((item) => item.isRead).toList();
+
+  int get unreadCount => unreadNotifications.length;
 
   @override
   void onReady() {

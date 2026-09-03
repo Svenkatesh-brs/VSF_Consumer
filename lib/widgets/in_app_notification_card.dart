@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/in_app_notification_model.dart';
+import '../utils/app_colors.dart';
 
 class InAppNotificationCard extends StatelessWidget {
   final InAppNotificationModel notification;
@@ -16,25 +17,30 @@ class InAppNotificationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
+    final showUnreadTint = !notification.isRead;
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(18),
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: notification.isRead
-              ? theme.colorScheme.surface
-              : theme.colorScheme.primary.withValues(
-                  alpha: 0.06,
-                ),
+          color: showUnreadTint
+              ? AppColors.lightBlue.withValues(alpha: 0.05)
+              : Colors.white.withValues(alpha: 0.6),
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
-            color: notification.isRead
-                ? theme.dividerColor.withValues(alpha: 0.12)
-                : theme.colorScheme.primary.withValues(
-                    alpha: 0.18,
-                  ),
+            color: showUnreadTint
+                ? AppColors.lightBlue.withValues(alpha: 0.15)
+                : theme.dividerColor.withValues(alpha: 0.10),
           ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -57,37 +63,62 @@ class InAppNotificationCard extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: theme.textTheme.titleMedium
                               ?.copyWith(
-                            fontWeight: notification.isRead
-                                ? FontWeight.w600
-                                : FontWeight.w700,
+                            color: showUnreadTint
+                                ? AppColors.lightBlue
+                                : Colors.black87,
+                            fontWeight: showUnreadTint
+                                ? FontWeight.w700
+                                : FontWeight.w600,
                           ),
                         ),
                       ),
-                      if (!notification.isRead)
+                      if (showUnreadTint)
                         Container(
                           width: 8,
                           height: 8,
+                          margin: const EdgeInsets.only(
+                            left: 8,
+                          ),
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color:
-                                theme.colorScheme.primary,
+                            color: AppColors.primary,
                           ),
                         ),
                     ],
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 5),
                   Text(
                     notification.body,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodyMedium,
+                    style: theme.textTheme.bodyMedium
+                        ?.copyWith(
+                      color: Colors.black54,
+                      height: 1.35,
+                    ),
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    _formatRelativeTime(
-                      notification.createdAt,
-                    ),
-                    style: theme.textTheme.bodySmall,
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.schedule_rounded,
+                        size: 12,
+                        color: Colors.black38,
+                      ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          _formatRelativeTime(
+                            notification.createdAt,
+                          ),
+                          style: theme.textTheme.bodySmall
+                              ?.copyWith(
+                            color: Colors.black45,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -139,30 +170,31 @@ class _NotificationIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     IconData icon;
+    Color color;
 
     if (notification.isEmiReminder) {
       icon = Icons.notifications_active_outlined;
+      color = AppColors.secondary;
     } else if (notification.isEmiPaid) {
       icon = Icons.check_circle_outline;
+      color = AppColors.primary;
     } else {
-      icon = Icons.notifications_none;
+      icon = Icons.notifications_none_rounded;
+      color = AppColors.lightBlue;
     }
 
     return Container(
-      width: 46,
-      height: 46,
+      width: 44,
+      height: 44,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: theme.colorScheme.primary.withValues(
-          alpha: 0.10,
-        ),
+        color: color.withValues(alpha: 0.12),
       ),
       child: Icon(
         icon,
-        color: theme.colorScheme.primary,
+        size: 22,
+        color: color,
       ),
     );
   }

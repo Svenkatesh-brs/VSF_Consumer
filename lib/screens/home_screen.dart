@@ -33,6 +33,31 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   // ------------------------------------------------------------
+  // GREETING HELPERS
+  // ------------------------------------------------------------
+
+  String _greetingForNow() {
+    final hour = DateTime.now().hour;
+
+    if (hour >= 5 && hour < 12) {
+      return 'Good Morning';
+    }
+
+    if (hour >= 12 && hour < 17) {
+      return 'Good Afternoon';
+    }
+
+    return 'Good Evening';
+  }
+
+  String _greetingName() {
+    final name =
+        controller.loggedInUserName.value.trim();
+
+    return name;
+  }
+
+  // ------------------------------------------------------------
   // LOGOUT CONFIRMATION
   // ------------------------------------------------------------
 
@@ -187,7 +212,7 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 // ==================================================
                 // APPBAR-STYLE HEADER
-                // LEFT: VSF Logo | RIGHT: Notification + Logout
+                // LEFT: VSF Logo + "Home" | RIGHT: Notification + Logout
                 // ==================================================
 
                 ScreenContentExit(
@@ -198,119 +223,129 @@ class _HomeScreenState extends State<HomeScreen> {
                     direction:
                         ContentTransitionDirection.fromLeft,
                     delay: Duration.zero,
-                    child: Row(
-                      crossAxisAlignment:
-                          CrossAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: 44,
-                          height: 44,
-                          padding:
-                              const EdgeInsets.all(5),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white.withValues(
-                              alpha: 0.75,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            AppColors.lightBlue.withValues(
+                              alpha: 0.06,
                             ),
-                            border: Border.all(
-                              color:
-                                  Colors.white.withValues(
-                                alpha: 0.7,
-                              ),
+                            AppColors.primary.withValues(
+                              alpha: 0.10,
                             ),
-                            boxShadow: [
-                              BoxShadow(
-                                color:
-                                    Colors.black.withValues(
-                                  alpha: 0.06,
-                                ),
-                                blurRadius: 14,
-                                offset:
-                                    const Offset(0, 6),
-                              ),
-                            ],
-                          ),
-                          child: ClipOval(
-                            child: Image.asset(
-                              'assets/vsf.png',
-                              fit: BoxFit.cover,
-                            ),
+                          ],
+                        ),
+                        borderRadius:
+                            BorderRadius.circular(22),
+                        border: Border.all(
+                          color: Colors.white.withValues(
+                            alpha: 0.55,
                           ),
                         ),
+                        boxShadow: [
+                          BoxShadow(
+                            color:
+                                Colors.black.withValues(
+                              alpha: 0.05,
+                            ),
+                            blurRadius: 16,
+                            offset: const Offset(
+                              0,
+                              6,
+                            ),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        crossAxisAlignment:
+                            CrossAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: 42,
+                            height: 42,
+                            padding:
+                                const EdgeInsets.all(5),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white
+                                  .withValues(
+                                alpha: 0.85,
+                              ),
+                              border: Border.all(
+                                color:
+                                    Colors.white
+                                        .withValues(
+                                  alpha: 0.8,
+                                ),
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black
+                                      .withValues(
+                                    alpha: 0.06,
+                                  ),
+                                  blurRadius: 14,
+                                  offset:
+                                      const Offset(
+                                        0,
+                                        6,
+                                      ),
+                                ),
+                              ],
+                            ),
+                            child: ClipOval(
+                              child: Image.asset(
+                                'assets/vsf.png',
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
 
-                        const Spacer(),
+                          const SizedBox(width: 12),
 
-                        SizedBox(
-                          width: 42,
-                          height: 42,
-                          child: IconButton(
-                            padding: EdgeInsets.zero,
+                          const Text(
+                            'Home',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight:
+                                  FontWeight.w700,
+                              color:
+                                  AppColors.lightBlue,
+                            ),
+                          ),
+
+                          const Spacer(),
+
+                          _HeaderIconButton(
                             tooltip: 'Notifications',
+                            icon: Icons
+                                .notifications_none_rounded,
+                            iconSize: 22,
                             onPressed: () {
                               Get.toNamed(
                                 AppRoutes
                                     .inAppNotifications,
                               );
                             },
-                            icon: const Icon(
-                              Icons
-                                  .notifications_none_rounded,
-                              size: 24,
-                              color:
-                                  AppColors.lightBlue,
-                            ),
                           ),
-                        ),
 
-                        SizedBox(
-                          width: 42,
-                          height: 42,
-                          child: IconButton(
-                            padding: EdgeInsets.zero,
+                          const SizedBox(width: 6),
+
+                          _HeaderIconButton(
                             tooltip: 'Logout',
+                            icon: Icons.logout_rounded,
+                            iconSize: 20,
                             onPressed:
                                 _showLogoutConfirmation,
-                            icon: Container(
-                              width: 38,
-                              height: 38,
-                              decoration: BoxDecoration(
-                                color:
-                                    Colors.white.withValues(
-                                  alpha: 0.75,
-                                ),
-                                shape:
-                                    BoxShape.circle,
-                                border: Border.all(
-                                  color: Colors.white
-                                      .withValues(
-                                    alpha: 0.7,
-                                  ),
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black
-                                        .withValues(
-                                      alpha: 0.05,
-                                    ),
-                                    blurRadius: 12,
-                                    offset:
-                                        const Offset(
-                                          0,
-                                          5,
-                                        ),
-                                  ),
-                                ],
-                              ),
-                              child: const Icon(
-                                Icons.logout_rounded,
-                                size: 18,
-                                color:
-                                    AppColors.lightBlue,
-                              ),
-                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -318,7 +353,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 20),
 
                 // ==================================================
-                // GREETING
+                // GREETING CARD
                 // ==================================================
 
                 ScreenContentExit(
@@ -329,33 +364,108 @@ class _HomeScreenState extends State<HomeScreen> {
                     direction:
                         ContentTransitionDirection.fromLeft,
                     delay: Duration.zero,
-                    child: Column(
-                      crossAxisAlignment:
-                          CrossAxisAlignment.start,
-                      children: [
-                        Obx(
-                          () => Text(
-                            'Good Morning, '
-                            '${controller.loggedInUserName.value}',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black
-                                  .withValues(alpha: 0.7),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 22,
+                      ),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            AppColors.lightBlue
+                                .withValues(alpha: 0.92),
+                            AppColors.primary
+                                .withValues(alpha: 0.82),
+                          ],
+                        ),
+                        borderRadius:
+                            BorderRadius.circular(22),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.lightBlue
+                                .withValues(alpha: 0.30),
+                            blurRadius: 20,
+                            offset: const Offset(
+                              0,
+                              8,
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          "Here's your loan overview",
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.black.withValues(
-                              alpha: 0.5,
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 46,
+                            height: 46,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white
+                                  .withValues(
+                                alpha: 0.20,
+                              ),
+                            ),
+                            child: const Icon(
+                              Icons.waving_hand_rounded,
+                              size: 26,
+                              color: Colors.white,
                             ),
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Obx(
+                              () => Column(
+                                crossAxisAlignment:
+                                    CrossAxisAlignment
+                                        .start,
+                                children: [
+                                  Text(
+                                    _greetingForNow(),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 20,
+                                      fontWeight:
+                                          FontWeight.w700,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow
+                                        .ellipsis,
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    _greetingName(),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 15,
+                                      fontWeight:
+                                          FontWeight.w600,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow
+                                        .ellipsis,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    "Here's a quick look at "
+                                    'your loan overview.',
+                                    style: TextStyle(
+                                      color:
+                                          Colors.white
+                                              .withValues(
+                                        alpha: 0.90,
+                                      ),
+                                      fontSize: 12,
+                                      height: 1.4,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -955,6 +1065,58 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _HeaderIconButton extends StatelessWidget {
+  final String tooltip;
+  final IconData icon;
+  final double iconSize;
+  final VoidCallback onPressed;
+
+  const _HeaderIconButton({
+    required this.tooltip,
+    required this.icon,
+    required this.onPressed,
+    this.iconSize = 22,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 42,
+      height: 42,
+      child: IconButton(
+        padding: EdgeInsets.zero,
+        tooltip: tooltip,
+        onPressed: onPressed,
+        icon: Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.white.withValues(alpha: 0.85),
+            border: Border.all(
+              color: AppColors.lightBlue.withValues(
+                alpha: 0.12,
+              ),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 12,
+                offset: const Offset(0, 5),
+              ),
+            ],
+          ),
+          child: Icon(
+            icon,
+            size: iconSize,
+            color: AppColors.lightBlue,
           ),
         ),
       ),
