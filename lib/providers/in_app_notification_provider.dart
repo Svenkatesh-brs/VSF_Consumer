@@ -6,9 +6,8 @@ import '../services/in_app_notification_service.dart';
 class InAppNotificationProvider extends GetxController {
   final InAppNotificationService _service;
 
-  InAppNotificationProvider({
-    required InAppNotificationService service,
-  }) : _service = service;
+  InAppNotificationProvider({required InAppNotificationService service})
+    : _service = service;
 
   final notifications = <InAppNotificationModel>[].obs;
 
@@ -23,11 +22,9 @@ class InAppNotificationProvider extends GetxController {
 
   static const int _recordsPerPage = 10;
 
-  bool get hasMore =>
-      notifications.length < total.value;
+  bool get hasMore => notifications.length < total.value;
 
-  int get unreadCount =>
-      notifications.where((item) => !item.isRead).length;
+  int get unreadCount => notifications.where((item) => !item.isRead).length;
 
   @override
   void onReady() {
@@ -54,15 +51,16 @@ class InAppNotificationProvider extends GetxController {
         return;
       }
 
-      notifications.assignAll(
-        response.notifications,
-      );
+      notifications.assignAll(response.notifications);
 
       currentPage.value = response.page;
       total.value = response.total;
     } catch (e) {
-      errorMessage.value =
-          'Unable to load notifications.';
+      print('========== IN APP NOTIFICATION ERROR ==========');
+      print('Error: $e');
+      print('===============================================');
+
+      errorMessage.value = 'Unable to load notifications.';
     } finally {
       isLoading.value = false;
     }
@@ -86,15 +84,12 @@ class InAppNotificationProvider extends GetxController {
         return;
       }
 
-      notifications.assignAll(
-        response.notifications,
-      );
+      notifications.assignAll(response.notifications);
 
       currentPage.value = response.page;
       total.value = response.total;
     } catch (e) {
-      errorMessage.value =
-          'Unable to refresh notifications.';
+      errorMessage.value = 'Unable to refresh notifications.';
     } finally {
       isRefreshing.value = false;
     }
@@ -119,9 +114,7 @@ class InAppNotificationProvider extends GetxController {
         return;
       }
 
-      notifications.addAll(
-        response.notifications,
-      );
+      notifications.addAll(response.notifications);
 
       currentPage.value = response.page;
       total.value = response.total;
@@ -130,9 +123,7 @@ class InAppNotificationProvider extends GetxController {
     }
   }
 
-  Future<void> markAsRead(
-    InAppNotificationModel notification,
-  ) async {
+  Future<void> markAsRead(InAppNotificationModel notification) async {
     if (notification.isRead) {
       return;
     }
@@ -148,9 +139,7 @@ class InAppNotificationProvider extends GetxController {
     final previous = notifications[index];
 
     // Optimistic update.
-    notifications[index] = previous.copyWith(
-      isRead: true,
-    );
+    notifications[index] = previous.copyWith(isRead: true);
 
     try {
       await _service.updateNotificationReadStatus(
@@ -169,9 +158,7 @@ class InAppNotificationProvider extends GetxController {
     }
   }
 
-  Future<void> markAsUnread(
-    InAppNotificationModel notification,
-  ) async {
+  Future<void> markAsUnread(InAppNotificationModel notification) async {
     if (!notification.isRead) {
       return;
     }
@@ -186,9 +173,7 @@ class InAppNotificationProvider extends GetxController {
 
     final previous = notifications[index];
 
-    notifications[index] = previous.copyWith(
-      isRead: false,
-    );
+    notifications[index] = previous.copyWith(isRead: false);
 
     try {
       await _service.updateNotificationReadStatus(

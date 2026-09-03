@@ -23,23 +23,32 @@ class InAppNotificationResponse {
 class InAppNotificationService {
   final ApiService _apiService;
 
-  InAppNotificationService({
-    required ApiService apiService,
-  }) : _apiService = apiService;
+  InAppNotificationService({required ApiService apiService})
+    : _apiService = apiService;
 
   Future<InAppNotificationResponse> getNotifications({
     required int page,
     int recordsPerPage = 10,
     String searchString = '',
   }) async {
+    print('========== IN APP NOTIFICATION API ==========');
+    print('Endpoint: ${AppConstants.notifications}');
+    print('Page: $page');
+    print('Records Per Page: $recordsPerPage');
+    print('Search String: $searchString');
+
     final response = await _apiService.get(
       AppConstants.notifications,
-      queryParameters: {
+      data: {
         'page': page,
         'recordsPerPage': recordsPerPage,
         'searchString': searchString,
       },
     );
+
+    print('Status Code: ${response.statusCode}');
+    print('Response Data: ${response.data}');
+    print('=============================================');
 
     if (response.data is! Map) {
       throw ApiException(
@@ -48,21 +57,19 @@ class InAppNotificationService {
       );
     }
 
-    final json = Map<String, dynamic>.from(
-      response.data as Map,
-    );
+    final json = Map<String, dynamic>.from(response.data as Map);
 
     final rawData = json['data'];
 
     final notifications = rawData is List
         ? rawData
-            .whereType<Map>()
-            .map(
-              (item) => InAppNotificationModel.fromJson(
-                Map<String, dynamic>.from(item),
-              ),
-            )
-            .toList()
+              .whereType<Map>()
+              .map(
+                (item) => InAppNotificationModel.fromJson(
+                  Map<String, dynamic>.from(item),
+                ),
+              )
+              .toList()
         : <InAppNotificationModel>[];
 
     return InAppNotificationResponse(
@@ -70,10 +77,7 @@ class InAppNotificationService {
       message: json['message']?.toString() ?? '',
       notifications: notifications,
       page: _toInt(json['page'], page),
-      recordsPerPage: _toInt(
-        json['recordsPerPage'],
-        recordsPerPage,
-      ),
+      recordsPerPage: _toInt(json['recordsPerPage'], recordsPerPage),
       total: _toInt(json['total'], 0),
     );
   }
@@ -84,9 +88,7 @@ class InAppNotificationService {
   }) async {
     final response = await _apiService.patch(
       '${AppConstants.notifications}/$notificationId',
-      data: {
-        'isRead': isRead,
-      },
+      data: {'isRead': isRead},
     );
 
     if (response.data is! Map) {
@@ -96,16 +98,13 @@ class InAppNotificationService {
       );
     }
 
-    final json = Map<String, dynamic>.from(
-      response.data as Map,
-    );
+    final json = Map<String, dynamic>.from(response.data as Map);
 
     if (json['success'] != true) {
       throw ApiException(
         statusCode: response.statusCode,
         message:
-            json['message']?.toString() ??
-            'Unable to update notification.',
+            json['message']?.toString() ?? 'Unable to update notification.',
       );
     }
   }
@@ -119,9 +118,6 @@ class InAppNotificationService {
       return value.toInt();
     }
 
-    return int.tryParse(
-          value?.toString() ?? '',
-        ) ??
-        fallback;
+    return int.tryParse(value?.toString() ?? '') ?? fallback;
   }
 }

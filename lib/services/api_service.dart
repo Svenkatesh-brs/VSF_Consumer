@@ -68,20 +68,22 @@ class ApiService {
   // ============================================================
 
   Future<Response<dynamic>> get(
-    String endpoint, {
-    Map<String, dynamic>? queryParameters,
-    Map<String, dynamic>? headers,
-  }) async {
-    try {
-      return await _dio.get(
-        endpoint,
-        queryParameters: queryParameters,
-        options: Options(headers: headers),
-      );
-    } on DioException catch (e) {
-      throw _handleDioException(e);
-    }
+  String endpoint, {
+  dynamic data,
+  Map<String, dynamic>? queryParameters,
+  Map<String, dynamic>? headers,
+}) async {
+  try {
+    return await _dio.get(
+      endpoint,
+      data: data,
+      queryParameters: queryParameters,
+      options: Options(headers: headers),
+    );
+  } on DioException catch (e) {
+    throw _handleDioException(e);
   }
+}
 
   // ============================================================
   // POST

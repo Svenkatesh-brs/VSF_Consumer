@@ -186,9 +186,8 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // ==================================================
-                // HEADER
-                // ENTRY LEFT
-                // EXIT RIGHT
+                // APPBAR-STYLE HEADER
+                // LEFT: VSF Logo | RIGHT: Notification + Logout
                 // ==================================================
 
                 ScreenContentExit(
@@ -203,152 +202,165 @@ class _HomeScreenState extends State<HomeScreen> {
                       crossAxisAlignment:
                           CrossAxisAlignment.center,
                       children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment:
-                                CrossAxisAlignment.start,
-                            children: [
-                              Obx(
-                                () => Text(
-                                  'Good Morning 👋, '
-                                  '${controller.loggedInUserName.value}',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight:
-                                        FontWeight.w500,
-                                    color:
-                                        Colors.black.withValues(
-                                      alpha: 0.55,
-                                    ),
-                                  ),
-                                ),
+                        Container(
+                          width: 44,
+                          height: 44,
+                          padding:
+                              const EdgeInsets.all(5),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white.withValues(
+                              alpha: 0.75,
+                            ),
+                            border: Border.all(
+                              color:
+                                  Colors.white.withValues(
+                                alpha: 0.7,
                               ),
-
-                              const SizedBox(height: 4),
-
-                              const Text(
-                                'Welcome back',
-                                style: TextStyle(
-                                  fontSize: 26,
-                                  fontWeight: FontWeight.w700,
-                                  color:
-                                      AppColors.lightBlue,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color:
+                                    Colors.black.withValues(
+                                  alpha: 0.06,
                                 ),
-                              ),
-
-                              const SizedBox(height: 4),
-
-                              Text(
-                                'Here is your loan overview',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color:
-                                      Colors.black.withValues(
-                                    alpha: 0.55,
-                                  ),
-                                ),
+                                blurRadius: 14,
+                                offset:
+                                    const Offset(0, 6),
                               ),
                             ],
                           ),
+                          child: ClipOval(
+                            child: Image.asset(
+                              'assets/vsf.png',
+                              fit: BoxFit.cover,
+                            ),
+                          ),
                         ),
 
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              tooltip: 'Logout',
-                              onPressed:
-                                  _showLogoutConfirmation,
-                              icon: Container(
-                                width: 40,
-                                height: 40,
-                                decoration:
-                                    BoxDecoration(
-                                  color:
-                                      Colors.white.withValues(
-                                    alpha: 0.75,
-                                  ),
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color:
-                                        Colors.white.withValues(
-                                      alpha: 0.7,
-                                    ),
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color:
-                                          Colors.black.withValues(
-                                        alpha: 0.05,
-                                      ),
-                                      blurRadius: 12,
-                                      offset:
-                                          const Offset(
-                                        0,
-                                        5,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                child: const Icon(
-                                  Icons.logout_rounded,
-                                  size: 19,
-                                  color:
-                                      AppColors.lightBlue,
-                                ),
-                              ),
+                        const Spacer(),
+
+                        SizedBox(
+                          width: 42,
+                          height: 42,
+                          child: IconButton(
+                            padding: EdgeInsets.zero,
+                            tooltip: 'Notifications',
+                            onPressed: () {
+                              Get.toNamed(
+                                AppRoutes
+                                    .inAppNotifications,
+                              );
+                            },
+                            icon: const Icon(
+                              Icons
+                                  .notifications_none_rounded,
+                              size: 24,
+                              color:
+                                  AppColors.lightBlue,
                             ),
+                          ),
+                        ),
 
-                            const SizedBox(width: 4),
-
-                            Container(
-                              width: 52,
-                              height: 52,
-                              padding:
-                                  const EdgeInsets.all(5),
-                              decoration:
-                                  BoxDecoration(
-                                shape: BoxShape.circle,
+                        SizedBox(
+                          width: 42,
+                          height: 42,
+                          child: IconButton(
+                            padding: EdgeInsets.zero,
+                            tooltip: 'Logout',
+                            onPressed:
+                                _showLogoutConfirmation,
+                            icon: Container(
+                              width: 38,
+                              height: 38,
+                              decoration: BoxDecoration(
                                 color:
                                     Colors.white.withValues(
                                   alpha: 0.75,
                                 ),
+                                shape:
+                                    BoxShape.circle,
                                 border: Border.all(
-                                  color:
-                                      Colors.white.withValues(
+                                  color: Colors.white
+                                      .withValues(
                                     alpha: 0.7,
                                   ),
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color:
-                                        Colors.black.withValues(
-                                      alpha: 0.06,
+                                    color: Colors.black
+                                        .withValues(
+                                      alpha: 0.05,
                                     ),
-                                    blurRadius: 14,
+                                    blurRadius: 12,
                                     offset:
                                         const Offset(
-                                      0,
-                                      6,
-                                    ),
+                                          0,
+                                          5,
+                                        ),
                                   ),
                                 ],
                               ),
-                              child: ClipOval(
-                                child: Image.asset(
-                                  'assets/vsf.png',
-                                  fit: BoxFit.cover,
-                                ),
+                              child: const Icon(
+                                Icons.logout_rounded,
+                                size: 18,
+                                color:
+                                    AppColors.lightBlue,
                               ),
                             ),
-                          ],
+                          ),
                         ),
                       ],
                     ),
                   ),
                 ),
 
-                const SizedBox(height: 28),
+                const SizedBox(height: 20),
+
+                // ==================================================
+                // GREETING
+                // ==================================================
+
+                ScreenContentExit(
+                  isExiting: _isExiting,
+                  direction: ContentExitDirection.toRight,
+                  delay: Duration.zero,
+                  child: ScreenContentTransition(
+                    direction:
+                        ContentTransitionDirection.fromLeft,
+                    delay: Duration.zero,
+                    child: Column(
+                      crossAxisAlignment:
+                          CrossAxisAlignment.start,
+                      children: [
+                        Obx(
+                          () => Text(
+                            'Good Morning, '
+                            '${controller.loggedInUserName.value}',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black
+                                  .withValues(alpha: 0.7),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          "Here's your loan overview",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.black.withValues(
+                              alpha: 0.5,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 24),
 
                 // ==================================================
                 // LOAN OVERVIEW
