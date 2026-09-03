@@ -162,9 +162,11 @@ class NotificationService {
   ) {
     final type = data['type']?.toString();
     final loanNo = data['loanNo']?.toString();
+    final loanId = data['loanId']?.toString();
 
-    print('Notification type: $type');
-    print('Notification loanNo: $loanNo');
+    print('[NOTIFICATION] type: $type');
+    print('[NOTIFICATION] loanNo: $loanNo');
+    print('[NOTIFICATION] loanId: $loanId');
 
     switch (type) {
       // --------------------------------------------------------
@@ -173,11 +175,13 @@ class NotificationService {
 
       case 'EMI_PAYMENT_REMINDER':
         print(
-          'Navigating to EMI Schedule screen.',
+          '[NOTIFICATION] Navigating to EMI Schedule screen '
+          'with loanId: $loanId',
         );
 
         Get.toNamed(
           AppRoutes.emiSchedule,
+          arguments: loanId,
         );
         break;
 
@@ -187,11 +191,13 @@ class NotificationService {
 
       case 'PAYMENT_CONFIRMATION':
         print(
-          'Navigating to Transactions screen.',
+          '[NOTIFICATION] Navigating to Transactions screen '
+          'with loanId: $loanId',
         );
 
         Get.toNamed(
           AppRoutes.transactions,
+          arguments: loanId,
         );
         break;
 
@@ -201,7 +207,7 @@ class NotificationService {
 
       default:
         print(
-          'Unknown notification type: $type',
+          '[NOTIFICATION] Unknown notification type: $type',
         );
         break;
     }

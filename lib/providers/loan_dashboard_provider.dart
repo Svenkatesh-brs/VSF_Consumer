@@ -64,6 +64,8 @@ class LoanDashboardProvider extends GetxController {
 
     final arguments = Get.arguments;
 
+    print('[LOAN PROVIDER] Get.arguments: $arguments');
+
     try {
       isLoading.value = true;
       errorMessage.value = null;
@@ -73,6 +75,8 @@ class LoanDashboardProvider extends GetxController {
       // --------------------------------------------------------
 
       final loanId = _resolveLoanId(arguments);
+
+      print('[LOAN PROVIDER] Resolved loanId: $loanId');
 
       if (loanId.isEmpty) {
         selectedLoan.value = _selectedLoanFromArguments(arguments);
@@ -86,7 +90,11 @@ class LoanDashboardProvider extends GetxController {
       // API CALL
       // --------------------------------------------------------
 
+      print('[LOAN PROVIDER] Loading loan: $loanId');
+
       final response = await _loanDashboardService.getLoanById(loanId);
+
+      print('[LOAN PROVIDER] API success: ${response.success}');
 
       // --------------------------------------------------------
       // API FAILURE
@@ -127,6 +135,9 @@ class LoanDashboardProvider extends GetxController {
       transactions.value = response.transactions;
 
       emiSchedule.value = response.emiSchedule;
+
+      print('[LOAN PROVIDER] EMI schedule available: '
+          '${response.emiSchedule != null}');
 
       // --------------------------------------------------------
       // MAP API MODEL TO EXISTING DASHBOARD UI STRUCTURE
