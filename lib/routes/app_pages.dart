@@ -66,14 +66,15 @@ abstract class AppPages {
     // ==========================================================
     // TRANSACTIONS
     //
-    // Reuses the live LoanDashboardProvider and its already
-    // fetched transaction data. No additional API call.
+    // Reuses LoanDashboardProvider and its transaction data.
+    // The binding is required because this screen can also be
+    // opened directly from a notification.
     // ==========================================================
     GetPage(
       name: AppRoutes.transactions,
       page: () => const TransactionsScreen(),
+      binding: LoanDashboardBinding(),
     ),
-
     // ==========================================================
     // RECEIPT PREVIEW
     //
@@ -90,11 +91,15 @@ abstract class AppPages {
     // ==========================================================
     // EMI SCHEDULE
     //
-    // Reuses the live LoanDashboardProvider and its already
-    // fetched EMI schedule data. No additional API call.
+    // Reuses LoanDashboardProvider and its EMI schedule data.
+    // The binding is required because this screen can also be
+    // opened directly from a notification.
     // ==========================================================
-    GetPage(name: AppRoutes.emiSchedule, page: () => const EmiScheduleScreen()),
-
+    GetPage(
+      name: AppRoutes.emiSchedule,
+      page: () => const EmiScheduleScreen(),
+      binding: LoanDashboardBinding(),
+    ),
     // ==========================================================
     // COMPLAINT
     // ==========================================================

@@ -169,6 +169,11 @@ class LoanDashboardModel {
       }
     }
 
+    print('========== LOAN ID DEBUG ==========');
+    print('Loan ID: ${json['id']}');
+    print('Loan No: ${json['loanNo']}');
+    print('===================================');
+
     return LoanDashboardModel(
       loanId: _toStr(json['id']),
       loanNo: _toStr(json['loanNo']),
