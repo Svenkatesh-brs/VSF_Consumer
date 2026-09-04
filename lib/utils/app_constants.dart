@@ -69,6 +69,14 @@ abstract class AppConstants {
 
   static const String loanById = '/api/v1/consumer/loan/';
 
+    // ============================================================
+  // PAY EMI API
+  // ============================================================
+
+  static const String company = '/api/v1/admin/consumer/company';
+
+  static const String consumerMedia = '/api/v1/consumer/media/';
+
   // ============================================================
   // CONTACT UPDATE API
   // ============================================================

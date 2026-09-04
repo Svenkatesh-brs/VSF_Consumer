@@ -72,13 +72,17 @@ class ApiService {
   dynamic data,
   Map<String, dynamic>? queryParameters,
   Map<String, dynamic>? headers,
+  ResponseType? responseType,
 }) async {
   try {
     return await _dio.get(
       endpoint,
       data: data,
       queryParameters: queryParameters,
-      options: Options(headers: headers),
+      options: Options(
+        headers: headers,
+        responseType: responseType,
+      ),
     );
   } on DioException catch (e) {
     throw _handleDioException(e);

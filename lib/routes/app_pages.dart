@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 
+import '../bindings/pay_emi_binding.dart';
 import '../bindings/in_app_notification_binding.dart';
 import '../screens/in_app_notification_screen.dart';
 import '../screens/pay_emi_screen.dart';
@@ -136,8 +137,16 @@ abstract class AppPages {
     //    // Reuses the live LoanDashboardProvider and its already
     //    // fetched EMI schedule data. No additional API call.
     //    // ==========================================================
-    GetPage(name: AppRoutes.payEmi, page: () => const PayEmiScreen()),
 
+    GetPage(
+      name: AppRoutes.payEmi,
+      page: () => const PayEmiScreen(),
+      binding: PayEmiBinding(),
+    ),
+
+    // ==========================================================
+    //    In App Notifications
+    // ==========================================================
     GetPage(
       name: AppRoutes.inAppNotifications,
       page: () => const InAppNotificationScreen(),
