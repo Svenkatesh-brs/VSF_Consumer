@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-
+import 'package:lottie/lottie.dart';
 import 'dart:typed_data';
 
 import '../providers/pay_emi_provider.dart';
@@ -597,49 +597,56 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
   // ============================================================
 
   Widget _buildLoadingState() {
-    return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
-      child: Column(
-        children: [
-          const SizedBox(height: 45),
-          Container(
-            width: 82,
-            height: 82,
-            decoration: BoxDecoration(
-              color: AppColors.tintColor,
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: const Center(
-              child: CircularProgressIndicator(
-                strokeWidth: 3,
-                color: AppColors.secondary,
+  return LayoutBuilder(
+    builder: (context, constraints) {
+      return SingleChildScrollView(
+        physics: const NeverScrollableScrollPhysics(),
+        child: SizedBox(
+          height: constraints.maxHeight,
+          width: double.infinity,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Lottie.asset(
+                'assets/animations/pay_emi_loading.json',
+                width: 320,
+                height: 320,
+                fit: BoxFit.contain,
+                repeat: true,
               ),
-            ),
+
+              const SizedBox(height: 8),
+
+              Text(
+                'Loading payment details',
+                style: AppTheme.style.copyWith(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.lightBlue,
+                ),
+              ),
+
+              const SizedBox(height: 6),
+
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 30),
+                child: Text(
+                  'Please wait while we fetch the latest payment information.',
+                  textAlign: TextAlign.center,
+                  style: AppTheme.style.copyWith(
+                    fontSize: 12,
+                    color: AppColors.hint,
+                    height: 1.4,
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 20),
-          Text(
-            'Loading payment details',
-            style: AppTheme.style.copyWith(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: AppColors.lightBlue,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            'Please wait while we fetch the latest payment information.',
-            textAlign: TextAlign.center,
-            style: AppTheme.style.copyWith(
-              fontSize: 12,
-              color: AppColors.hint,
-              height: 1.4,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+        ),
+      );
+    },
+  );
+}
 
   // ============================================================
   // ERROR
