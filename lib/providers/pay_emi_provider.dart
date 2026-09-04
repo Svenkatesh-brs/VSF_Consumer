@@ -8,9 +8,8 @@ import '../services/pay_emi_service.dart';
 class PayEmiProvider extends GetxController {
   final PayEmiService _payEmiService;
 
-  PayEmiProvider({
-    required PayEmiService payEmiService,
-  }) : _payEmiService = payEmiService;
+  PayEmiProvider({required PayEmiService payEmiService})
+    : _payEmiService = payEmiService;
 
   // ============================================================
   // STATE
@@ -18,8 +17,7 @@ class PayEmiProvider extends GetxController {
 
   final Rxn<PayEmiModel> paymentInfo = Rxn<PayEmiModel>();
 
-  final Rxn<Uint8List> qrImage = Rxn<Uint8List>();
-
+  final RxList<Uint8List> qrImages = <Uint8List>[].obs;
   final RxBool isLoading = false.obs;
 
   final RxString errorMessage = ''.obs;
@@ -28,17 +26,12 @@ class PayEmiProvider extends GetxController {
   // GETTERS
   // ============================================================
 
-  List<String> get paymentNumbers =>
-      paymentInfo.value?.paymentNumbers ?? [];
+  List<String> get paymentNumbers => paymentInfo.value?.paymentNumbers ?? [];
 
-  List<String> get upiIds =>
-      paymentInfo.value?.upiIds ?? [];
+  List<String> get upiIds => paymentInfo.value?.upiIds ?? [];
 
-  bool get hasQrImage =>
-      qrImage.value != null && qrImage.value!.isNotEmpty;
-
-  bool get hasPaymentInfo =>
-      paymentInfo.value != null;
+  bool get hasQrImages => qrImages.isNotEmpty;
+  bool get hasPaymentInfo => paymentInfo.value != null;
 
   // ============================================================
   // LIFECYCLE
@@ -70,20 +63,28 @@ class PayEmiProvider extends GetxController {
       // ========================================================
       // LOAD QR IMAGE
       // ========================================================
+      qrImages.clear();
 
-      if (info.files.isNotEmpty) {
-        final fileId = info.files.first;
+      for (final fileId in info.files) {
+        try {
+          print('Loading QR: $fileId');
 
-        final imageBytes = await _payEmiService.getQrImage(fileId);
+          final imageBytes = await _payEmiService.getQrImage(fileId);
 
-        qrImage.value = Uint8List.fromList(imageBytes);
-      } else {
-        qrImage.value = null;
+          print('QR loaded: $fileId | bytes: ${imageBytes.length}');
+
+          if (imageBytes.isNotEmpty) {
+            qrImages.add(Uint8List.fromList(imageBytes));
+          }
+        } catch (e) {
+          print('QR failed: $fileId');
+          print('QR error: $e');
+        }
       }
     } catch (e) {
       errorMessage.value = e.toString();
       paymentInfo.value = null;
-      qrImage.value = null;
+      qrImages.clear();
     } finally {
       isLoading.value = false;
     }

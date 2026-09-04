@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
+import 'dart:typed_data';
+
 import '../providers/pay_emi_provider.dart';
 import '../utils/app_colors.dart';
 import '../utils/app_theme.dart';
@@ -20,11 +22,7 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
           child: Column(
             children: [
               _buildHeader(),
-              Expanded(
-                child: Obx(
-                  () => _buildBody(context),
-                ),
-              ),
+              Expanded(child: Obx(() => _buildBody(context))),
             ],
           ),
         ),
@@ -219,10 +217,7 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
           _buildQrImage(),
           const SizedBox(height: 18),
           Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 14,
-              vertical: 11,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
             decoration: BoxDecoration(
               color: AppColors.tintColor.withValues(alpha: 0.45),
               borderRadius: BorderRadius.circular(14),
@@ -257,43 +252,72 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
   }
 
   Widget _buildQrImage() {
-    final image = controller.qrImage.value;
+    final images = controller.qrImages;
 
-    if (image == null || image.isEmpty) {
+    if (images.isEmpty) {
       return _buildQrUnavailable();
     }
 
-    return Container(
-      width: 230,
-      height: 230,
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: AppColors.tintColor,
-          width: 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.lightBlack.withValues(alpha: 0.07),
-            blurRadius: 18,
-            offset: const Offset(0, 7),
+    if (images.length == 1) {
+      return _buildSingleQrImage(images.first);
+    }
+
+    return Column(
+      children: [
+        SizedBox(
+          height: 250,
+          child: PageView.builder(
+            itemCount: images.length,
+            controller: PageController(viewportFraction: 0.88),
+            itemBuilder: (context, index) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6),
+                child: _buildSingleQrImage(images[index]),
+              );
+            },
           ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Image.memory(
-          image,
-          fit: BoxFit.contain,
-          errorBuilder: (_, __, ___) {
-            return _buildQrUnavailable();
-          },
         ),
-      ),
+        const SizedBox(height: 10),
+        Text(
+          'Swipe to view all ${images.length} QR codes',
+          style: AppTheme.style.copyWith(fontSize: 11.5, color: AppColors.hint),
+        ),
+      ],
     );
   }
+
+  Widget _buildSingleQrImage(Uint8List image) {
+  return Container(
+    width: 230,
+    height: 230,
+    padding: const EdgeInsets.all(14),
+    decoration: BoxDecoration(
+      color: AppColors.white,
+      borderRadius: BorderRadius.circular(22),
+      border: Border.all(
+        color: AppColors.tintColor,
+        width: 1.5,
+      ),
+      boxShadow: [
+        BoxShadow(
+          color: AppColors.lightBlack.withValues(alpha: 0.07),
+          blurRadius: 18,
+          offset: const Offset(0, 7),
+        ),
+      ],
+    ),
+    child: ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: Image.memory(
+        image,
+        fit: BoxFit.contain,
+        errorBuilder: (_, _, _) {
+          return _buildQrUnavailable();
+        },
+      ),
+    ),
+  );
+}
 
   Widget _buildQrUnavailable() {
     return Container(
@@ -306,11 +330,7 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
-            Icons.qr_code_rounded,
-            color: AppColors.hint,
-            size: 64,
-          ),
+          const Icon(Icons.qr_code_rounded, color: AppColors.hint, size: 64),
           const SizedBox(height: 10),
           Text(
             'QR code unavailable',
@@ -400,11 +420,7 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
                 color: AppColors.tintColor,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(
-                icon,
-                color: AppColors.lightBlue,
-                size: 20,
-              ),
+              child: Icon(icon, color: AppColors.lightBlue, size: 20),
             ),
             const SizedBox(width: 11),
             Expanded(
@@ -469,11 +485,7 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
             color: AppColors.tintColor.withValues(alpha: 0.65),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Icon(
-            icon,
-            color: AppColors.secondary,
-            size: 19,
-          ),
+          child: Icon(icon, color: AppColors.secondary, size: 19),
         ),
         const SizedBox(width: 11),
         Expanded(
@@ -516,11 +528,7 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
         onTap: () => _copyToClipboard(value),
         child: const Padding(
           padding: EdgeInsets.all(10),
-          child: Icon(
-            Icons.copy_rounded,
-            color: AppColors.lightBlue,
-            size: 18,
-          ),
+          child: Icon(Icons.copy_rounded, color: AppColors.lightBlue, size: 18),
         ),
       ),
     );
@@ -536,9 +544,7 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
       decoration: BoxDecoration(
         color: AppColors.tintColor.withValues(alpha: 0.42),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: AppColors.primary.withValues(alpha: 0.28),
-        ),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.28)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -696,9 +702,7 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
                   backgroundColor: AppColors.secondary,
                   foregroundColor: AppColors.white,
                   elevation: 0,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 22,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 22),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
@@ -766,9 +770,7 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
   // ============================================================
 
   Future<void> _copyToClipboard(String value) async {
-    await Clipboard.setData(
-      ClipboardData(text: value),
-    );
+    await Clipboard.setData(ClipboardData(text: value));
 
     Get.snackbar(
       'Copied',
@@ -778,10 +780,7 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
       duration: const Duration(seconds: 2),
       backgroundColor: AppColors.lightBlue,
       colorText: AppColors.white,
-      icon: const Icon(
-        Icons.check_circle_rounded,
-        color: AppColors.primary,
-      ),
+      icon: const Icon(Icons.check_circle_rounded, color: AppColors.primary),
     );
   }
 }
