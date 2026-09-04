@@ -10,7 +10,6 @@ class LoanQuickActions extends StatefulWidget {
   final VoidCallback? onComplaintsTap;
   final VoidCallback? onHelpTap;
   final VoidCallback? onEmiScheduleTap;
-  final VoidCallback? onReceiptsTap;
 
   const LoanQuickActions({
     super.key,
@@ -19,7 +18,6 @@ class LoanQuickActions extends StatefulWidget {
     this.onComplaintsTap,
     this.onHelpTap,
     this.onEmiScheduleTap,
-    this.onReceiptsTap,
   });
 
   @override
@@ -210,6 +208,12 @@ class _LoanQuickActionsState
   List<_QuickActionData> get _actions {
     return [
       _QuickActionData(
+        title: 'EMI Schedule',
+        icon: Icons.event_note_outlined,
+        color: const Color(0xFF258F92),
+        onTap: widget.onEmiScheduleTap,
+      ),
+      _QuickActionData(
         title: 'Transactions',
         icon: Icons.swap_vert_rounded,
         color: const Color(0xFF3158B8),
@@ -232,18 +236,6 @@ class _LoanQuickActionsState
         icon: Icons.help_outline_rounded,
         color: const Color(0xFF268B68),
         onTap: widget.onHelpTap,
-      ),
-      _QuickActionData(
-        title: 'EMI Schedule',
-        icon: Icons.event_note_outlined,
-        color: const Color(0xFF258F92),
-        onTap: widget.onEmiScheduleTap,
-      ),
-      _QuickActionData(
-        title: 'Receipts',
-        icon: Icons.receipt_long_outlined,
-        color: const Color(0xFF5968BE),
-        onTap: widget.onReceiptsTap,
       ),
     ];
   }

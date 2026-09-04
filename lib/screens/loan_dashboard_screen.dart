@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import '../widgets/loan_dashboard/profile_drawer.dart';
 import '../widgets/loan_dashboard/pay_emi_button.dart';
 import '../providers/loan_dashboard_provider.dart';
@@ -10,6 +11,7 @@ import '../widgets/common/screen_content_exit.dart';
 import '../widgets/common/screen_transition.dart';
 import '../widgets/loan_dashboard/loan_overview_card.dart';
 import '../widgets/loan_dashboard/loan_quick_actions.dart';
+import '../widgets/common/app_loading.dart';
 
 class LoanDashboardScreen extends StatefulWidget {
   const LoanDashboardScreen({super.key});
@@ -147,33 +149,14 @@ class _LoanDashboardScreenState extends State<LoanDashboardScreen> {
   // QUICK ACTION
   // ============================================================
 
-  void _onQuickActionTap(String action) {
-    _showTemporaryMessage(action, '$action will be available soon.');
-  }
-
-  // ============================================================
-  // TEMPORARY MESSAGE
-  // ============================================================
-
-  void _showTemporaryMessage(String title, String message) {
-    Get.snackbar(
-      title,
-      message,
-      snackPosition: SnackPosition.BOTTOM,
-      margin: const EdgeInsets.all(16),
-      backgroundColor: Colors.white.withValues(alpha: 0.96),
-      colorText: AppColors.lightBlue,
-      duration: const Duration(seconds: 2),
-    );
-  }
 
   // ============================================================
   // PROFILE DRAWER
   // ============================================================
 
   void _openProfileDrawer() {
-  ProfileDrawer.show(context);
-}
+    ProfileDrawer.show(context);
+  }
 
   // ============================================================
   // BUILD
@@ -188,8 +171,10 @@ class _LoanDashboardScreenState extends State<LoanDashboardScreen> {
         child: SafeArea(
           child: Obx(() {
             if (controller.selectedLoan.value == null) {
-              return const Center(
-                child: CircularProgressIndicator(color: AppColors.primary),
+              return const AppLoading(
+                message: 'Loading loan dashboard',
+                subtitle: 'Please wait while we fetch your loan information.',
+                size: 300,
               );
             }
 
@@ -331,22 +316,11 @@ class _LoanDashboardScreenState extends State<LoanDashboardScreen> {
                           direction: ContentTransitionDirection.fromLeft,
                           delay: const Duration(milliseconds: 220),
                           child: LoanQuickActions(
-                            onTransactionsTap: () {
-                              _openTransactions();
-                            },
-                            onContactUpdateTap: () {
-                              _openContactUpdate();
-                            },
-                            onComplaintsTap: () {
-                              _openComplaint();
-                            },
+                            onEmiScheduleTap: _openEmiSchedule,
+                            onTransactionsTap: _openTransactions,
+                            onContactUpdateTap: _openContactUpdate,
+                            onComplaintsTap: _openComplaint,
                             onHelpTap: _openHelp,
-                            onEmiScheduleTap: () {
-                              _openEmiSchedule();
-                            },
-                            onReceiptsTap: () {
-                              _onQuickActionTap('Receipts');
-                            },
                           ),
                         ),
                       ),
