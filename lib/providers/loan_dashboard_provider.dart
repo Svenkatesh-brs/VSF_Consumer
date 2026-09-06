@@ -136,8 +136,10 @@ class LoanDashboardProvider extends GetxController {
 
       emiSchedule.value = response.emiSchedule;
 
-      print('[LOAN PROVIDER] EMI schedule available: '
-          '${response.emiSchedule != null}');
+      print(
+        '[LOAN PROVIDER] EMI schedule available: '
+        '${response.emiSchedule != null}',
+      );
 
       // --------------------------------------------------------
       // MAP API MODEL TO EXISTING DASHBOARD UI STRUCTURE
@@ -272,6 +274,15 @@ class LoanDashboardProvider extends GetxController {
 
   int? get nextEmiDueDateMs => dashboard.value?.nextEmiDueDateMs;
 
+  /// EMI schedule summary for the Loan Overview Card.
+  int get totalEmis => emiSchedule.value?.totalCount ?? 0;
+
+  int get paidEmis => emiSchedule.value?.paidCount ?? 0;
+
+  int get upcomingEmis => emiSchedule.value?.upcomingCount ?? 0;
+
+  int get overdueEmis => emiSchedule.value?.overdueCount ?? 0;
+
   /// Formatted "dd MMM yyyy"; a dash when no upcoming EMI
   /// exists (all paid or not provided by the API).
   String get nextEmiDueDate => formatDateMs(nextEmiDueDateMs);
@@ -279,17 +290,17 @@ class LoanDashboardProvider extends GetxController {
   /// Formats epoch milliseconds as "dd MMM yyyy" using
   /// [_monthNames]; returns a dash when the value is null.
   String formatDateMs(int? ms) {
-  if (ms == null) {
-    return '-';
+    if (ms == null) {
+      return '-';
+    }
+
+    final date = DateTime.fromMillisecondsSinceEpoch(ms);
+
+    final day = date.day.toString().padLeft(2, '0');
+    final month = date.month.toString().padLeft(2, '0');
+
+    return '$day/$month/${date.year}';
   }
-
-  final date = DateTime.fromMillisecondsSinceEpoch(ms);
-
-  final day = date.day.toString().padLeft(2, '0');
-  final month = date.month.toString().padLeft(2, '0');
-
-  return '$day/$month/${date.year}';
-}
 
   String get guarantorName => _firstGuarantor()?.name ?? '';
 

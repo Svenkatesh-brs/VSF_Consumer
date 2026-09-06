@@ -149,7 +149,6 @@ class _LoanDashboardScreenState extends State<LoanDashboardScreen> {
   // QUICK ACTION
   // ============================================================
 
-
   // ============================================================
   // PROFILE DRAWER
   // ============================================================
@@ -297,6 +296,12 @@ class _LoanDashboardScreenState extends State<LoanDashboardScreen> {
                               outstandingAmount: controller.outstandingAmount,
                               emiAmount: controller.emiAmount,
                               nextEmiDate: controller.nextEmiDueDate,
+
+                              totalEmis: controller.totalEmis,
+                              paidEmis: controller.paidEmis,
+                              upcomingEmis: controller.upcomingEmis,
+                              overdueEmis: controller.overdueEmis,
+
                               repaymentProgress: controller.repaymentProgress,
                             ),
                           ),
