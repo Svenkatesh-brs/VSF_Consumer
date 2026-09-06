@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../widgets/common/app_loading.dart';
 import '../models/transactions_model.dart';
 import '../providers/loan_dashboard_provider.dart';
 import '../routes/app_routes.dart';
@@ -13,12 +14,10 @@ class TransactionsScreen extends StatefulWidget {
   const TransactionsScreen({super.key});
 
   @override
-  State<TransactionsScreen> createState() =>
-      _TransactionsScreenState();
+  State<TransactionsScreen> createState() => _TransactionsScreenState();
 }
 
-class _TransactionsScreenState
-    extends State<TransactionsScreen> {
+class _TransactionsScreenState extends State<TransactionsScreen> {
   late final LoanDashboardProvider controller;
 
   bool _isExiting = false;
@@ -51,9 +50,7 @@ class _TransactionsScreenState
       _isExiting = true;
     });
 
-    await Future.delayed(
-      const Duration(milliseconds: 400),
-    );
+    await Future.delayed(const Duration(milliseconds: 400));
 
     if (!mounted) {
       return;
@@ -78,24 +75,16 @@ class _TransactionsScreenState
   // ============================================================
 
   Widget _buildTypeBadge(String type) {
-    final isEmi =
-        type.toLowerCase().contains('emi');
+    final isEmi = type.toLowerCase().contains('emi');
 
-    final badgeColor = isEmi
-        ? AppColors.buttonEnd
-        : AppColors.secondary;
+    final badgeColor = isEmi ? AppColors.buttonEnd : AppColors.secondary;
 
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 9,
-        vertical: 4,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
       decoration: BoxDecoration(
         color: badgeColor.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(100),
-        border: Border.all(
-          color: badgeColor.withValues(alpha: 0.16),
-        ),
+        border: Border.all(color: badgeColor.withValues(alpha: 0.16)),
       ),
       child: Text(
         type.isEmpty ? '-' : type,
@@ -118,15 +107,10 @@ class _TransactionsScreenState
   // Collection / Seize) of the merged voucher receipt.
   // ============================================================
 
-  Widget _buildComponentPill(
-    String label,
-    double amount,
-  ) {
+  Widget _buildComponentPill(String label, double amount) {
     return Flexible(
       child: Container(
-        padding:
-            const EdgeInsets.symmetric(horizontal: 9,
-                vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
         decoration: BoxDecoration(
           color: Colors.black.withValues(alpha: 0.04),
           borderRadius: BorderRadius.circular(100),
@@ -149,14 +133,10 @@ class _TransactionsScreenState
   // TRANSACTION CARD
   // ============================================================
 
-  Widget _buildTransactionCard(
-    LoanTransaction transaction,
-  ) {
+  Widget _buildTransactionCard(LoanTransaction transaction) {
     return GestureDetector(
-      onTap: () => Get.toNamed(
-        AppRoutes.receiptPreview,
-        arguments: transaction,
-      ),
+      onTap: () =>
+          Get.toNamed(AppRoutes.receiptPreview, arguments: transaction),
       child: Container(
         width: double.infinity,
         margin: const EdgeInsets.only(bottom: 12),
@@ -170,63 +150,89 @@ class _TransactionsScreenState
               Colors.white.withValues(alpha: 0.48),
             ],
           ),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.60),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 18,
-            offset: const Offset(0, 8),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.60),
+            width: 1,
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ------------------------------------------------------
-          // TOP ROW: DESCRIPTION + AMOUNT
-          // ------------------------------------------------------
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.06),
+              blurRadius: 18,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ------------------------------------------------------
+            // TOP ROW: DESCRIPTION + AMOUNT
+            // ------------------------------------------------------
 
-          Row(
-            crossAxisAlignment:
-                CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 38,
-                height: 38,
-                decoration: BoxDecoration(
-                  color: AppColors.lightBlue
-                      .withValues(alpha: 0.08),
-                  borderRadius:
-                      BorderRadius.circular(12),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: AppColors.lightBlue.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.receipt_long_outlined,
+                    size: 19,
+                    color: AppColors.lightBlue,
+                  ),
                 ),
-                child: const Icon(
-                  Icons.receipt_long_outlined,
-                  size: 19,
-                  color: AppColors.lightBlue,
+
+                const SizedBox(width: 11),
+
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        transaction.description.isEmpty
+                            ? '-'
+                            : transaction.description,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.lightBlue,
+                        ),
+                      ),
+
+                      const SizedBox(height: 4),
+
+                      Text(
+                        'Voucher '
+                        '${transaction.voucherNo.isEmpty ? '-' : transaction.voucherNo}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black45,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
 
-              const SizedBox(width: 11),
+                const SizedBox(width: 8),
 
-              Expanded(
-                child: Column(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.start,
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      transaction.description.isEmpty
-                          ? '-'
-                          : transaction.description,
-                      maxLines: 2,
-                      overflow:
-                          TextOverflow.ellipsis,
+                      _formatAmount(transaction.amountCollected),
                       style: const TextStyle(
-                        fontSize: 13.5,
-                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
                         color: AppColors.lightBlue,
                       ),
                     ),
@@ -234,11 +240,7 @@ class _TransactionsScreenState
                     const SizedBox(height: 4),
 
                     Text(
-                      'Voucher '
-                          '${transaction.voucherNo.isEmpty ? '-' : transaction.voucherNo}',
-                      maxLines: 1,
-                      overflow:
-                          TextOverflow.ellipsis,
+                      controller.formatDateMs(transaction.dateMs),
                       style: const TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w500,
@@ -247,108 +249,54 @@ class _TransactionsScreenState
                     ),
                   ],
                 ),
-              ),
+              ],
+            ),
 
-              const SizedBox(width: 8),
+            // ------------------------------------------------------
+            // BOTTOM ROW: TYPE + COLLECTED COMPONENTS
+            //
+            // Every component actually collected on this voucher
+            // appears as its own pill; the headline amount above is
+            // amountCollected (sum of all components).
+            // ------------------------------------------------------
+            if (transaction.type.isNotEmpty || transaction.hasExtras)
+              Padding(
+                padding: const EdgeInsets.only(top: 10),
+                child: Row(
+                  children: [
+                    _buildTypeBadge(transaction.type),
 
-              Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    _formatAmount(transaction
-                        .amountCollected),
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.lightBlue,
-                    ),
-                  ),
-
-                  const SizedBox(height: 4),
-
-                  Text(
-                    controller.formatDateMs(
-                        transaction.dateMs),
-                    style: const TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black45,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-
-          // ------------------------------------------------------
-          // BOTTOM ROW: TYPE + COLLECTED COMPONENTS
-          //
-          // Every component actually collected on this voucher
-          // appears as its own pill; the headline amount above is
-          // amountCollected (sum of all components).
-          // ------------------------------------------------------
-
-          if (transaction.type.isNotEmpty ||
-              transaction.hasExtras)
-            Padding(
-              padding:
-                  const EdgeInsets.only(top: 10),
-              child: Row(
-                children: [
-                  _buildTypeBadge(
-                      transaction.type),
-
-                  if (transaction.emiAmount > 0)
-                    ...[
+                    if (transaction.emiAmount > 0) ...[
                       const SizedBox(width: 6),
-                      _buildComponentPill(
-                        'EMI',
-                        transaction.emiAmount,
-                      ),
+                      _buildComponentPill('EMI', transaction.emiAmount),
                     ],
 
-                  if (transaction.vasAmount > 0)
-                    ...[
+                    if (transaction.vasAmount > 0) ...[
                       const SizedBox(width: 6),
-                      _buildComponentPill(
-                        'VAS',
-                        transaction.vasAmount,
-                      ),
+                      _buildComponentPill('VAS', transaction.vasAmount),
                     ],
 
-                  if (transaction.lpcAmount > 0)
-                    ...[
+                    if (transaction.lpcAmount > 0) ...[
                       const SizedBox(width: 6),
-                      _buildComponentPill(
-                        'LPC',
-                        transaction.lpcAmount,
-                      ),
+                      _buildComponentPill('LPC', transaction.lpcAmount),
                     ],
 
-                  if (transaction.collectionCharge >
-                      0)
-                    ...[
+                    if (transaction.collectionCharge > 0) ...[
                       const SizedBox(width: 6),
                       _buildComponentPill(
                         'Collection',
-                        transaction
-                            .collectionCharge,
+                        transaction.collectionCharge,
                       ),
                     ],
 
-                  if (transaction.seizeCharge > 0)
-                    ...[
+                    if (transaction.seizeCharge > 0) ...[
                       const SizedBox(width: 6),
-                      _buildComponentPill(
-                        'Seize',
-                        transaction.seizeCharge,
-                      ),
+                      _buildComponentPill('Seize', transaction.seizeCharge),
                     ],
-                ],
+                  ],
+                ),
               ),
-            ),
-        ],
+          ],
         ),
       ),
     );
@@ -368,8 +316,7 @@ class _TransactionsScreenState
             Icon(
               Icons.receipt_long_outlined,
               size: 42,
-              color: AppColors.lightBlue
-                  .withValues(alpha: 0.45),
+              color: AppColors.lightBlue.withValues(alpha: 0.45),
             ),
 
             const SizedBox(height: 14),
@@ -397,8 +344,7 @@ class _TransactionsScreenState
   // ============================================================
 
   Widget _buildErrorView() {
-    final errorMessage =
-        controller.errorMessage.value ?? '';
+    final errorMessage = controller.errorMessage.value ?? '';
 
     return Center(
       child: Padding(
@@ -431,12 +377,10 @@ class _TransactionsScreenState
             Material(
               color: Colors.transparent,
               child: InkWell(
-                borderRadius:
-                    BorderRadius.circular(100),
+                borderRadius: BorderRadius.circular(100),
                 onTap: controller.retry,
                 child: Container(
-                  padding: const EdgeInsets
-                      .symmetric(
+                  padding: const EdgeInsets.symmetric(
                     horizontal: 26,
                     vertical: 11,
                   ),
@@ -444,13 +388,9 @@ class _TransactionsScreenState
                     gradient: const LinearGradient(
                       begin: Alignment.centerLeft,
                       end: Alignment.centerRight,
-                      colors: [
-                        AppColors.buttonStart,
-                        AppColors.buttonEnd,
-                      ],
+                      colors: [AppColors.buttonStart, AppColors.buttonEnd],
                     ),
-                    borderRadius:
-                        BorderRadius.circular(100),
+                    borderRadius: BorderRadius.circular(100),
                   ),
                   child: const Text(
                     'Retry',
@@ -473,9 +413,7 @@ class _TransactionsScreenState
   // BUILD CONTENT
   // ============================================================
 
-  Widget _buildContent(
-    List<LoanTransaction> transactions,
-  ) {
+  Widget _buildContent(List<LoanTransaction> transactions) {
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
@@ -493,8 +431,7 @@ class _TransactionsScreenState
             direction: ContentExitDirection.toRight,
             delay: Duration.zero,
             child: ScreenContentTransition(
-              direction:
-                  ContentTransitionDirection.fromLeft,
+              direction: ContentTransitionDirection.fromLeft,
               delay: Duration.zero,
               child: Row(
                 children: [
@@ -502,12 +439,10 @@ class _TransactionsScreenState
                     width: 42,
                     height: 42,
                     decoration: BoxDecoration(
-                      color: Colors.white
-                          .withValues(alpha: 0.75),
+                      color: Colors.white.withValues(alpha: 0.75),
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: Colors.white
-                            .withValues(alpha: 0.65),
+                        color: Colors.white.withValues(alpha: 0.65),
                       ),
                     ),
                     child: IconButton(
@@ -525,17 +460,14 @@ class _TransactionsScreenState
 
                   Expanded(
                     child: Column(
-                      crossAxisAlignment:
-                          CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
                           'Transactions',
                           style: TextStyle(
                             fontSize: 23,
-                            fontWeight:
-                                FontWeight.w700,
-                            color:
-                                AppColors.lightBlue,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.lightBlue,
                           ),
                         ),
 
@@ -545,11 +477,10 @@ class _TransactionsScreenState
                           transactions.isEmpty
                               ? 'Payment history'
                               : '${transactions.length} '
-                                  '${transactions.length == 1 ? 'record' : 'records'}',
+                                    '${transactions.length == 1 ? 'record' : 'records'}',
                           style: const TextStyle(
                             fontSize: 11,
-                            fontWeight:
-                                FontWeight.w500,
+                            fontWeight: FontWeight.w500,
                             color: Colors.black45,
                           ),
                         ),
@@ -568,24 +499,16 @@ class _TransactionsScreenState
           // ENTRY LEFT - 80ms
           // EXIT RIGHT - 80ms
           // ==================================================
-
           if (transactions.isEmpty)
             ScreenContentExit(
               isExiting: _isExiting,
-              direction:
-                  ContentExitDirection.toRight,
-              delay: const Duration(
-                  milliseconds: 80),
+              direction: ContentExitDirection.toRight,
+              delay: const Duration(milliseconds: 80),
               child: ScreenContentTransition(
-                direction: ContentTransitionDirection
-                    .fromLeft,
-                delay: const Duration(
-                    milliseconds: 80),
+                direction: ContentTransitionDirection.fromLeft,
+                delay: const Duration(milliseconds: 80),
                 child: SizedBox(
-                  height: MediaQuery.of(context)
-                          .size
-                          .height *
-                      0.5,
+                  height: MediaQuery.of(context).size.height * 0.5,
                   width: double.infinity,
                   child: _buildEmptyState(),
                 ),
@@ -594,19 +517,13 @@ class _TransactionsScreenState
           else
             ScreenContentExit(
               isExiting: _isExiting,
-              direction:
-                  ContentExitDirection.toRight,
-              delay: const Duration(
-                  milliseconds: 80),
+              direction: ContentExitDirection.toRight,
+              delay: const Duration(milliseconds: 80),
               child: ScreenContentTransition(
-                direction: ContentTransitionDirection
-                    .fromLeft,
-                delay: const Duration(
-                    milliseconds: 80),
+                direction: ContentTransitionDirection.fromLeft,
+                delay: const Duration(milliseconds: 80),
                 child: Column(
-                  children: transactions
-                      .map(_buildTransactionCard)
-                      .toList(),
+                  children: transactions.map(_buildTransactionCard).toList(),
                 ),
               ),
             ),
@@ -627,27 +544,22 @@ class _TransactionsScreenState
         showBottomImage: false,
         child: SafeArea(
           child: Obx(() {
-            final model =
-                controller.transactions.value;
+            final model = controller.transactions.value;
 
             final transactions =
-                model?.transactions ??
-                    const <LoanTransaction>[];
+                model?.transactions ?? const <LoanTransaction>[];
 
             if (model == null) {
-              final isLoading =
-                  controller.isLoading.value;
+              final isLoading = controller.isLoading.value;
 
-              if (!isLoading &&
-                  controller.errorMessage.value !=
-                      null) {
+              if (!isLoading && controller.errorMessage.value != null) {
                 return _buildErrorView();
               }
 
-              return const Center(
-                child: CircularProgressIndicator(
-                  color: AppColors.primary,
-                ),
+              return const AppLoading(
+                message: 'Loading transactions',
+                subtitle: 'Please wait while we fetch your payment history.',
+                size: 300,
               );
             }
 

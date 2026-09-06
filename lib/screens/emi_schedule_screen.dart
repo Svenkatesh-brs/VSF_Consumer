@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../widgets/common/app_loading.dart';
 import '../models/emi_schedule_model.dart';
 import '../providers/loan_dashboard_provider.dart';
 import '../utils/app_colors.dart';
@@ -12,12 +13,10 @@ class EmiScheduleScreen extends StatefulWidget {
   const EmiScheduleScreen({super.key});
 
   @override
-  State<EmiScheduleScreen> createState() =>
-      _EmiScheduleScreenState();
+  State<EmiScheduleScreen> createState() => _EmiScheduleScreenState();
 }
 
-class _EmiScheduleScreenState
-    extends State<EmiScheduleScreen> {
+class _EmiScheduleScreenState extends State<EmiScheduleScreen> {
   late final LoanDashboardProvider controller;
 
   bool _isExiting = false;
@@ -61,9 +60,7 @@ class _EmiScheduleScreenState
       _isExiting = true;
     });
 
-    await Future.delayed(
-      const Duration(milliseconds: 400),
-    );
+    await Future.delayed(const Duration(milliseconds: 400));
 
     if (!mounted) {
       return;
@@ -109,16 +106,11 @@ class _EmiScheduleScreenState
     final badgeColor = _statusColor(status);
 
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 9,
-        vertical: 4,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
       decoration: BoxDecoration(
         color: badgeColor.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(100),
-        border: Border.all(
-          color: badgeColor.withValues(alpha: 0.16),
-        ),
+        border: Border.all(color: badgeColor.withValues(alpha: 0.16)),
       ),
       child: Text(
         status.isEmpty ? '-' : status.toUpperCase(),
@@ -180,19 +172,12 @@ class _EmiScheduleScreenState
           gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              AppColors.buttonStart,
-              AppColors.buttonEnd,
-            ],
+            colors: [AppColors.buttonStart, AppColors.buttonEnd],
           ),
-          border: Border.all(
-            color: Colors.white,
-            width: 2.5,
-          ),
+          border: Border.all(color: Colors.white, width: 2.5),
           boxShadow: [
             BoxShadow(
-              color: AppColors.buttonEnd
-                  .withValues(alpha: 0.35),
+              color: AppColors.buttonEnd.withValues(alpha: 0.35),
               blurRadius: 6,
               offset: const Offset(0, 2),
             ),
@@ -296,8 +281,7 @@ class _EmiScheduleScreenState
           child: Container(
             width: 2,
             decoration: BoxDecoration(
-              color: AppColors.tintColor
-                  .withValues(alpha: 0.75),
+              color: AppColors.tintColor.withValues(alpha: 0.75),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -332,23 +316,18 @@ class _EmiScheduleScreenState
           end: Alignment.bottomRight,
           colors: isNextUpcoming
               ? [
-                  AppColors.buttonEnd
-                      .withValues(alpha: 0.07),
-                  Colors.white
-                      .withValues(alpha: 0.85),
+                  AppColors.buttonEnd.withValues(alpha: 0.07),
+                  Colors.white.withValues(alpha: 0.85),
                 ]
               : [
-                  Colors.white
-                      .withValues(alpha: 0.80),
-                  Colors.white
-                      .withValues(alpha: 0.48),
+                  Colors.white.withValues(alpha: 0.80),
+                  Colors.white.withValues(alpha: 0.48),
                 ],
         ),
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
           color: isNextUpcoming
-              ? AppColors.buttonEnd
-                  .withValues(alpha: 0.20)
+              ? AppColors.buttonEnd.withValues(alpha: 0.20)
               : Colors.white.withValues(alpha: 0.60),
           width: 1,
         ),
@@ -369,8 +348,7 @@ class _EmiScheduleScreenState
             child: Padding(
               padding: const EdgeInsets.all(14),
               child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildCardHeader(
                     emi: emi,
@@ -379,16 +357,12 @@ class _EmiScheduleScreenState
                     isExpanded: isExpanded,
                   ),
                   AnimatedSize(
-                    duration: const Duration(
-                        milliseconds: 240),
+                    duration: const Duration(milliseconds: 240),
                     curve: Curves.easeInOut,
                     alignment: Alignment.topCenter,
                     child: isExpanded
                         ? _buildExpandedDetails(emi)
-                        : const SizedBox(
-                            width: double.infinity,
-                            height: 0,
-                          ),
+                        : const SizedBox(width: double.infinity, height: 0),
                   ),
                 ],
               ),
@@ -413,18 +387,14 @@ class _EmiScheduleScreenState
           height: 40,
           decoration: BoxDecoration(
             color: isNextUpcoming
-                ? AppColors.buttonEnd
-                    .withValues(alpha: 0.12)
-                : AppColors.lightBlue
-                    .withValues(alpha: 0.08),
+                ? AppColors.buttonEnd.withValues(alpha: 0.12)
+                : AppColors.lightBlue.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(
             Icons.event_note_outlined,
             size: 19,
-            color: isNextUpcoming
-                ? AppColors.buttonEnd
-                : AppColors.lightBlue,
+            color: isNextUpcoming ? AppColors.buttonEnd : AppColors.lightBlue,
           ),
         ),
 
@@ -432,8 +402,7 @@ class _EmiScheduleScreenState
 
         Expanded(
           child: Column(
-            crossAxisAlignment:
-                CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
@@ -449,8 +418,7 @@ class _EmiScheduleScreenState
                   if (isNextUpcoming) ...[
                     const SizedBox(width: 8),
                     Container(
-                      padding: const EdgeInsets
-                          .symmetric(
+                      padding: const EdgeInsets.symmetric(
                         horizontal: 8,
                         vertical: 3,
                       ),
@@ -458,20 +426,15 @@ class _EmiScheduleScreenState
                         gradient: const LinearGradient(
                           begin: Alignment.centerLeft,
                           end: Alignment.centerRight,
-                          colors: [
-                            AppColors.buttonStart,
-                            AppColors.buttonEnd,
-                          ],
+                          colors: [AppColors.buttonStart, AppColors.buttonEnd],
                         ),
-                        borderRadius:
-                            BorderRadius.circular(100),
+                        borderRadius: BorderRadius.circular(100),
                       ),
                       child: const Text(
                         'NEXT',
                         style: TextStyle(
                           fontSize: 8.5,
-                          fontWeight:
-                              FontWeight.w800,
+                          fontWeight: FontWeight.w800,
                           letterSpacing: 0.8,
                           color: Colors.white,
                         ),
@@ -536,8 +499,7 @@ class _EmiScheduleScreenState
 
                 AnimatedRotation(
                   turns: isExpanded ? 0.5 : 0,
-                  duration: const Duration(
-                      milliseconds: 240),
+                  duration: const Duration(milliseconds: 240),
                   curve: Curves.easeInOut,
                   child: const Icon(
                     Icons.keyboard_arrow_down_rounded,
@@ -551,15 +513,10 @@ class _EmiScheduleScreenState
             if (emi.daysOverdue > 0) ...[
               const SizedBox(height: 4),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 3,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: AppColors.error
-                      .withValues(alpha: 0.08),
-                  borderRadius:
-                      BorderRadius.circular(100),
+                  color: AppColors.error.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(100),
                 ),
                 child: Text(
                   '${emi.daysOverdue} '
@@ -599,14 +556,8 @@ class _EmiScheduleScreenState
           label: 'Outstanding',
           value: _formatAmount(emi.principalOutstanding),
         ),
-      _buildInfoRow(
-        label: 'LPC Due',
-        value: _formatAmount(emi.lpcDue),
-      ),
-      _buildInfoRow(
-        label: 'Total Paid',
-        value: _formatAmount(emi.totalPaid),
-      ),
+      _buildInfoRow(label: 'LPC Due', value: _formatAmount(emi.lpcDue)),
+      _buildInfoRow(label: 'Total Paid', value: _formatAmount(emi.totalPaid)),
       _buildInfoRow(
         label: 'Remaining',
         value: _formatAmount(emi.remainingAmount),
@@ -614,8 +565,7 @@ class _EmiScheduleScreenState
       if (emi.lastPaymentDateMs != null)
         _buildInfoRow(
           label: 'Last Payment',
-          value:
-              controller.formatDateMs(emi.lastPaymentDateMs),
+          value: controller.formatDateMs(emi.lastPaymentDateMs),
         ),
     ];
 
@@ -625,29 +575,20 @@ class _EmiScheduleScreenState
         width: double.infinity,
         padding: const EdgeInsets.fromLTRB(12, 6, 12, 10),
         decoration: BoxDecoration(
-          color: AppColors.tintColor
-              .withValues(alpha: 0.20),
+          color: AppColors.tintColor.withValues(alpha: 0.20),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: AppColors.tintColor
-                .withValues(alpha: 0.55),
+            color: AppColors.tintColor.withValues(alpha: 0.55),
           ),
         ),
-        child: Column(
-          children: detailRows,
-        ),
+        child: Column(children: detailRows),
       ),
     );
   }
 
-  Widget _buildInfoRow({
-    required String label,
-    required String value,
-  }) {
+  Widget _buildInfoRow({required String label, required String value}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        vertical: 3,
-      ),
+      padding: const EdgeInsets.symmetric(vertical: 3),
       child: Row(
         children: [
           Expanded(
@@ -685,10 +626,7 @@ class _EmiScheduleScreenState
 
   Widget _buildSectionLabel(String title) {
     return Padding(
-      padding: const EdgeInsets.only(
-        bottom: 10,
-        left: 2,
-      ),
+      padding: const EdgeInsets.only(bottom: 10, left: 2),
       child: Text(
         title.toUpperCase(),
         style: const TextStyle(
@@ -715,8 +653,7 @@ class _EmiScheduleScreenState
             Icon(
               Icons.event_note_outlined,
               size: 42,
-              color: AppColors.lightBlue
-                  .withValues(alpha: 0.45),
+              color: AppColors.lightBlue.withValues(alpha: 0.45),
             ),
 
             const SizedBox(height: 14),
@@ -744,8 +681,7 @@ class _EmiScheduleScreenState
   // ============================================================
 
   Widget _buildErrorView() {
-    final errorMessage =
-        controller.errorMessage.value ?? '';
+    final errorMessage = controller.errorMessage.value ?? '';
 
     return Center(
       child: Padding(
@@ -778,12 +714,10 @@ class _EmiScheduleScreenState
             Material(
               color: Colors.transparent,
               child: InkWell(
-                borderRadius:
-                    BorderRadius.circular(100),
+                borderRadius: BorderRadius.circular(100),
                 onTap: controller.retry,
                 child: Container(
-                  padding: const EdgeInsets
-                      .symmetric(
+                  padding: const EdgeInsets.symmetric(
                     horizontal: 26,
                     vertical: 11,
                   ),
@@ -791,13 +725,9 @@ class _EmiScheduleScreenState
                     gradient: const LinearGradient(
                       begin: Alignment.centerLeft,
                       end: Alignment.centerRight,
-                      colors: [
-                        AppColors.buttonStart,
-                        AppColors.buttonEnd,
-                      ],
+                      colors: [AppColors.buttonStart, AppColors.buttonEnd],
                     ),
-                    borderRadius:
-                        BorderRadius.circular(100),
+                    borderRadius: BorderRadius.circular(100),
                   ),
                   child: const Text(
                     'Retry',
@@ -829,13 +759,9 @@ class _EmiScheduleScreenState
     EmiScheduleModel schedule, {
     required int? nextUpcomingIndex,
   }) {
-    final pastEmis = schedule.emis
-        .where((emi) => emi.isPast)
-        .toList();
+    final pastEmis = schedule.emis.where((emi) => emi.isPast).toList();
 
-    final upcomingEmis = schedule.emis
-        .where((emi) => emi.isUpcoming)
-        .toList();
+    final upcomingEmis = schedule.emis.where((emi) => emi.isUpcoming).toList();
 
     final pastIndices = pastEmis
         .map((emi) => schedule.emis.indexOf(emi))
@@ -848,9 +774,7 @@ class _EmiScheduleScreenState
     final sections = <Widget>[];
 
     if (pastEmis.isNotEmpty) {
-      sections.add(
-        _buildSectionLabel('Past EMIs'),
-      );
+      sections.add(_buildSectionLabel('Past EMIs'));
 
       sections.add(
         _buildTimelineGroup([
@@ -866,14 +790,10 @@ class _EmiScheduleScreenState
 
     if (upcomingEmis.isNotEmpty) {
       if (sections.isNotEmpty) {
-        sections.add(
-          const SizedBox(height: 14),
-        );
+        sections.add(const SizedBox(height: 14));
       }
 
-      sections.add(
-        _buildSectionLabel('Upcoming EMIs'),
-      );
+      sections.add(_buildSectionLabel('Upcoming EMIs'));
 
       sections.add(
         _buildTimelineGroup([
@@ -881,8 +801,7 @@ class _EmiScheduleScreenState
             _buildTimelineItem(
               emi: upcomingEmis[i],
               index: upcomingIndices[i],
-              isNextUpcoming:
-                  upcomingIndices[i] == nextUpcomingIndex,
+              isNextUpcoming: upcomingIndices[i] == nextUpcomingIndex,
             ),
         ]),
       );
@@ -898,16 +817,11 @@ class _EmiScheduleScreenState
   // any EMI is overdue.
   // ============================================================
 
-  Widget _buildScheduleSummary(
-    EmiScheduleModel schedule,
-  ) {
+  Widget _buildScheduleSummary(EmiScheduleModel schedule) {
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 20),
-      padding: const EdgeInsets.symmetric(
-        vertical: 16,
-        horizontal: 6,
-      ),
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 6),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -918,9 +832,7 @@ class _EmiScheduleScreenState
           ],
         ),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.75),
-        ),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.75)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -934,14 +846,8 @@ class _EmiScheduleScreenState
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _summaryMetric(
-                value: '${schedule.totalCount}',
-                label: 'TOTAL',
-              ),
-              _summaryMetric(
-                value: '${schedule.paidCount}',
-                label: 'PAID',
-              ),
+              _summaryMetric(value: '${schedule.totalCount}', label: 'TOTAL'),
+              _summaryMetric(value: '${schedule.paidCount}', label: 'PAID'),
               _summaryMetric(
                 value: '${schedule.upcomingCount}',
                 label: 'UPCOMING',
@@ -952,17 +858,12 @@ class _EmiScheduleScreenState
           if (schedule.overdueCount > 0) ...[
             const SizedBox(height: 12),
             Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 5,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
               decoration: BoxDecoration(
-                color:
-                    AppColors.error.withValues(alpha: 0.08),
+                color: AppColors.error.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(100),
                 border: Border.all(
-                  color:
-                      AppColors.error.withValues(alpha: 0.16),
+                  color: AppColors.error.withValues(alpha: 0.16),
                 ),
               ),
               child: Text(
@@ -983,10 +884,7 @@ class _EmiScheduleScreenState
     );
   }
 
-  Widget _summaryMetric({
-    required String value,
-    required String label,
-  }) {
+  Widget _summaryMetric({required String value, required String label}) {
     return Expanded(
       child: Column(
         children: [
@@ -1019,12 +917,9 @@ class _EmiScheduleScreenState
     }
 
     final parts = <String>[
-      if (schedule.paidCount > 0)
-        '${schedule.paidCount} paid',
-      if (schedule.overdueCount > 0)
-        '${schedule.overdueCount} overdue',
-      if (schedule.upcomingCount > 0)
-        '${schedule.upcomingCount} upcoming',
+      if (schedule.paidCount > 0) '${schedule.paidCount} paid',
+      if (schedule.overdueCount > 0) '${schedule.overdueCount} overdue',
+      if (schedule.upcomingCount > 0) '${schedule.upcomingCount} upcoming',
     ];
 
     if (parts.isEmpty) {
@@ -1047,28 +942,23 @@ class _EmiScheduleScreenState
         showBottomImage: false,
         child: SafeArea(
           child: Obx(() {
-            final schedule =
-                controller.emiSchedule.value;
+            final schedule = controller.emiSchedule.value;
 
             if (schedule == null) {
-              final isLoading =
-                  controller.isLoading.value;
+              final isLoading = controller.isLoading.value;
 
-              if (!isLoading &&
-                  controller.errorMessage.value !=
-                      null) {
+              if (!isLoading && controller.errorMessage.value != null) {
                 return _buildErrorView();
               }
 
-              return const Center(
-                child: CircularProgressIndicator(
-                  color: AppColors.primary,
-                ),
+              return const AppLoading(
+                message: 'Loading EMI schedule',
+                subtitle: 'Please wait while we fetch your payment schedule.',
+                size: 300,
               );
             }
 
-            final nextUpcomingIndex =
-                _firstUpcomingIndex(schedule);
+            final nextUpcomingIndex = _firstUpcomingIndex(schedule);
 
             if (!_expansionInitialized) {
               _expansionInitialized = true;
@@ -1081,13 +971,10 @@ class _EmiScheduleScreenState
             }
 
             return SingleChildScrollView(
-              physics:
-                  const BouncingScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(
-                  20, 16, 20, 40),
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
               child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // ============================================
                   // HEADER
@@ -1097,13 +984,10 @@ class _EmiScheduleScreenState
 
                   ScreenContentExit(
                     isExiting: _isExiting,
-                    direction: ContentExitDirection
-                        .toRight,
+                    direction: ContentExitDirection.toRight,
                     delay: Duration.zero,
                     child: ScreenContentTransition(
-                      direction:
-                          ContentTransitionDirection
-                              .fromLeft,
+                      direction: ContentTransitionDirection.fromLeft,
                       delay: Duration.zero,
                       child: Row(
                         children: [
@@ -1111,67 +995,46 @@ class _EmiScheduleScreenState
                             width: 42,
                             height: 42,
                             decoration: BoxDecoration(
-                              color: Colors.white
-                                  .withValues(
-                                      alpha: 0.75),
-                              shape:
-                                  BoxShape.circle,
+                              color: Colors.white.withValues(alpha: 0.75),
+                              shape: BoxShape.circle,
                               border: Border.all(
-                                color: Colors.white
-                                    .withValues(
-                                        alpha:
-                                            0.65),
+                                color: Colors.white.withValues(alpha: 0.65),
                               ),
                             ),
                             child: IconButton(
-                              padding:
-                                  EdgeInsets.zero,
+                              padding: EdgeInsets.zero,
                               onPressed: _goBack,
                               icon: const Icon(
-                                Icons
-                                    .arrow_back_rounded,
+                                Icons.arrow_back_rounded,
                                 size: 21,
-                                color: AppColors
-                                    .lightBlue,
+                                color: AppColors.lightBlue,
                               ),
                             ),
                           ),
 
-                          const SizedBox(
-                              width: 14),
+                          const SizedBox(width: 14),
 
                           Expanded(
                             child: Column(
-                              crossAxisAlignment:
-                                  CrossAxisAlignment
-                                      .start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const Text(
                                   'EMI Schedule',
                                   style: TextStyle(
                                     fontSize: 23,
-                                    fontWeight:
-                                        FontWeight
-                                            .w700,
-                                    color: AppColors
-                                        .lightBlue,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.lightBlue,
                                   ),
                                 ),
 
-                                const SizedBox(
-                                    height: 2),
+                                const SizedBox(height: 2),
 
                                 Text(
-                                  _buildSubtitle(
-                                      schedule),
-                                  style:
-                                      const TextStyle(
+                                  _buildSubtitle(schedule),
+                                  style: const TextStyle(
                                     fontSize: 11,
-                                    fontWeight:
-                                        FontWeight
-                                            .w500,
-                                    color: Colors
-                                        .black45,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.black45,
                                   ),
                                 ),
                               ],
@@ -1189,43 +1052,26 @@ class _EmiScheduleScreenState
                   // ENTRY LEFT - 80ms
                   // EXIT RIGHT - 80ms
                   // ============================================
-
                   ScreenContentExit(
                     isExiting: _isExiting,
-                    direction: ContentExitDirection
-                        .toRight,
-                    delay: const Duration(
-                        milliseconds: 80),
-                    child:
-                        ScreenContentTransition(
-                      direction:
-                          ContentTransitionDirection
-                              .fromLeft,
-                      delay: const Duration(
-                          milliseconds: 80),
+                    direction: ContentExitDirection.toRight,
+                    delay: const Duration(milliseconds: 80),
+                    child: ScreenContentTransition(
+                      direction: ContentTransitionDirection.fromLeft,
+                      delay: const Duration(milliseconds: 80),
                       child: schedule.isEmpty
                           ? SizedBox(
-                              height: MediaQuery.of(
-                                          context)
-                                      .size
-                                      .height *
-                                  0.5,
-                              width:
-                                  double.infinity,
-                              child:
-                                  _buildEmptyState(),
+                              height: MediaQuery.of(context).size.height * 0.5,
+                              width: double.infinity,
+                              child: _buildEmptyState(),
                             )
                           : Column(
-                              crossAxisAlignment:
-                                  CrossAxisAlignment
-                                      .start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                _buildScheduleSummary(
-                                    schedule),
+                                _buildScheduleSummary(schedule),
                                 ..._buildScheduleSections(
                                   schedule,
-                                  nextUpcomingIndex:
-                                      nextUpcomingIndex,
+                                  nextUpcomingIndex: nextUpcomingIndex,
                                 ),
                               ],
                             ),
