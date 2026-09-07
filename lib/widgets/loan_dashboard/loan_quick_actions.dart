@@ -21,12 +21,10 @@ class LoanQuickActions extends StatefulWidget {
   });
 
   @override
-  State<LoanQuickActions> createState() =>
-      _LoanQuickActionsState();
+  State<LoanQuickActions> createState() => _LoanQuickActionsState();
 }
 
-class _LoanQuickActionsState
-    extends State<LoanQuickActions>
+class _LoanQuickActionsState extends State<LoanQuickActions>
     with TickerProviderStateMixin {
   late final AnimationController _entryController;
   late final AnimationController _floatController;
@@ -43,9 +41,7 @@ class _LoanQuickActionsState
 
     _scrollController = ScrollController();
 
-    _scrollController.addListener(
-      _handleScroll,
-    );
+    _scrollController.addListener(_handleScroll);
 
     // ==========================================================
     // ENTRY ANIMATION
@@ -53,9 +49,7 @@ class _LoanQuickActionsState
 
     _entryController = AnimationController(
       vsync: this,
-      duration: const Duration(
-        milliseconds: 900,
-      ),
+      duration: const Duration(milliseconds: 900),
     );
 
     // ==========================================================
@@ -64,9 +58,7 @@ class _LoanQuickActionsState
 
     _floatController = AnimationController(
       vsync: this,
-      duration: const Duration(
-        milliseconds: 3200,
-      ),
+      duration: const Duration(milliseconds: 3200),
     )..repeat(reverse: true);
 
     // ==========================================================
@@ -75,20 +67,13 @@ class _LoanQuickActionsState
 
     _hintController = AnimationController(
       vsync: this,
-      duration: const Duration(
-        milliseconds: 1300,
-      ),
+      duration: const Duration(milliseconds: 1300),
     );
 
     _entryController.forward();
 
     // Give the dock time to appear before showing the hint.
-    Future.delayed(
-      const Duration(
-        milliseconds: 950,
-      ),
-      _playScrollHint,
-    );
+    Future.delayed(const Duration(milliseconds: 950), _playScrollHint);
   }
 
   // ============================================================
@@ -127,9 +112,7 @@ class _LoanQuickActionsState
   // ============================================================
 
   Future<void> _playScrollHint() async {
-    if (!mounted ||
-        _hasUserScrolled ||
-        !_scrollController.hasClients) {
+    if (!mounted || _hasUserScrolled || !_scrollController.hasClients) {
       return;
     }
 
@@ -139,44 +122,30 @@ class _LoanQuickActionsState
 
     await _hintController.forward();
 
-    if (!mounted ||
-        _hasUserScrolled ||
-        !_scrollController.hasClients) {
+    if (!mounted || _hasUserScrolled || !_scrollController.hasClients) {
       return;
     }
 
     // Tiny movement to reveal that the content is scrollable.
     await _scrollController.animateTo(
       18,
-      duration: const Duration(
-        milliseconds: 420,
-      ),
+      duration: const Duration(milliseconds: 420),
       curve: Curves.easeOut,
     );
 
-    if (!mounted ||
-        _hasUserScrolled ||
-        !_scrollController.hasClients) {
+    if (!mounted || _hasUserScrolled || !_scrollController.hasClients) {
       return;
     }
 
-    await Future.delayed(
-      const Duration(
-        milliseconds: 180,
-      ),
-    );
+    await Future.delayed(const Duration(milliseconds: 180));
 
-    if (!mounted ||
-        _hasUserScrolled ||
-        !_scrollController.hasClients) {
+    if (!mounted || _hasUserScrolled || !_scrollController.hasClients) {
       return;
     }
 
     await _scrollController.animateTo(
       0,
-      duration: const Duration(
-        milliseconds: 420,
-      ),
+      duration: const Duration(milliseconds: 420),
       curve: Curves.easeOut,
     );
 
@@ -189,9 +158,7 @@ class _LoanQuickActionsState
 
   @override
   void dispose() {
-    _scrollController.removeListener(
-      _handleScroll,
-    );
+    _scrollController.removeListener(_handleScroll);
 
     _scrollController.dispose();
     _entryController.dispose();
@@ -247,8 +214,7 @@ class _LoanQuickActionsState
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment:
-          CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
           'Quick Actions',
@@ -275,7 +241,6 @@ class _LoanQuickActionsState
         // ========================================================
         // DOCK
         // ========================================================
-
         SizedBox(
           height: 100,
           child: Stack(
@@ -287,8 +252,7 @@ class _LoanQuickActionsState
               ListView.separated(
                 controller: _scrollController,
                 scrollDirection: Axis.horizontal,
-                physics:
-                    const BouncingScrollPhysics(),
+                physics: const BouncingScrollPhysics(),
                 padding: const EdgeInsets.only(
                   left: 2,
                   right: 30,
@@ -296,24 +260,17 @@ class _LoanQuickActionsState
                   bottom: 4,
                 ),
                 itemCount: _actions.length,
-                separatorBuilder:
-                    (context, index) {
-                  return const SizedBox(
-                    width: 8,
-                  );
+                separatorBuilder: (context, index) {
+                  return const SizedBox(width: 4);
                 },
-                itemBuilder:
-                    (context, index) {
-                  final action =
-                      _actions[index];
+                itemBuilder: (context, index) {
+                  final action = _actions[index];
 
                   return _FloatingActionItem(
                     data: action,
                     index: index,
-                    entryController:
-                        _entryController,
-                    floatController:
-                        _floatController,
+                    entryController: _entryController,
+                    floatController: _floatController,
                   );
                 },
               ),
@@ -321,34 +278,20 @@ class _LoanQuickActionsState
               // ==================================================
               // RIGHT EDGE FADE
               // ==================================================
-
               IgnorePointer(
                 child: Align(
-                  alignment:
-                      Alignment.centerRight,
+                  alignment: Alignment.centerRight,
                   child: AnimatedOpacity(
-                    duration:
-                        const Duration(
-                      milliseconds: 250,
-                    ),
-                    opacity:
-                        _showScrollHint
-                            ? 1
-                            : 0,
+                    duration: const Duration(milliseconds: 250),
+                    opacity: _showScrollHint ? 1 : 0,
                     child: Container(
                       width: 42,
                       height: 92,
-                      decoration:
-                          const BoxDecoration(
+                      decoration: const BoxDecoration(
                         gradient: LinearGradient(
-                          begin:
-                              Alignment.centerLeft,
-                          end:
-                              Alignment.centerRight,
-                          colors: [
-                            Colors.transparent,
-                            Colors.white,
-                          ],
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                          colors: [Colors.transparent, Colors.white],
                         ),
                       ),
                     ),
@@ -359,71 +302,40 @@ class _LoanQuickActionsState
               // ==================================================
               // ANIMATED RIGHT ARROW
               // ==================================================
-
               Positioned(
                 right: 2,
                 top: 35,
                 child: IgnorePointer(
                   child: AnimatedOpacity(
-                    duration:
-                        const Duration(
-                      milliseconds: 250,
-                    ),
-                    opacity:
-                        _showScrollHint
-                            ? 1
-                            : 0,
+                    duration: const Duration(milliseconds: 250),
+                    opacity: _showScrollHint ? 1 : 0,
                     child: AnimatedBuilder(
-                      animation:
-                          _hintController,
-                      builder:
-                          (context, child) {
+                      animation: _hintController,
+                      builder: (context, child) {
                         final movement =
-                            math.sin(
-                              _hintController
-                                      .value *
-                                  math.pi *
-                                  2,
-                            ) *
-                            3;
+                            math.sin(_hintController.value * math.pi * 2) * 3;
 
                         return Transform.translate(
-                          offset: Offset(
-                            movement,
-                            0,
-                          ),
+                          offset: Offset(movement, 0),
                           child: Container(
                             width: 25,
                             height: 30,
-                            decoration:
-                                BoxDecoration(
-                              color: Colors.white
-                                  .withValues(
-                                alpha: 0.90,
-                              ),
-                              borderRadius:
-                                  BorderRadius
-                                      .circular(
-                                15,
-                              ),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.90),
+                              borderRadius: BorderRadius.circular(15),
                               boxShadow: [
                                 BoxShadow(
-                                  color: AppColors
-                                      .lightBlue
-                                      .withValues(
+                                  color: AppColors.lightBlue.withValues(
                                     alpha: 0.08,
                                   ),
                                   blurRadius: 8,
                                 ),
                               ],
                             ),
-                            child:
-                                const Icon(
-                              Icons
-                                  .chevron_right_rounded,
+                            child: const Icon(
+                              Icons.chevron_right_rounded,
                               size: 20,
-                              color: AppColors
-                                  .lightBlue,
+                              color: AppColors.lightBlue,
                             ),
                           ),
                         );
@@ -462,8 +374,7 @@ class _QuickActionData {
 // FLOATING ACTION ITEM
 // ==================================================================
 
-class _FloatingActionItem
-    extends StatefulWidget {
+class _FloatingActionItem extends StatefulWidget {
   final _QuickActionData data;
   final int index;
   final AnimationController entryController;
@@ -477,17 +388,14 @@ class _FloatingActionItem
   });
 
   @override
-  State<_FloatingActionItem> createState() =>
-      _FloatingActionItemState();
+  State<_FloatingActionItem> createState() => _FloatingActionItemState();
 }
 
-class _FloatingActionItemState
-    extends State<_FloatingActionItem> {
+class _FloatingActionItemState extends State<_FloatingActionItem> {
   bool _isPressed = false;
 
   void _setPressed(bool value) {
-    if (widget.data.onTap == null ||
-        !mounted) {
+    if (widget.data.onTap == null || !mounted) {
       return;
     }
 
@@ -498,16 +406,11 @@ class _FloatingActionItemState
 
   @override
   Widget build(BuildContext context) {
-    final start =
-        (0.08 + (widget.index * 0.08))
-            .clamp(0.0, 0.70);
+    final start = (0.08 + (widget.index * 0.08)).clamp(0.0, 0.70);
 
-    final end =
-        (start + 0.30)
-            .clamp(0.0, 1.0);
+    final end = (start + 0.30).clamp(0.0, 1.0);
 
-    final bool isDisabled =
-        widget.data.onTap == null;
+    final bool isDisabled = widget.data.onTap == null;
 
     return AnimatedBuilder(
       animation: Listenable.merge([
@@ -516,28 +419,15 @@ class _FloatingActionItemState
       ]),
       builder: (context, child) {
         final float =
-            math.sin(
-              widget.floatController
-                      .value *
-                  math.pi *
-                  2,
-            ) *
-            1.4;
+            math.sin(widget.floatController.value * math.pi * 2) * 1.4;
 
         return FadeTransition(
           opacity: CurvedAnimation(
             parent: widget.entryController,
-            curve: Interval(
-              start,
-              end,
-              curve: Curves.easeOut,
-            ),
+            curve: Interval(start, end, curve: Curves.easeOut),
           ),
           child: Transform.translate(
-            offset: Offset(
-              0,
-              float,
-            ),
+            offset: Offset(0, float),
             child: GestureDetector(
               onTapDown: (_) {
                 _setPressed(true);
@@ -550,147 +440,74 @@ class _FloatingActionItemState
               },
               onTap: widget.data.onTap,
               child: AnimatedScale(
-                scale:
-                    _isPressed ? 0.93 : 1.0,
-                duration:
-                    const Duration(
-                  milliseconds: 120,
-                ),
+                scale: _isPressed ? 0.93 : 1.0,
+                duration: const Duration(milliseconds: 120),
                 child: SizedBox(
-                  width: 78,
+                  width: 72,
                   child: Column(
-                    mainAxisAlignment:
-                        MainAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       // ==================================================
                       // ICON
                       // ==================================================
 
+                      // ==================================================
+                      // PREMIUM COLORFUL BUBBLE
+                      // ==================================================
                       AnimatedContainer(
-                        duration:
-                            const Duration(
-                          milliseconds: 180,
-                        ),
-                        width:
-                            _isPressed ? 50 : 47,
-                        height:
-                            _isPressed ? 50 : 47,
-                        decoration:
-                            BoxDecoration(
-                          shape:
-                              BoxShape.circle,
-                          gradient:
-                              LinearGradient(
-                            begin:
-                                Alignment.topLeft,
-                            end:
-                                Alignment
-                                    .bottomRight,
+                        duration: const Duration(milliseconds: 180),
+                        width: _isPressed ? 54 : 50,
+                        height: _isPressed ? 54 : 50,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+
+                          // Clean PhonePe-style colorful icon background
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
                             colors: [
-                              widget.data
-                                  .color
-                                  .withValues(
-                                alpha:
-                                    isDisabled
-                                        ? 0.06
-                                        : 0.14,
-                              ),
-                              widget.data
-                                  .color
-                                  .withValues(
-                                alpha:
-                                    isDisabled
-                                        ? 0.03
-                                        : 0.07,
-                              ),
+                              widget.data.color,
+                              widget.data.color.withValues(alpha: 0.78),
                             ],
                           ),
-                          border:
-                              Border.all(
-                            color: widget.data
-                                .color
-                                .withValues(
-                              alpha:
-                                  isDisabled
-                                      ? 0.08
-                                      : 0.18,
-                            ),
-                          ),
+
                           boxShadow: [
                             BoxShadow(
-                              color: widget.data
-                                  .color
-                                  .withValues(
-                                alpha:
-                                    _isPressed
-                                        ? 0.22
-                                        : 0.10,
+                              color: widget.data.color.withValues(
+                                alpha: _isPressed ? 0.32 : 0.18,
                               ),
-                              blurRadius:
-                                  _isPressed
-                                      ? 18
-                                      : 12,
-                              spreadRadius:
-                                  _isPressed
-                                      ? 2
-                                      : 0,
-                            ),
-                            BoxShadow(
-                              color: Colors
-                                  .white
-                                  .withValues(
-                                alpha: 0.40,
-                              ),
-                              blurRadius: 4,
-                              offset:
-                                  const Offset(
-                                -1,
-                                -1,
-                              ),
+                              blurRadius: _isPressed ? 14 : 10,
+                              offset: const Offset(0, 4),
                             ),
                           ],
                         ),
-                        child: Icon(
-                          widget.data.icon,
-                          size: 20,
-                          color: isDisabled
-                              ? widget.data
-                                  .color
-                                  .withValues(
-                                  alpha: 0.40,
-                                )
-                              : widget.data.color,
+
+                        child: Center(
+                          child: Icon(
+                            widget.data.icon,
+                            size: _isPressed ? 23 : 21,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
 
-                      const SizedBox(
-                        height: 7,
-                      ),
+                      const SizedBox(height: 5),
 
                       // ==================================================
                       // LABEL
                       // ==================================================
-
                       Text(
                         widget.data.title,
-                        textAlign:
-                            TextAlign.center,
+                        textAlign: TextAlign.center,
                         maxLines: 2,
-                        overflow:
-                            TextOverflow.ellipsis,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: 9.5,
                           height: 1.15,
-                          fontWeight:
-                              FontWeight.w600,
+                          fontWeight: FontWeight.w600,
                           color: isDisabled
-                              ? AppColors
-                                  .lightBlue
-                                  .withValues(
-                                  alpha: 0.40,
-                                )
-                              : AppColors
-                                  .lightBlue,
+                              ? AppColors.lightBlue.withValues(alpha: 0.40)
+                              : AppColors.lightBlue,
                         ),
                       ),
                     ],
