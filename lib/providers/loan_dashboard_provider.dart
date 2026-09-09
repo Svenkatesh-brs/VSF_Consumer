@@ -79,7 +79,9 @@ class LoanDashboardProvider extends GetxController {
       print('[LOAN PROVIDER] Resolved loanId: $loanId');
 
       if (loanId.isEmpty) {
-        selectedLoan.value = _selectedLoanFromArguments(arguments);
+        if (selectedLoan.value == null) {
+          selectedLoan.value = _selectedLoanFromArguments(arguments);
+        }
 
         errorMessage.value = 'No loan information was found.';
 
@@ -105,7 +107,9 @@ class LoanDashboardProvider extends GetxController {
             ? response.message
             : 'Unable to load your loan information.';
 
-        selectedLoan.value = _selectedLoanFromArguments(arguments);
+        if (selectedLoan.value == null) {
+          selectedLoan.value = _selectedLoanFromArguments(arguments);
+        }
 
         return;
       }
@@ -119,7 +123,9 @@ class LoanDashboardProvider extends GetxController {
       if (dashboardData == null) {
         errorMessage.value = 'No loan information was found.';
 
-        selectedLoan.value = _selectedLoanFromArguments(arguments);
+        if (selectedLoan.value == null) {
+          selectedLoan.value = _selectedLoanFromArguments(arguments);
+        }
 
         return;
       }
@@ -167,7 +173,9 @@ class LoanDashboardProvider extends GetxController {
     } catch (e) {
       errorMessage.value = _getErrorMessage(e);
 
-      selectedLoan.value = _selectedLoanFromArguments(arguments);
+      if (selectedLoan.value == null) {
+        selectedLoan.value = _selectedLoanFromArguments(arguments);
+      }
     } finally {
       isLoading.value = false;
     }
@@ -179,10 +187,23 @@ class LoanDashboardProvider extends GetxController {
   // Home navigates with its mapped card map whose 'loan' entry
   // keeps the original HomeLoan API model; its id identifies the
   // loan on the backend. Direct ids and raw strings are also
-  // accepted defensively.
+  // accepted defensively. When no arguments carry an id (e.g. the
+  // sub-screens pushed after the dashboard), the already-loaded
+  // selectedLoan is used so pull-to-refresh still targets the
+  // correct loan.
   // ============================================================
 
   String _resolveLoanId(dynamic arguments) {
+    var loanId = _loanIdFromArguments(arguments);
+
+    if (loanId.isEmpty) {
+      loanId = _loanIdFromArguments(selectedLoan.value);
+    }
+
+    return loanId;
+  }
+
+  String _loanIdFromArguments(dynamic arguments) {
     if (arguments is HomeLoan) {
       return arguments.id;
     }

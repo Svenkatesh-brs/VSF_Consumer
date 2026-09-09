@@ -91,7 +91,7 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
 
     return RefreshIndicator(
       color: AppColors.secondary,
-      onRefresh: controller.retry,
+      onRefresh: controller.refreshPaymentInfo,
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(
           parent: BouncingScrollPhysics(),

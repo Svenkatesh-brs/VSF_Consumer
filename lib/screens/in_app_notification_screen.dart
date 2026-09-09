@@ -313,6 +313,9 @@ class _NotificationList extends StatelessWidget {
         },
         child: ListView.separated(
           controller: scrollController,
+          physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics(),
+          ),
           padding: const EdgeInsets.all(16),
           itemCount:
               notifications.length +

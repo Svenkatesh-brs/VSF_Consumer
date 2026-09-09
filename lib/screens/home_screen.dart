@@ -199,15 +199,20 @@ class _HomeScreenState extends State<HomeScreen> {
         showWatermark: true,
         showBottomImage: false,
         child: SafeArea(
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.fromLTRB(
-              20,
-              24,
-              20,
-              24,
-            ),
-            child: Column(
+          child: RefreshIndicator(
+            onRefresh: controller.refreshDashboard,
+            color: AppColors.lightBlue,
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics(),
+              ),
+              padding: const EdgeInsets.fromLTRB(
+                20,
+                24,
+                20,
+                24,
+              ),
+              child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // ==================================================
@@ -1068,7 +1073,8 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-    );
+    ),
+  );
   }
 }
 

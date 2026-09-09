@@ -179,10 +179,15 @@ class _LoanDashboardScreenState extends State<LoanDashboardScreen> {
 
             return Stack(
               children: [
-                SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 115),
-                  child: Column(
+                RefreshIndicator(
+                  onRefresh: controller.retry,
+                  color: AppColors.lightBlue,
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(
+                      parent: BouncingScrollPhysics(),
+                    ),
+                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 115),
+                    child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // ==================================================
@@ -334,6 +339,7 @@ class _LoanDashboardScreenState extends State<LoanDashboardScreen> {
                     ],
                   ),
                 ),
+              ),
 
                 // ========================================================
                 // PAY EMI BUTTON

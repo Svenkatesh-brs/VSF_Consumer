@@ -48,12 +48,30 @@ class PayEmiProvider extends GetxController {
   // ============================================================
 
   Future<void> loadPaymentInfo() async {
+    await _loadPaymentInfo(showLoading: true);
+  }
+
+  // ============================================================
+  // REFRESH PAYMENT INFORMATION
+  //
+  // Same API call and data updates as loadPaymentInfo, but keeps
+  // the current content on screen while the RefreshIndicator
+  // provides the progress feedback. Used for pull-to-refresh.
+  // ============================================================
+
+  Future<void> refreshPaymentInfo() async {
+    await _loadPaymentInfo(showLoading: false);
+  }
+
+  Future<void> _loadPaymentInfo({required bool showLoading}) async {
     if (isLoading.value) {
       return;
     }
 
-    isLoading.value = true;
-    errorMessage.value = '';
+    if (showLoading) {
+      isLoading.value = true;
+      errorMessage.value = '';
+    }
 
     try {
       final info = await _payEmiService.getPaymentInfo();
@@ -82,11 +100,15 @@ class PayEmiProvider extends GetxController {
         }
       }
     } catch (e) {
-      errorMessage.value = e.toString();
-      paymentInfo.value = null;
-      qrImages.clear();
+      if (showLoading) {
+        errorMessage.value = e.toString();
+        paymentInfo.value = null;
+        qrImages.clear();
+      }
     } finally {
-      isLoading.value = false;
+      if (showLoading) {
+        isLoading.value = false;
+      }
     }
   }
 

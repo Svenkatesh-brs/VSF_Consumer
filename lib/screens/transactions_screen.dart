@@ -414,10 +414,15 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   // ============================================================
 
   Widget _buildContent(List<LoanTransaction> transactions) {
-    return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
-      child: Column(
+    return RefreshIndicator(
+      onRefresh: controller.retry,
+      color: AppColors.lightBlue,
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(
+          parent: BouncingScrollPhysics(),
+        ),
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // ==================================================
@@ -528,6 +533,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
               ),
             ),
         ],
+      ),
       ),
     );
   }

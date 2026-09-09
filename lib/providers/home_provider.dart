@@ -90,13 +90,33 @@ class HomeProvider extends GetxController {
   // ============================================================
 
   Future<void> loadDashboard() async {
+    await _loadDashboard(showLoading: true);
+  }
+
+  // ============================================================
+  // REFRESH HOME DASHBOARD
+  //
+  // Same API call and data updates as loadDashboard, but keeps
+  // the current content on screen while the RefreshIndicator
+  // provides the progress feedback. Used for pull-to-refresh.
+  // ============================================================
+
+  Future<void> refreshDashboard() async {
+    await _loadDashboard(showLoading: false);
+  }
+
+  Future<void> _loadDashboard({
+    required bool showLoading,
+  }) async {
     if (isLoading.value) {
       return;
     }
 
     try {
-      isLoading.value = true;
-      errorMessage.value = null;
+      if (showLoading) {
+        isLoading.value = true;
+        errorMessage.value = null;
+      }
 
       // --------------------------------------------------------
       // REQUEST
@@ -118,15 +138,20 @@ class HomeProvider extends GetxController {
 
       // --------------------------------------------------------
       // API FAILURE
+      //
+      // On refresh the current data stays on screen; only the
+      // initial load clears it and surfaces the error view.
       // --------------------------------------------------------
 
       if (!response.success) {
-        errorMessage.value = response.message.isNotEmpty
-            ? response.message
-            : 'Unable to load your loan information.';
+        if (showLoading) {
+          errorMessage.value = response.message.isNotEmpty
+              ? response.message
+              : 'Unable to load your loan information.';
 
-        loans.clear();
-        _clearSummary();
+          loans.clear();
+          _clearSummary();
+        }
 
         return;
       }
@@ -138,11 +163,13 @@ class HomeProvider extends GetxController {
       final homeData = response.data;
 
       if (homeData == null) {
-        loans.clear();
-        _clearSummary();
+        if (showLoading) {
+          loans.clear();
+          _clearSummary();
 
-        errorMessage.value =
-            'No customer information was found.';
+          errorMessage.value =
+              'No customer information was found.';
+        }
 
         return;
       }
@@ -185,13 +212,17 @@ class HomeProvider extends GetxController {
 
       _calculateSummary();
     } catch (e) {
-      loans.clear();
-      _clearSummary();
+      if (showLoading) {
+        loans.clear();
+        _clearSummary();
 
-      errorMessage.value =
-          _getErrorMessage(e);
+        errorMessage.value =
+            _getErrorMessage(e);
+      }
     } finally {
-      isLoading.value = false;
+      if (showLoading) {
+        isLoading.value = false;
+      }
     }
   }
 

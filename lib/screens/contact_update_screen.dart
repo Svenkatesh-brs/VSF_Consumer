@@ -483,15 +483,20 @@ class _ContactUpdateScreenState
               .loanDetails.value?.borrower?.phone ??
           '';
 
-      return SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(
-          20,
-          8,
-          20,
-          28,
-        ),
-        child: Column(
+      return RefreshIndicator(
+        onRefresh: loanController.retry,
+        color: AppColors.lightBlue,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics(),
+          ),
+          padding: const EdgeInsets.fromLTRB(
+            20,
+            8,
+            20,
+            28,
+          ),
+          child: Column(
           crossAxisAlignment:
               CrossAxisAlignment.start,
           children: [
@@ -544,7 +549,8 @@ class _ContactUpdateScreenState
             ),
           ],
         ),
-      );
+      ),
+    );
     });
   }
 
@@ -559,15 +565,20 @@ class _ContactUpdateScreenState
       final isSaving =
           contactController.isLoading.value;
 
-      return SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(
-          20,
-          8,
-          20,
-          28,
-        ),
-        child: contactController.hasAddress
+      return RefreshIndicator(
+        onRefresh: loanController.retry,
+        color: AppColors.lightBlue,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics(),
+          ),
+          padding: const EdgeInsets.fromLTRB(
+            20,
+            8,
+            20,
+            28,
+          ),
+          child: contactController.hasAddress
             ? Column(
                 crossAxisAlignment:
                     CrossAxisAlignment.start,
@@ -580,7 +591,8 @@ class _ContactUpdateScreenState
                 ],
               )
             : _buildNoAddressCard(),
-      );
+      ),
+    );
     });
   }
 
