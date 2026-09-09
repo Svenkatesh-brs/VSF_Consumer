@@ -107,27 +107,27 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   // Collection / Seize) of the merged voucher receipt.
   // ============================================================
 
-  Widget _buildComponentPill(String label, double amount) {
-    return Flexible(
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-        decoration: BoxDecoration(
-          color: Colors.black.withValues(alpha: 0.04),
-          borderRadius: BorderRadius.circular(100),
-        ),
-        child: Text(
-          '$label ${_formatAmount(amount)}',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            fontSize: 9,
-            fontWeight: FontWeight.w600,
-            color: Colors.black54,
-          ),
-        ),
-      ),
-    );
-  }
+  // Widget _buildComponentPill(String label, double amount) {
+  //   return Flexible(
+  //     child: Container(
+  //       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+  //       decoration: BoxDecoration(
+  //         color: Colors.black.withValues(alpha: 0.04),
+  //         borderRadius: BorderRadius.circular(100),
+  //       ),
+  //       child: Text(
+  //         '$label ${_formatAmount(amount)}',
+  //         maxLines: 1,
+  //         overflow: TextOverflow.ellipsis,
+  //         style: const TextStyle(
+  //           fontSize: 9,
+  //           fontWeight: FontWeight.w600,
+  //           color: Colors.black54,
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   // ============================================================
   // TRANSACTION CARD
@@ -266,33 +266,33 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                   children: [
                     _buildTypeBadge(transaction.type),
 
-                    if (transaction.emiAmount > 0) ...[
-                      const SizedBox(width: 6),
-                      _buildComponentPill('EMI', transaction.emiAmount),
-                    ],
+                    // if (transaction.emiAmount > 0) ...[
+                    //   const SizedBox(width: 6),
+                    //   _buildComponentPill('EMI', transaction.emiAmount),
+                    // ],
 
-                    if (transaction.vasAmount > 0) ...[
-                      const SizedBox(width: 6),
-                      _buildComponentPill('VAS', transaction.vasAmount),
-                    ],
+                    // if (transaction.vasAmount > 0) ...[
+                    //   const SizedBox(width: 6),
+                    //   _buildComponentPill('VAS', transaction.vasAmount),
+                    // ],
 
-                    if (transaction.lpcAmount > 0) ...[
-                      const SizedBox(width: 6),
-                      _buildComponentPill('LPC', transaction.lpcAmount),
-                    ],
+                    // if (transaction.lpcAmount > 0) ...[
+                    //   const SizedBox(width: 6),
+                    //   _buildComponentPill('LPC', transaction.lpcAmount),
+                    // ],
 
-                    if (transaction.collectionCharge > 0) ...[
-                      const SizedBox(width: 6),
-                      _buildComponentPill(
-                        'Collection',
-                        transaction.collectionCharge,
-                      ),
-                    ],
+                    // if (transaction.collectionCharge > 0) ...[
+                    //   const SizedBox(width: 6),
+                    //   _buildComponentPill(
+                    //     'Collection',
+                    //     transaction.collectionCharge,
+                    //   ),
+                    // ],
 
-                    if (transaction.seizeCharge > 0) ...[
-                      const SizedBox(width: 6),
-                      _buildComponentPill('Seize', transaction.seizeCharge),
-                    ],
+                    // if (transaction.seizeCharge > 0) ...[
+                    //   const SizedBox(width: 6),
+                    //   _buildComponentPill('Seize', transaction.seizeCharge),
+                    // ],
                   ],
                 ),
               ),
