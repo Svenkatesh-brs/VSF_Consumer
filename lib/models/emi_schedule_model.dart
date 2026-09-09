@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 // ============================================================
 // EMI SCHEDULE MODEL
 //
@@ -94,7 +96,7 @@ class EmiItem {
   factory EmiItem.fromJson(
     Map<String, dynamic> json,
   ) {
-    return EmiItem(
+    final result = EmiItem(
       id: _toStr(json['id']),
       dueDateMs: _toMillis(json['dueDate']),
       emiAmount: _toDouble(json['emi']),
@@ -116,8 +118,19 @@ class EmiItem {
       lastPaymentDateMs:
           _toMillis(json['lastPaymentDate']),
       status: _toStr(json['status']),
-      daysOverdue: _toInt(json['daysOverdue']),
+      daysOverdue: _calculateDaysOverdue(json),
     );
+
+    debugPrint(
+      '[EMI DEBUG] id=${json['id']} | '
+      'status=${json['status']} | '
+      'daysOverdue=${json['daysOverdue']} | '
+      'dueDate=${json['dueDate']} | '
+      'payments=${json['payments']} | '
+      'calculated=${result.daysOverdue}',
+    );
+
+    return result;
   }
 
   // ------------------------------------------------------------
@@ -156,6 +169,44 @@ String _toStr(dynamic value) {
   }
 
   return value.toString();
+}
+
+int _calculateDaysOverdue(
+  Map<String, dynamic> json,
+) {
+  var total = _toInt(json['daysOverdue']);
+
+  final payments = json['payments'];
+
+  if (payments is List) {
+    for (final payment in payments) {
+      if (payment is Map &&
+          payment['isLatestPayment'] == true) {
+        total += _toInt(payment['lpcDueDays']);
+        break;
+      }
+    }
+  }
+
+  // When the installment is Overdue but the combined value is
+  // still 0 (e.g. daysOverdue was 0 and no latest payment
+  // carries lpcDueDays), compute overdue days from dueDate.
+  if (total == 0 &&
+      _toStr(json['status']).toLowerCase() == 'overdue') {
+    final dueMs = _toMillis(json['dueDate']);
+
+    if (dueMs != null) {
+      final now = DateTime.now();
+      final due = DateTime.fromMillisecondsSinceEpoch(dueMs);
+      final diff = now.difference(due).inDays;
+
+      if (diff > 0) {
+        total = diff;
+      }
+    }
+  }
+
+  return total;
 }
 
 int _toInt(dynamic value) {

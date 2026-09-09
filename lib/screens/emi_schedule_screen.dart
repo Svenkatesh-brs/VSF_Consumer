@@ -457,19 +457,19 @@ class _EmiScheduleScreenState extends State<EmiScheduleScreen> {
                 ),
               ),
 
-              if (emi.id.isNotEmpty) ...[
-                const SizedBox(height: 2),
-                Text(
-                  emi.id,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 9.5,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black38,
-                  ),
-                ),
-              ],
+              // if (emi.id.isNotEmpty) ...[
+              //   const SizedBox(height: 2),
+              //   Text(
+              //     emi.id,
+              //     maxLines: 1,
+              //     overflow: TextOverflow.ellipsis,
+              //     style: const TextStyle(
+              //       fontSize: 9.5,
+              //       fontWeight: FontWeight.w500,
+              //       color: Colors.black38,
+              //     ),
+              //   ),
+              // ],
             ],
           ),
         ),
@@ -556,7 +556,7 @@ class _EmiScheduleScreenState extends State<EmiScheduleScreen> {
           label: 'Outstanding',
           value: _formatAmount(emi.principalOutstanding),
         ),
-      _buildInfoRow(label: 'LPC Due', value: _formatAmount(emi.lpcDue)),
+      // _buildInfoRow(label: 'LPC Due', value: _formatAmount(emi.lpcDue)),
       _buildInfoRow(label: 'Total Paid', value: _formatAmount(emi.totalPaid)),
       _buildInfoRow(
         label: 'Remaining',
