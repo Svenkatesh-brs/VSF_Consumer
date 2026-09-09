@@ -74,31 +74,31 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   // 'VAS Receipt', 'Mixed Receipt' or 'Charges Receipt'.
   // ============================================================
 
-  Widget _buildTypeBadge(String type) {
-    final isEmi = type.toLowerCase().contains('emi');
+  // Widget _buildTypeBadge(String type) {
+  //   final isEmi = type.toLowerCase().contains('emi');
 
-    final badgeColor = isEmi ? AppColors.buttonEnd : AppColors.secondary;
+  //   final badgeColor = isEmi ? AppColors.buttonEnd : AppColors.secondary;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-      decoration: BoxDecoration(
-        color: badgeColor.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(100),
-        border: Border.all(color: badgeColor.withValues(alpha: 0.16)),
-      ),
-      child: Text(
-        type.isEmpty ? '-' : type,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: TextStyle(
-          fontSize: 9,
-          fontWeight: FontWeight.w800,
-          letterSpacing: 0.5,
-          color: badgeColor,
-        ),
-      ),
-    );
-  }
+  //   return Container(
+  //     padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+  //     decoration: BoxDecoration(
+  //       color: badgeColor.withValues(alpha: 0.08),
+  //       borderRadius: BorderRadius.circular(100),
+  //       border: Border.all(color: badgeColor.withValues(alpha: 0.16)),
+  //     ),
+  //     child: Text(
+  //       type.isEmpty ? '-' : type,
+  //       maxLines: 1,
+  //       overflow: TextOverflow.ellipsis,
+  //       style: TextStyle(
+  //         fontSize: 9,
+  //         fontWeight: FontWeight.w800,
+  //         letterSpacing: 0.5,
+  //         color: badgeColor,
+  //       ),
+  //     ),
+  //   );
+  // }
 
   // ============================================================
   // COMPONENT PILL
@@ -259,12 +259,12 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
             // appears as its own pill; the headline amount above is
             // amountCollected (sum of all components).
             // ------------------------------------------------------
-            if (transaction.type.isNotEmpty || transaction.hasExtras)
-              Padding(
-                padding: const EdgeInsets.only(top: 10),
-                child: Row(
-                  children: [
-                    _buildTypeBadge(transaction.type),
+            // if (transaction.type.isNotEmpty || transaction.hasExtras)
+            //   Padding(
+            //     padding: const EdgeInsets.only(top: 10),
+            //     child: Row(
+            //       children: [
+                    // _buildTypeBadge(transaction.type),
 
                     // if (transaction.emiAmount > 0) ...[
                     //   const SizedBox(width: 6),
@@ -294,9 +294,9 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                     //   _buildComponentPill('Seize', transaction.seizeCharge),
                     // ],
                   ],
-                ),
-              ),
-          ],
+              //   ),
+              // ),
+          // ],
         ),
       ),
     );
