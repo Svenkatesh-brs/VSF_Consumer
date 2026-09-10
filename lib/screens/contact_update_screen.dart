@@ -69,6 +69,8 @@ class _ContactUpdateScreenState
 
   bool _isExiting = false;
 
+  bool _addressSuccessHandled = false;
+
   @override
   void initState() {
     super.initState();
@@ -161,6 +163,24 @@ class _ContactUpdateScreenState
     _addressTypeController = TextEditingController(
       text: initial?.addressType ?? '',
     );
+  }
+
+  void _clearAddressFields() {
+    _houseNumberController.clear();
+    _floorNumberController.clear();
+    _buildingNameController.clear();
+    _apartmentNameController.clear();
+    _streetNameController.clear();
+    _addressLine1Controller.clear();
+    _addressLine2Controller.clear();
+    _landmarkController.clear();
+    _villageController.clear();
+    _districtController.clear();
+    _cityController.clear();
+    _stateController.clear();
+    _countryController.clear();
+    _pincodeController.clear();
+    _addressTypeController.clear();
   }
 
   @override
@@ -264,7 +284,16 @@ class _ContactUpdateScreenState
       addressType: _addressTypeController.text.trim(),
     );
 
-    await contactController.updateAddress(request);
+    final success =
+        await contactController.updateAddress(request);
+
+    if (!mounted || !success) {
+      return;
+    }
+
+    _addressSuccessHandled = true;
+    _clearAddressFields();
+    _showAddressSuccessPopup();
   }
 
   // ============================================================
@@ -289,6 +318,187 @@ class _ContactUpdateScreenState
       colorText: isError
           ? AppColors.error
           : Colors.black87,
+    );
+  }
+
+  // ============================================================
+  // ADDRESS SUCCESS POPUP
+  //
+  // Animated dialog shown after a successful address update
+  // request. Uses TweenAnimationBuilder for the card entrance
+  // and the check icon bounce — no extra packages needed.
+  // ============================================================
+
+  void _showAddressSuccessPopup() {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierColor: Colors.black.withValues(alpha: 0.35),
+      builder: (dialogContext) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 36,
+          ),
+          child: TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.0, end: 1.0),
+            duration: const Duration(
+              milliseconds: 400,
+            ),
+            curve: Curves.easeOutBack,
+            builder: (context, animValue, child) {
+              return Transform.scale(
+                scale: animValue,
+                child: child,
+              );
+            },
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(
+                24, 28, 24, 22,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius:
+                    BorderRadius.circular(22),
+                border: Border.all(
+                  color: AppColors.lightBlue
+                      .withValues(alpha: 0.12),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.lightBlue
+                        .withValues(alpha: 0.10),
+                    blurRadius: 30,
+                    offset: const Offset(0, 8),
+                  ),
+                  BoxShadow(
+                    color: Colors.black.withValues(
+                      alpha: 0.05,
+                    ),
+                    blurRadius: 16,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TweenAnimationBuilder<double>(
+                    tween: Tween(
+                      begin: 0.0,
+                      end: 1.0,
+                    ),
+                    duration: const Duration(
+                      milliseconds: 600,
+                    ),
+                    curve: Curves.elasticOut,
+                    builder:
+                        (
+                          context,
+                          iconValue,
+                          child,
+                        ) {
+                          return Transform.scale(
+                            scale: iconValue,
+                            child: child,
+                          );
+                        },
+                    child: Container(
+                      width: 62,
+                      height: 62,
+                      decoration: BoxDecoration(
+                        color: AppColors.lightBlue
+                            .withValues(alpha: 0.10),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.check_rounded,
+                        size: 30,
+                        color:
+                            AppColors.lightBlue,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 18),
+
+                  const Text(
+                    'Address Request Sent',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.lightBlue,
+                    ),
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  Text(
+                    'Your address update request has been sent to our Customer Support team.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 13,
+                      height: 1.5,
+                      color: Colors.black
+                          .withValues(alpha: 0.60),
+                    ),
+                  ),
+
+                  const SizedBox(height: 6),
+
+                  Text(
+                    'Your new address will be reflected in the app once your request is reviewed and approved.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      height: 1.5,
+                      color: Colors.black
+                          .withValues(alpha: 0.45),
+                    ),
+                  ),
+
+                  const SizedBox(height: 22),
+
+                  GestureDetector(
+                    onTap: () =>
+                        Navigator.of(dialogContext)
+                            .pop(),
+                    child: Container(
+                      width: double.infinity,
+                      padding:
+                          const EdgeInsets.symmetric(
+                            vertical: 13,
+                          ),
+                      decoration: BoxDecoration(
+                        color:
+                            AppColors.lightBlue,
+                        borderRadius:
+                            BorderRadius.circular(
+                              14,
+                            ),
+                      ),
+                      child: const Text(
+                        'Got it',
+                        textAlign:
+                            TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight:
+                              FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -1049,6 +1259,12 @@ class _ContactUpdateScreenState
         contactController.successMessage.value;
 
     if (success != null && success.isNotEmpty) {
+      if (_addressSuccessHandled) {
+        _addressSuccessHandled = false;
+        contactController.successMessage.value = null;
+        return;
+      }
+
       WidgetsBinding.instance.addPostFrameCallback(
         (_) {
           if (!mounted) {
