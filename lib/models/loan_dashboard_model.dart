@@ -121,36 +121,34 @@ class LoanDashboardModel {
         ? <Map<String, dynamic>>[]
         : _mapList(lead['borrowers'], (m) => m);
 
-    final schemes = _mapList(json['loanSchemes'], (m) => m);
-
     final installments = _mapList(json['installments'], (m) => m);
 
     // --------------------------------------------------------
-    // EMI AMOUNT: scheme first, then first installment
+    // EMI AMOUNT: first installment EMI (used for summary card)
     // --------------------------------------------------------
 
-    final double emiAmount = schemes.isNotEmpty
-        ? _toDouble(schemes.first['emi'])
-        : installments.isEmpty
-        ? 0
-        : _toDouble(installments.first['emi']);
+    final double emiAmount = installments.isNotEmpty
+        ? _toDouble(installments.first['emi'])
+        : 0;
 
     // --------------------------------------------------------
     // NUMBER OF INSTALLMENTS
     // --------------------------------------------------------
 
-    final int numberOfInstallments = schemes.isNotEmpty
-        ? _toInt(schemes.first['noOfInstallments'])
-        : 0;
+    final int numberOfInstallments = installments.length;
 
     // --------------------------------------------------------
     // DISPLAYED LOAN AMOUNT
     //
-    // Total scheduled repayment = EMI amount × number of
-    // installments.
+    // Sum of the EMI amount from every installment returned
+    // by the API.
     // --------------------------------------------------------
 
-    final double loanAmount = emiAmount * numberOfInstallments;
+    double loanAmount = 0;
+
+    for (final installment in installments) {
+      loanAmount += _toDouble(installment['emi']);
+    }
 
     // --------------------------------------------------------
     // BORROWER NAME: first borrower with a usable name
