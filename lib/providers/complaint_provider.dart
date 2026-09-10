@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 
 import '../models/complaint_model.dart';
 import '../services/complaint_service.dart';
+import 'loan_dashboard_provider.dart';
 
 class ComplaintProvider extends GetxController {
   // ============================================================
@@ -77,8 +78,7 @@ class ComplaintProvider extends GetxController {
   }
 
   void setIssueType(int issueType) {
-    if (issueType < ComplaintCreateRequest.billingOrPayment ||
-        issueType > ComplaintCreateRequest.other) {
+    if (!ComplaintCreateRequest.issueTypeValues.contains(issueType)) {
       return;
     }
 
@@ -109,6 +109,30 @@ class ComplaintProvider extends GetxController {
   // CREATE COMPLAINT
   // ============================================================
 
+  // ------------------------------------------------------------
+  // CURRENT LOAN ID
+  //
+  // The complaint screen is always opened from the Loan
+  // Dashboard, whose provider is still alive on the navigation
+  // stack. Defensively falls back to '' when unavailable.
+  // ------------------------------------------------------------
+
+  String get _currentLoanId {
+    if (!Get.isRegistered<LoanDashboardProvider>()) {
+      return '';
+    }
+
+    final loanProvider = Get.find<LoanDashboardProvider>();
+
+    final loanId = loanProvider.dashboard.value?.loanId ?? '';
+
+    if (loanId.isNotEmpty) {
+      return loanId;
+    }
+
+    return loanProvider.selectedLoan.value?['loanId']?.toString() ?? '';
+  }
+
   Future<bool> createComplaint() async {
     if (isCreating.value) {
       return false;
@@ -131,6 +155,10 @@ class ComplaintProvider extends GetxController {
         description: trimmedDescription,
         urgent: isUrgent.value,
         issueType: selectedIssueType.value,
+        loanId: _currentLoanId,
+        // No file handling exists yet; preserve the current
+        // empty-string value the documentation shows for "file".
+        file: '',
       );
 
       final response = await _complaintService.createComplaint(
@@ -191,6 +219,7 @@ class ComplaintProvider extends GetxController {
         status: selectedStatus.value,
         page: currentPage.value,
         recordsPerPage: recordsPerPage.value,
+        loanId: _currentLoanId,
       );
 
       final response =
@@ -210,6 +239,14 @@ class ComplaintProvider extends GetxController {
       if (!response.success) {
         complaints.clear();
         totalComplaints.value = 0;
+
+        // The backend reports "no complaints found" with
+        // success:false and an empty list; that is a valid
+        // empty-list state, not a technical error.
+        if (response.data.isEmpty) {
+          errorMessage.value = null;
+          return;
+        }
 
         errorMessage.value =
             response.message.isNotEmpty
@@ -342,6 +379,9 @@ class ComplaintProvider extends GetxController {
 
       case ComplaintCreateRequest.vehicleRelated:
         return 'Vehicle Related';
+
+      case ComplaintCreateRequest.technicalAndStaff:
+        return 'Technical & Staff';
 
       case ComplaintCreateRequest.other:
         return 'Other';
