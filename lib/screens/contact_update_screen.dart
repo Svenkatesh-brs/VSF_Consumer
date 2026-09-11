@@ -16,13 +16,23 @@ import '../widgets/common/screen_transition.dart';
 // CONTACT UPDATE SCREEN
 //
 // Two tabs:
-//   1. Phone Number -> PATCH /api/v1/consumer/customer/me/phone
+//   1. Phone Number -> OTP-based approval workflow. OTP is sent
+//                      to the CURRENT number first (verified via
+//                      /consumer/otp/verify, returned token
+//                      ignored), then to the NEW number (verified
+//                      via /consumer/phone/otp/verify, which
+//                      creates the backend update request). The
+//                      saved phone is never changed locally. The
+//                      legacy PATCH .../me/phone API is no longer
+//                      used.
 //   2. Address      -> PUT   /api/v1/consumer/customer/address/:id
 //
 // All data comes from the live providers:
 //   - Current address: LoanDashboardProvider
 //     (loanDetails.value?.borrower?.address — already fetched
 //     by the Loan Dashboard response; never refetched here)
+//   - Current phone: LoanDashboardProvider
+//     (loanDetails.value?.borrower?.phone — read-only)
 //   - Updates: ContactUpdateProvider (id / cid supplied there)
 //
 // The screen performs no direct API calls.
@@ -46,6 +56,8 @@ class _ContactUpdateScreenState
   late final TabController _tabController;
 
   late final TextEditingController _phoneController;
+
+  late final TextEditingController _otpController;
 
   // ------------------------------------------------------------
   // EDITABLE ADDRESS FIELDS
@@ -71,6 +83,8 @@ class _ContactUpdateScreenState
 
   bool _addressSuccessHandled = false;
 
+  bool _phoneSuccessHandled = false;
+
   @override
   void initState() {
     super.initState();
@@ -91,11 +105,9 @@ class _ContactUpdateScreenState
       vsync: this,
     );
 
-    _phoneController = TextEditingController(
-      text: loanController.loanDetails.value?.borrower
-              ?.phone ??
-          '',
-    );
+    _phoneController = TextEditingController();
+
+    _otpController = TextEditingController();
 
     _prefillAddressFields();
   }
@@ -187,6 +199,7 @@ class _ContactUpdateScreenState
   void dispose() {
     _tabController.dispose();
     _phoneController.dispose();
+    _otpController.dispose();
     _addressLine1Controller.dispose();
     _addressLine2Controller.dispose();
     _landmarkController.dispose();
@@ -235,15 +248,122 @@ class _ContactUpdateScreenState
   }
 
   // ============================================================
-  // SUBMIT PHONE
+  // PHONE TAB — SUBMIT OTP TO CURRENT NUMBER
+  //
+  // Step 1 -> Step 2. Sends the OTP to the CURRENT/OLD phone.
+  // Does not call the legacy PATCH phone API.
   // ============================================================
 
   Future<void> _submitPhone() async {
     FocusScope.of(context).unfocus();
 
-    await contactController.updatePhone(
+    final success =
+        await contactController.beginPhoneUpdate(
       _phoneController.text,
     );
+
+    if (!mounted || !success) {
+      return;
+    }
+
+    setState(() {
+      _otpController.clear();
+    });
+  }
+
+  // ============================================================
+  // PHONE TAB — VERIFY OTP
+  //
+  // Dispatches to the current step:
+  //   Step 2 (verify current phone) -> step 3 on success
+  //   Step 3 (verify new phone)     -> approval popup on success
+  // ============================================================
+
+  Future<void> _submitOtp() async {
+    FocusScope.of(context).unfocus();
+
+    final step = contactController.phoneUpdateStep.value;
+
+    if (step == PhoneUpdateStep.verifyCurrentPhone) {
+      final success =
+          await contactController.verifyCurrentPhoneOtp(
+        _otpController.text,
+      );
+
+      if (!mounted || !success) {
+        return;
+      }
+
+      setState(() {
+        _otpController.clear();
+      });
+      return;
+    }
+
+    if (step == PhoneUpdateStep.verifyNewPhone) {
+      final success =
+          await contactController.verifyNewPhoneOtp(
+        _otpController.text,
+      );
+
+      if (!mounted || !success) {
+        return;
+      }
+
+      _phoneSuccessHandled = true;
+
+      _showPhoneSuccessPopup();
+
+      if (!mounted) {
+        return;
+      }
+
+      contactController.resetPhoneUpdate();
+
+      _resetPhoneUpdateFields();
+    }
+  }
+
+  // ============================================================
+  // PHONE TAB — RESEND OTP
+  //
+  // Current-phone OTP resends through /consumer/otp/request;
+  // new-phone OTP resends through /consumer/phone/otp/request.
+  // ============================================================
+
+  Future<void> _resendPhoneOtp() async {
+    if (_isExiting ||
+        contactController.isLoading.value) {
+      return;
+    }
+
+    FocusManager.instance.primaryFocus?.unfocus();
+
+    final step = contactController.phoneUpdateStep.value;
+
+    final success = step == PhoneUpdateStep.verifyCurrentPhone
+        ? await contactController.resendCurrentPhoneOtp()
+        : await contactController.resendNewPhoneOtp();
+
+    if (!mounted || !success) {
+      return;
+    }
+
+    setState(() {
+      _otpController.clear();
+    });
+  }
+
+  // ============================================================
+  // PHONE TAB — RESET INPUT
+  //
+  // Clears only the NEW-number/OTP fields after the request has
+  // been submitted. The current saved phone is never modified.
+  // ============================================================
+
+  void _resetPhoneUpdateFields() {
+    _phoneController.clear();
+    _otpController.clear();
   }
 
   // ============================================================
@@ -503,6 +623,187 @@ class _ContactUpdateScreenState
   }
 
   // ============================================================
+  // PHONE SUCCESS POPUP
+  //
+  // Shown after the NEW phone OTP is verified and the backend has
+  // created the phone update request. Same animation, styling,
+  // typography and spacing as the Address Request Sent popup.
+  // ============================================================
+
+  void _showPhoneSuccessPopup() {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierColor: Colors.black.withValues(alpha: 0.35),
+      builder: (dialogContext) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 36,
+          ),
+          child: TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.0, end: 1.0),
+            duration: const Duration(
+              milliseconds: 400,
+            ),
+            curve: Curves.easeOutBack,
+            builder: (context, animValue, child) {
+              return Transform.scale(
+                scale: animValue,
+                child: child,
+              );
+            },
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(
+                24, 28, 24, 22,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius:
+                    BorderRadius.circular(22),
+                border: Border.all(
+                  color: AppColors.lightBlue
+                      .withValues(alpha: 0.12),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.lightBlue
+                        .withValues(alpha: 0.10),
+                    blurRadius: 30,
+                    offset: const Offset(0, 8),
+                  ),
+                  BoxShadow(
+                    color: Colors.black.withValues(
+                      alpha: 0.05,
+                    ),
+                    blurRadius: 16,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TweenAnimationBuilder<double>(
+                    tween: Tween(
+                      begin: 0.0,
+                      end: 1.0,
+                    ),
+                    duration: const Duration(
+                      milliseconds: 600,
+                    ),
+                    curve: Curves.elasticOut,
+                    builder:
+                        (
+                          context,
+                          iconValue,
+                          child,
+                        ) {
+                          return Transform.scale(
+                            scale: iconValue,
+                            child: child,
+                          );
+                        },
+                    child: Container(
+                      width: 62,
+                      height: 62,
+                      decoration: BoxDecoration(
+                        color: AppColors.lightBlue
+                            .withValues(alpha: 0.10),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.phone_android_rounded,
+                        size: 30,
+                        color:
+                            AppColors.lightBlue,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 18),
+
+                  const Text(
+                    'Phone Update Request Sent',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.lightBlue,
+                    ),
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  Text(
+                    'Your phone number update request has been sent to our Customer Support team.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 13,
+                      height: 1.5,
+                      color: Colors.black
+                          .withValues(alpha: 0.60),
+                    ),
+                  ),
+
+                  const SizedBox(height: 6),
+
+                  Text(
+                    'Your new phone number will be reflected in the app once your request is reviewed and approved.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      height: 1.5,
+                      color: Colors.black
+                          .withValues(alpha: 0.45),
+                    ),
+                  ),
+
+                  const SizedBox(height: 22),
+
+                  GestureDetector(
+                    onTap: () =>
+                        Navigator.of(dialogContext)
+                            .pop(),
+                    child: Container(
+                      width: double.infinity,
+                      padding:
+                          const EdgeInsets.symmetric(
+                            vertical: 13,
+                          ),
+                      decoration: BoxDecoration(
+                        color:
+                            AppColors.lightBlue,
+                        borderRadius:
+                            BorderRadius.circular(
+                              14,
+                            ),
+                      ),
+                      child: const Text(
+                        'Got it',
+                        textAlign:
+                            TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight:
+                              FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // ============================================================
   // BUILD
   // ============================================================
 
@@ -689,6 +990,9 @@ class _ContactUpdateScreenState
       final isSaving =
           contactController.isLoading.value;
 
+      final step =
+          contactController.phoneUpdateStep.value;
+
       final currentPhone = loanController
               .loanDetails.value?.borrower?.phone ??
           '';
@@ -707,60 +1011,210 @@ class _ContactUpdateScreenState
             28,
           ),
           child: Column(
-          crossAxisAlignment:
-              CrossAxisAlignment.start,
-          children: [
-            _buildCurrentContactCard(
-              icon: Icons.phone_outlined,
-              title: 'Registered Phone',
-              rows: [
-                _buildInfoRow(
-                  label: 'Current Number',
-                  value: currentPhone,
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 16),
-
-            AppFormCard(
-              child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.start,
-                children: [
-                  _buildSectionTitle(
-                    icon: Icons.edit_outlined,
-                    title: 'New Phone Number',
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  AppTextField(
-                    controller: _phoneController,
-                    keyboardType: TextInputType.phone,
-                    textInputAction:
-                        TextInputAction.done,
-                    labelText: 'Phone Number',
-                    hintText: '10-digit mobile number',
-                    prefixIcon: const Icon(
-                      Icons.phone_outlined,
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  AppSubmitButton(
-                    label: 'Update Phone',
-                    isLoading: isSaving,
-                    onTap: _submitPhone,
+            crossAxisAlignment:
+                CrossAxisAlignment.start,
+            children: [
+              _buildCurrentContactCard(
+                icon: Icons.phone_outlined,
+                title: 'Registered Phone',
+                rows: [
+                  _buildInfoRow(
+                    label: 'Current Number',
+                    value: currentPhone,
                   ),
                 ],
               ),
-            ),
-          ],
+
+              const SizedBox(height: 16),
+
+              if (step == PhoneUpdateStep.enterNewPhone)
+                _buildNewPhoneForm(isSaving)
+              else if (step ==
+                  PhoneUpdateStep.verifyCurrentPhone)
+                _buildCurrentPhoneOtpCard(isSaving)
+              else
+                _buildNewPhoneOtpCard(isSaving),
+            ],
+          ),
         ),
+      );
+    });
+  }
+
+  // ============================================================
+  // PHONE TAB — STEP 1: NEW NUMBER FORM
+  // ============================================================
+
+  Widget _buildNewPhoneForm(bool isSaving) {
+    return AppFormCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionTitle(
+            icon: Icons.edit_outlined,
+            title: 'New Phone Number',
+          ),
+
+          const SizedBox(height: 20),
+
+          AppTextField(
+            controller: _phoneController,
+            keyboardType: TextInputType.phone,
+            textInputAction: TextInputAction.done,
+            labelText: 'Phone Number',
+            hintText: '10-digit mobile number',
+            prefixIcon: const Icon(
+              Icons.phone_outlined,
+            ),
+          ),
+
+          const SizedBox(height: 24),
+
+          AppSubmitButton(
+            label: 'Update Phone',
+            isLoading: isSaving,
+            onTap: _submitPhone,
+          ),
+        ],
       ),
     );
+  }
+
+  // ============================================================
+  // PHONE TAB — STEP 2: CURRENT-PHONE OTP
+  // ============================================================
+
+  Widget _buildCurrentPhoneOtpCard(bool isSaving) {
+    return AppFormCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionTitle(
+            icon: Icons.verified_user_outlined,
+            title: 'Verify Current Number',
+          ),
+
+          const SizedBox(height: 12),
+
+          Text(
+            'Enter the OTP sent to your current mobile number.',
+            style: TextStyle(
+              fontSize: 13,
+              height: 1.5,
+              color: Colors.black
+                  .withValues(alpha: 0.60),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          _buildOtpField(),
+
+          const SizedBox(height: 24),
+
+          AppSubmitButton(
+            label: 'Verify OTP',
+            isLoading: isSaving,
+            onTap: _submitOtp,
+          ),
+
+          const SizedBox(height: 12),
+
+          _buildResendOtpRow(),
+        ],
+      ),
+    );
+  }
+
+  // ============================================================
+  // PHONE TAB — STEP 3: NEW-PHONE OTP
+  // ============================================================
+
+  Widget _buildNewPhoneOtpCard(bool isSaving) {
+    return AppFormCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionTitle(
+            icon: Icons.phone_iphone,
+            title: 'Verify New Number',
+          ),
+
+          const SizedBox(height: 12),
+
+          Text(
+            'Enter the OTP sent to your new mobile number.',
+            style: TextStyle(
+              fontSize: 13,
+              height: 1.5,
+              color: Colors.black
+                  .withValues(alpha: 0.60),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          _buildOtpField(),
+
+          const SizedBox(height: 24),
+
+          AppSubmitButton(
+            label: 'Verify OTP',
+            isLoading: isSaving,
+            onTap: _submitOtp,
+          ),
+
+          const SizedBox(height: 12),
+
+          _buildResendOtpRow(),
+        ],
+      ),
+    );
+  }
+
+  // ============================================================
+  // PHONE TAB — OTP INPUT
+  // ============================================================
+
+  Widget _buildOtpField() {
+    return AppTextField(
+      controller: _otpController,
+      keyboardType: TextInputType.number,
+      textInputAction: TextInputAction.done,
+      labelText: 'OTP',
+      hintText: 'Enter 6-digit OTP',
+      prefixIcon: const Icon(
+        Icons.verified_outlined,
+      ),
+    );
+  }
+
+  // ============================================================
+  // PHONE TAB — RESEND ROW
+  // ============================================================
+
+  Widget _buildResendOtpRow() {
+    return Obx(() {
+      final countdown =
+          contactController.otpCountdown.value;
+
+      final canResend =
+          contactController.canResendOtp.value;
+
+      return Center(
+        child: canResend
+            ? TextButton(
+                onPressed: _resendPhoneOtp,
+                child: const Text('Resend OTP'),
+              )
+            : Text(
+                'Resend OTP in ${countdown}s',
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.black54,
+                ),
+              ),
+      );
     });
   }
 
@@ -1261,6 +1715,12 @@ class _ContactUpdateScreenState
     if (success != null && success.isNotEmpty) {
       if (_addressSuccessHandled) {
         _addressSuccessHandled = false;
+        contactController.successMessage.value = null;
+        return;
+      }
+
+      if (_phoneSuccessHandled) {
+        _phoneSuccessHandled = false;
         contactController.successMessage.value = null;
         return;
       }

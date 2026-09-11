@@ -172,3 +172,42 @@ class ContactUpdateResponse {
     );
   }
 }
+
+// ============================================================
+// PHONE OTP VERIFY RESPONSE
+//
+//   POST /api/v1/consumer/phone/otp/verify
+//
+// Success envelope:
+//   { "data": "8639144157",
+//     "message": "Phone number verified and update request created successfully",
+//     "success": true }
+//
+// data carries the verified (new) phone number as a string; it
+// stays dynamic here because the request-creation flow may vary
+// the payload shape. The token returned by the login-centric
+// /consumer/otp/verify endpoint is deliberately NOT declared in
+// this model so Contact Update never persists it.
+// ============================================================
+
+class PhoneOtpVerifyResponse {
+  final bool success;
+  final String message;
+  final dynamic data;
+
+  const PhoneOtpVerifyResponse({
+    required this.success,
+    required this.message,
+    required this.data,
+  });
+
+  factory PhoneOtpVerifyResponse.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return PhoneOtpVerifyResponse(
+      success: json['success'] == true,
+      message: json['message']?.toString() ?? '',
+      data: json['data'],
+    );
+  }
+}

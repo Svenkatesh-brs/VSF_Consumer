@@ -86,6 +86,14 @@ abstract class AppConstants {
   static const String updateAddress = '/api/v1/consumer/customer/address/';
 
   // ============================================================
+  // PHONE OTP API
+  // ============================================================
+
+  static const String phoneOtpRequest = '/api/v1/consumer/phone/otp/request';
+
+  static const String phoneOtpVerify = '/api/v1/consumer/phone/otp/verify';
+
+  // ============================================================
   // NOTIFICATION API
   // ============================================================
 
