@@ -180,28 +180,8 @@ int _calculateDaysOverdue(
 
   if (payments is List) {
     for (final payment in payments) {
-      if (payment is Map &&
-          payment['isLatestPayment'] == true) {
+      if (payment is Map) {
         total += _toInt(payment['lpcDueDays']);
-        break;
-      }
-    }
-  }
-
-  // When the installment is Overdue but the combined value is
-  // still 0 (e.g. daysOverdue was 0 and no latest payment
-  // carries lpcDueDays), compute overdue days from dueDate.
-  if (total == 0 &&
-      _toStr(json['status']).toLowerCase() == 'overdue') {
-    final dueMs = _toMillis(json['dueDate']);
-
-    if (dueMs != null) {
-      final now = DateTime.now();
-      final due = DateTime.fromMillisecondsSinceEpoch(dueMs);
-      final diff = now.difference(due).inDays;
-
-      if (diff > 0) {
-        total = diff;
       }
     }
   }
