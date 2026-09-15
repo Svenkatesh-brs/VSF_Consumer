@@ -245,57 +245,52 @@ class ContactUpdateStatusRequest {
 }
 
 // ============================================================
-// CONTACT UPDATE STATUS MAPPING  *** BACKEND CONFIRMATION REQUIRED ***
+// CONTACT UPDATE STATUS MAPPING  *** BACKEND CONFIRMED ***
 //
-// The meaning of the status integer returned by
-// POST /api/v1/compliant/query is NOT documented in the codebase.
+// Backend-confirmed meaning of the status integer returned by
+// POST /api/v1/compliant/query for the Contact Update workflows:
+//   1 = Pending   (request submitted, under review)
+//   2 = Approved  (request approved)
+//   3 = Rejected  (request rejected; comments may explain why)
 //
-// The ComplaintModel mapping (1 = Pending, 2 = Approved,
-// 3 = Rejected) MUST NOT be assumed to apply here: Contact Update
-// workflow status is a separate domain.
+// This mapping belongs EXCLUSIVELY to the Contact Update workflow
+// query and must NOT be applied to ComplaintModel or any other
+// status domain.
 //
-// Until the backend developer confirms the exact mapping:
-//   - isBackendConfirmed stays false
-//   - pending / approved / rejected stay null
-//   - all form-locking helpers resolve to "unlocked"
-//   - the status card shows the raw integer (no invented label)
-//
-// To enable the workflow locking: fill the three status constants
-// below with the backend-confirmed values and set
-// isBackendConfirmed = true. No other code change is required;
-// the UI and provider read this mapping exclusively.
+// Derived UI behaviour:
+//   - Pending  -> editable form hidden; request card shows Pending
+//   - Approved -> editable form available again (green status)
+//   - Rejected -> editable form available again (red status)
 // ============================================================
 
 class ContactUpdateStatusMapping {
   /// Whether the backend has confirmed the workflow status meaning.
-  static const bool isBackendConfirmed = false;
+  static const bool isBackendConfirmed = true;
 
-  /// Backend-confirmed "pending" status value; null until confirmed.
-  static const int? pending = null;
+  /// Backend-confirmed "pending" status value.
+  static const int pending = 1;
 
-  /// Backend-confirmed "approved" status value; null until confirmed.
-  static const int? approved = null;
+  /// Backend-confirmed "approved" status value.
+  static const int approved = 2;
 
-  /// Backend-confirmed "rejected" status value; null until confirmed.
-  static const int? rejected = null;
+  /// Backend-confirmed "rejected" status value.
+  static const int rejected = 3;
 
   /// Human label for a workflow status value.
   ///
-  /// Uses the backend-confirmed mapping when available; otherwise
-  /// falls back to the raw integer rather than inventing a label.
+  /// Uses the backend-confirmed mapping; unknown values fall back
+  /// to the raw integer rather than inventing a label.
   static String label(int status) {
-    if (isBackendConfirmed) {
-      if (pending != null && status == pending) {
-        return 'Pending';
-      }
+    if (status == pending) {
+      return 'Pending';
+    }
 
-      if (approved != null && status == approved) {
-        return 'Approved';
-      }
+    if (status == approved) {
+      return 'Approved';
+    }
 
-      if (rejected != null && status == rejected) {
-        return 'Rejected';
-      }
+    if (status == rejected) {
+      return 'Rejected';
     }
 
     return '$status';
@@ -368,7 +363,9 @@ class PhoneUpdateStatusResponse {
 //
 // oldAddress / newAddress are kept as raw maps: their schema is
 // backend-owned and intentionally NOT forced into LoanAddress.
-// The UI only reads known display fields via newAddressSummary.
+// The UI compares newAddress against the authoritative saved
+// LoanAddress via changedFields() so only genuinely changed
+// fields are displayed.
 // ============================================================
 
 class AddressUpdateStatusModel {
@@ -398,31 +395,89 @@ class AddressUpdateStatusModel {
     );
   }
 
-  /// Concise, safe summary of the requested address for the status
-  /// card. Unknown or null keys are simply skipped.
-  String get newAddressSummary {
-    final address = newAddress;
+  /// Fields that differ between the current saved address and the
+  /// address requested in this workflow.
+  ///
+  /// Compares the authoritative [LoanAddress] (customer/loan data
+  /// is always the source of truth) against the backend `newAddress`
+  /// map. Only genuinely changed fields are returned, in the same
+  /// order shown by the saved-address card. Null/empty values are
+  /// treated as empty so requests that omit unchanged fields never
+  /// produce duplicate or irrelevant entries. The saved address is
+  /// never modified here.
+  List<AddressFieldChange> changedFields(LoanAddress current) {
+    final requested = newAddress ?? const <String, dynamic>{};
 
-    if (address == null) {
-      return '-';
+    var changes = <AddressFieldChange>[];
+
+    String read(String key) {
+      final raw = requested[key];
+
+      if (raw == null) {
+        return '';
+      }
+
+      return raw.toString().trim();
     }
 
-    final parts = <String>[
-      address['houseNumber'],
-      address['buildingName'],
-      address['streetName'],
-      address['addressLine1'],
-      address['village'],
-      address['district'],
-      address['city'],
-      address['state'],
-      address['pincode'],
-    ].whereType<String>().map((value) => value.trim()).where(
-          (value) => value.isNotEmpty,
-        ).toList();
+    void compare({
+      required String label,
+      required String currentValue,
+      required String key,
+    }) {
+      final requestValue = read(key);
 
-    return parts.isEmpty ? '-' : parts.join(', ');
+      if (requestValue == currentValue.trim()) {
+        return;
+      }
+
+      changes = [
+        ...changes,
+        AddressFieldChange(
+          label: label,
+          oldValue: currentValue.trim(),
+          newValue: requestValue,
+        ),
+      ];
+    }
+
+    compare(label: 'House Number', currentValue: current.houseNumber, key: 'houseNumber');
+    compare(label: 'Floor Number', currentValue: current.floorNumber, key: 'floorNumber');
+    compare(label: 'Building Name', currentValue: current.buildingName, key: 'buildingName');
+    compare(label: 'Apartment Name', currentValue: current.apartmentName, key: 'apartmentName');
+    compare(label: 'Street Name', currentValue: current.streetName, key: 'streetName');
+    compare(label: 'Address Line 1', currentValue: current.addressLine1, key: 'addressLine1');
+    compare(label: 'Address Line 2', currentValue: current.addressLine2, key: 'addressLine2');
+    compare(label: 'Landmark', currentValue: current.landmark, key: 'landmark');
+    compare(label: 'Village', currentValue: current.village, key: 'village');
+    compare(label: 'District', currentValue: current.district, key: 'district');
+    compare(label: 'City', currentValue: current.city, key: 'city');
+    compare(label: 'State', currentValue: current.state, key: 'state');
+    compare(label: 'Country', currentValue: current.country, key: 'country');
+    compare(label: 'Pincode', currentValue: current.pincode, key: 'pincode');
+    compare(label: 'Address Type', currentValue: current.addressType, key: 'addressType');
+
+    return changes;
   }
+}
+
+// ============================================================
+// ADDRESS FIELD CHANGE
+//
+// Read-only representation of a single changed address field for
+// the Address Update request card ("Changed Fields" section).
+// ============================================================
+
+class AddressFieldChange {
+  final String label;
+  final String oldValue;
+  final String newValue;
+
+  const AddressFieldChange({
+    required this.label,
+    required this.oldValue,
+    required this.newValue,
+  });
 }
 
 class AddressUpdateStatusResponse {

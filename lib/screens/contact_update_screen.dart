@@ -13,6 +13,24 @@ import '../widgets/common/screen_content_exit.dart';
 import '../widgets/common/screen_transition.dart';
 
 // ============================================================
+// STATUS COLOURS
+//
+// Green / amber / red for the workflow status badge and the
+// animated progress bar. Declared at file level so the screen
+// and the _ContactUpdateProgressBar widget share the same
+// values. Green and red reuse existing AppColors; amber is a
+// standard Material hue not yet in AppColors.
+// ============================================================
+
+final Color _statusApproved = AppColors.buttonStart;
+
+final Color _statusPending = Colors.amber.shade800;
+
+final Color _statusRejected = AppColors.error;
+
+const Color _statusTrack = Color(0x12000000);
+
+// ============================================================
 // CONTACT UPDATE SCREEN
 //
 // Two tabs:
@@ -129,6 +147,38 @@ class _ContactUpdateScreenState
     });
 
     _tabController.addListener(_onTabChanged);
+
+    // ----------------------------------------------------------
+    // ADDRESS FORM AUTO-REFILL
+    //
+    // When a Pending address request is later approved or
+    // rejected, the editable form becomes visible again. Refresh
+    // its fields from the saved address so the user starts from
+    // the authoritative values (not the cleared post-submit
+    // state). This complements initState's _prefillAddressFields.
+    // ----------------------------------------------------------
+
+    ever(
+      contactController.addressUpdateStatus,
+      (status) {
+        if (status == null) {
+          return;
+        }
+
+        if (status.status ==
+            ContactUpdateStatusMapping.approved ||
+            status.status ==
+                ContactUpdateStatusMapping.rejected) {
+          WidgetsBinding.instance.addPostFrameCallback(
+            (_) {
+              if (mounted) {
+                _refillAddressFields();
+              }
+            },
+          );
+        }
+      },
+    );
   }
 
   void _onTabChanged() {
@@ -218,6 +268,41 @@ class _ContactUpdateScreenState
     _countryController.clear();
     _pincodeController.clear();
     _addressTypeController.clear();
+  }
+
+  // ------------------------------------------------------------
+  // REFILL ADDRESS FIELDS
+  //
+  // Repopulates the editable address form from the saved
+  // (authoritative) address. Called when the form becomes
+  // visible again after a Pending request is approved/rejected,
+  // so the user always starts editing from the current saved
+  // values (never from the stale submitted/cleared state).
+  // ------------------------------------------------------------
+
+  void _refillAddressFields() {
+    final initial =
+        contactController.initialAddressRequest;
+
+    if (initial == null) {
+      return;
+    }
+
+    _houseNumberController.text = initial.houseNumber;
+    _floorNumberController.text = initial.floorNumber;
+    _buildingNameController.text = initial.buildingName;
+    _apartmentNameController.text = initial.apartmentName;
+    _streetNameController.text = initial.streetName;
+    _addressLine1Controller.text = initial.addressLine1;
+    _addressLine2Controller.text = initial.addressLine2;
+    _landmarkController.text = initial.landmark;
+    _villageController.text = initial.village;
+    _districtController.text = initial.district;
+    _cityController.text = initial.city;
+    _stateController.text = initial.state;
+    _countryController.text = initial.country;
+    _pincodeController.text = initial.pincode;
+    _addressTypeController.text = initial.addressType;
   }
 
   @override
@@ -1029,11 +1114,11 @@ class _ContactUpdateScreenState
       final hasPhoneStatus =
           contactController.phoneUpdateStatus.value != null;
 
-      final isPhoneLocked =
+      final isPhonePending =
           contactController.isPhoneUpdateLocked;
 
       final phoneForm = step == PhoneUpdateStep.enterNewPhone
-          ? _buildNewPhoneForm(isSaving, isPhoneLocked)
+          ? _buildNewPhoneForm(isSaving)
           : step == PhoneUpdateStep.verifyCurrentPhone
               ? _buildCurrentPhoneOtpCard(isSaving)
               : _buildNewPhoneOtpCard(isSaving);
@@ -1071,11 +1156,17 @@ class _ContactUpdateScreenState
                 _buildPhoneStatusCard(),
               ],
 
-              const SizedBox(height: 16),
-
-              isPhoneLocked
-                  ? _buildLockedForm(phoneForm)
-                  : phoneForm,
+              if (isPhonePending) ...[
+                const SizedBox(height: 16),
+                _buildPendingNotice(
+                  message:
+                      'Your mobile number update request is currently under review. '
+                      'You can submit another update once it is approved or rejected.',
+                ),
+              ] else ...[
+                const SizedBox(height: 16),
+                phoneForm,
+              ],
             ],
           ),
         ),
@@ -1087,7 +1178,7 @@ class _ContactUpdateScreenState
   // PHONE TAB — STEP 1: NEW NUMBER FORM
   // ============================================================
 
-  Widget _buildNewPhoneForm(bool isSaving, bool isLocked) {
+  Widget _buildNewPhoneForm(bool isSaving) {
     return AppFormCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1108,7 +1199,6 @@ class _ContactUpdateScreenState
             prefixIcon: const Icon(
               Icons.phone_outlined,
             ),
-            enabled: !isLocked,
           ),
 
           const SizedBox(height: 24),
@@ -1116,7 +1206,7 @@ class _ContactUpdateScreenState
           AppSubmitButton(
             label: 'Update Phone',
             isLoading: isSaving,
-            onTap: isLocked ? null : _submitPhone,
+            onTap: _submitPhone,
           ),
         ],
       ),
@@ -1272,6 +1362,12 @@ class _ContactUpdateScreenState
       final isSaving =
           contactController.isLoading.value;
 
+      final hasAddressStatus =
+          contactController.addressUpdateStatus.value != null;
+
+      final isAddressPending =
+          contactController.isAddressUpdateLocked;
+
       return RefreshIndicator(
         onRefresh: loanController.retry,
         color: AppColors.lightBlue,
@@ -1292,24 +1388,27 @@ class _ContactUpdateScreenState
                 children: [
                   _buildSavedAddressCard(),
 
-                  if (contactController.addressUpdateStatus.value !=
-                      null) ...[
+                  if (hasAddressStatus) ...[
                     const SizedBox(height: 16),
                     _buildAddressStatusCard(),
                   ],
 
-                  const SizedBox(height: 16),
-
-                  contactController.isAddressUpdateLocked
-                      ? _buildLockedForm(
-                          _buildAddressForm(isSaving),
-                        )
-                      : _buildAddressForm(isSaving),
+                  if (isAddressPending) ...[
+                    const SizedBox(height: 16),
+                    _buildPendingNotice(
+                      message:
+                          'Your address update request is currently under review. '
+                          'You can submit another update once it is approved or rejected.',
+                    ),
+                  ] else ...[
+                    const SizedBox(height: 16),
+                    _buildAddressForm(isSaving),
+                  ],
                 ],
               )
             : _buildNoAddressCard(),
-      ),
-    );
+        ),
+      );
     });
   }
 
@@ -1603,11 +1702,11 @@ class _ContactUpdateScreenState
   // ============================================================
   // PHONE WORKFLOW STATUS CARD
   //
-  // Read-only view over the latest phone update request fetched
-  // from POST /api/v1/compliant/query (issueType 7). It shows the
-  // requested number, the backend-confirmed status label and the
-  // backend comments. It never edits nor replaces the current
-  // phone.
+  // Modern SMS-style notification card for the latest phone
+  // update request fetched from POST /api/v1/compliant/query
+  // (issueType 7). Shows requested number, status badge, backend
+  // comments and an animated progress bar. Never edits nor
+  // replaces the current phone.
   // ============================================================
 
   Widget _buildPhoneStatusCard() {
@@ -1617,78 +1716,510 @@ class _ContactUpdateScreenState
       return const SizedBox.shrink();
     }
 
-    return _buildCurrentContactCard(
-      icon: Icons.pending_actions_outlined,
-      title: 'Phone Update Request',
-      rows: [
-        _buildInfoRow(
-          label: 'New Number',
+    return _buildWorkflowStatusCard(
+      icon: Icons.sms_rounded,
+      title: 'Mobile Number Update',
+      subtitle: 'Update Request',
+      status: status.status,
+      detailRows: [
+        _buildRequestRow(
+          label: 'Requested Number',
           value: status.newPhone,
         ),
-        _buildInfoRow(
-          label: 'Status',
-          value: ContactUpdateStatusMapping.label(status.status),
-        ),
-        _buildInfoRow(
-          label: 'Comments',
-          value: status.comments,
-        ),
       ],
+      comments: status.comments,
     );
   }
 
   // ============================================================
   // ADDRESS WORKFLOW STATUS CARD
   //
-  // Read-only view over the latest address update request fetched
-  // from POST /api/v1/compliant/query (issueType 6). It shows a
-  // safe summary of the requested address, the backend-confirmed
-  // status label and the backend comments. It never edits nor
-  // replaces the current saved address.
+  // Modern SMS-style notification card for the latest address
+  // update request fetched from POST /api/v1/compliant/query
+  // (issueType 6). Compares current saved address against
+  // newAddress to display only genuinely changed fields.
+  // Never edits nor replaces the saved address.
   // ============================================================
 
   Widget _buildAddressStatusCard() {
-    final status = contactController.addressUpdateStatus.value;
+    final status =
+        contactController.addressUpdateStatus.value;
 
     if (status == null) {
       return const SizedBox.shrink();
     }
 
-    return _buildCurrentContactCard(
-      icon: Icons.home_work_outlined,
-      title: 'Address Update Request',
-      rows: [
-        _buildInfoRow(
-          label: 'New Address',
-          value: status.newAddressSummary,
-        ),
-        _buildInfoRow(
-          label: 'Status',
-          value: ContactUpdateStatusMapping.label(status.status),
-        ),
-        _buildInfoRow(
-          label: 'Comments',
-          value: status.comments,
-        ),
-      ],
+    final current = contactController.currentAddress;
+
+    final changes = current == null
+        ? const <AddressFieldChange>[]
+        : status.changedFields(current);
+
+    final detailRows = <Widget>[
+      if (changes.isEmpty)
+        _buildRequestRow(
+          label: 'Changed Fields',
+          value: 'No changes detected',
+          valueColor: Colors.black38,
+        )
+      else
+        _buildChangedFieldsBlock(changes),
+    ];
+
+    return _buildWorkflowStatusCard(
+      icon: Icons.sms_rounded,
+      title: 'Address Update',
+      subtitle: 'Update Request',
+      status: status.status,
+      detailRows: detailRows,
+      comments: status.comments,
     );
   }
 
   // ============================================================
-  // LOCKED FORM OVERLAY
+  // SHARED WORKFLOW STATUS CARD
   //
-  // Visually disables a locked form while preserving its layout.
-  // AbsorbPointer blocks all interaction; combined with the
-  // per-field `enabled` / null `onTap` passed down from the build
-  // methods it cannot be bypassed through the UI.
+  // Common layout for both phone and address request cards.
+  // Top-level animated progress bar + SMS icon header + detail
+  // box + status badge + optional comments.
   // ============================================================
 
-  Widget _buildLockedForm(Widget form) {
-    return Opacity(
-      opacity: 0.55,
-      child: AbsorbPointer(
-        absorbing: true,
-        child: form,
+  Widget _buildWorkflowStatusCard({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required int status,
+    required List<Widget> detailRows,
+    required String comments,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.white.withValues(alpha: 0.92),
+            Colors.white.withValues(alpha: 0.62),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.70),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _ContactUpdateProgressBar(status: status),
+
+          const SizedBox(height: 16),
+
+          Row(
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: AppColors.lightBlue.withValues(
+                    alpha: 0.10,
+                  ),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  icon,
+                  size: 19,
+                  color: AppColors.lightBlue,
+                ),
+              ),
+
+              const SizedBox(width: 10),
+
+              Expanded(
+                child: Column(
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.lightBlue,
+                      ),
+                    ),
+
+                    const SizedBox(height: 2),
+
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        color: Colors.black.withValues(
+                          alpha: 0.45,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 14),
+
+          _buildWorkflowDetailBox(detailRows),
+
+          const SizedBox(height: 14),
+
+          Row(
+            children: [
+              Text(
+                'Status',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black.withValues(
+                    alpha: 0.45,
+                  ),
+                ),
+              ),
+
+              const Spacer(),
+
+              _buildStatusBadge(status),
+            ],
+          ),
+
+          if (comments.trim().isNotEmpty) ...[
+            const SizedBox(height: 14),
+
+            Text(
+              'Comments',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: Colors.black.withValues(
+                  alpha: 0.45,
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 8),
+
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.lightBlue.withValues(
+                  alpha: 0.06,
+                ),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                comments.trim(),
+                style: TextStyle(
+                  fontSize: 12.5,
+                  height: 1.5,
+                  color: Colors.black.withValues(
+                    alpha: 0.65,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  // ============================================================
+  // WORKFLOW DETAIL BOX
+  //
+  // Soft inner container inside the status card that holds the
+  // request-specific rows (requested number / changed fields).
+  // ============================================================
+
+  Widget _buildWorkflowDetailBox(List<Widget> children) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.lightBlue.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: AppColors.lightBlue.withValues(
+            alpha: 0.08,
+          ),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: children,
+      ),
+    );
+  }
+
+  // ============================================================
+  // STATUS BADGE
+  //
+  // Coloured pill for the current workflow status:
+  //   Pending  -> amber
+  //   Approved -> green (AppColors.buttonStart)
+  //   Rejected -> red   (AppColors.error)
+  // ============================================================
+
+  Widget _buildStatusBadge(int status) {
+    final label =
+        ContactUpdateStatusMapping.label(status);
+
+    final isPending =
+        status == ContactUpdateStatusMapping.pending;
+    final isRejected =
+        status == ContactUpdateStatusMapping.rejected;
+
+    final Color color;
+    final IconData iconData;
+
+    if (isRejected) {
+      color = _statusRejected;
+      iconData = Icons.cancel_rounded;
+    } else if (isPending) {
+      color = _statusPending;
+      iconData = Icons.hourglass_top_rounded;
+    } else {
+      color = _statusApproved;
+      iconData = Icons.check_circle_rounded;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 12,
+        vertical: 6,
+      ),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: color.withValues(alpha: 0.25),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(iconData, size: 14, color: color),
+
+          const SizedBox(width: 6),
+
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ============================================================
+  // REQUEST ROW (label / value pair for the detail box)
+  // ============================================================
+
+  Widget _buildRequestRow({
+    required String label,
+    required String value,
+    Color? valueColor,
+  }) {
+    final displayValue =
+        value.trim().isEmpty ? '-' : value.trim();
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 4,
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: Colors.black54,
+              ),
+            ),
+          ),
+
+          const SizedBox(width: 8),
+
+          Expanded(
+            flex: 6,
+            child: Text(
+              displayValue,
+              textAlign: TextAlign.right,
+              style: TextStyle(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w700,
+                color:
+                    valueColor ?? AppColors.lightBlue,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ============================================================
+  // CHANGED FIELDS BLOCK
+  //
+  // Bulleted list of address fields that differ between the
+  // current saved address and the requested new address.
+  // Each row: "• Label : old → new"
+  // ============================================================
+
+  Widget _buildChangedFieldsBlock(
+    List<AddressFieldChange> changes,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(bottom: 8),
+            child: Text(
+              'Changed Fields',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: Colors.black54,
+              ),
+            ),
+          ),
+
+          ...changes.map((change) {
+            final oldText =
+                change.oldValue.trim().isEmpty
+                    ? '—'
+                    : change.oldValue.trim();
+
+            final newText =
+                change.newValue.trim().isEmpty
+                    ? '—'
+                    : change.newValue.trim();
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Row(
+                crossAxisAlignment:
+                    CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '•',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.black45,
+                    ),
+                  ),
+
+                  const SizedBox(width: 8),
+
+                  Expanded(
+                    child: RichText(
+                      text: TextSpan(
+                        style: const TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.lightBlue,
+                          height: 1.4,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: '${change.label}: ',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          TextSpan(
+                            text: '$oldText → $newText',
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  // ============================================================
+  // PENDING NOTICE
+  //
+  // Short informational card shown in place of the editable form
+  // when the workflow status is Pending. The status card above
+  // already communicates the full state; this card simply
+  // explains why the form is absent.
+  // ============================================================
+
+  Widget _buildPendingNotice({required String message}) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.68),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: _statusPending.withValues(alpha: 0.20),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: _statusPending.withValues(alpha: 0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            Icons.info_outline_rounded,
+            size: 18,
+            color: _statusPending,
+          ),
+
+          const SizedBox(width: 10),
+
+          Expanded(
+            child: Text(
+              message,
+              style: TextStyle(
+                fontSize: 12.5,
+                height: 1.55,
+                color: Colors.black.withValues(
+                  alpha: 0.60,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1884,5 +2415,362 @@ class _ContactUpdateScreenState
         },
       );
     }
+  }
+}
+
+// ============================================================
+// WORKFLOW PROGRESS BAR
+//
+// Three-step horizontal indicator shown at the top of each
+// request card:
+//
+//   Step 1: Request Submitted
+//   Step 2: Under Review
+//   Step 3: Approved / Rejected
+//
+// GREEN progress line + animated ticks per completed stage.
+//   Pending  → step 1 done, step 2 active (amber), step 3 upcoming
+//   Approved → all steps done, full green line
+//   Rejected → step 1 done, step 2 reviewed, step 3 red
+//              (no green approval tick for rejected stage)
+//
+// Uses built-in Flutter animation APIs only; no new dependency.
+// The controller replays when the status changes (didUpdateWidget)
+// and also on first mount.
+// ============================================================
+
+class _ContactUpdateProgressBar extends StatefulWidget {
+  final int status;
+
+  const _ContactUpdateProgressBar({required this.status});
+
+  @override
+  State<_ContactUpdateProgressBar> createState() =>
+      _ContactUpdateProgressBarState();
+}
+
+class _ContactUpdateProgressBarState
+    extends State<_ContactUpdateProgressBar>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  late final Animation<double> _node0Anim;
+  late final Animation<double> _line0Anim;
+  late final Animation<double> _node1Anim;
+  late final Animation<double> _line1Anim;
+  late final Animation<double> _node2Anim;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    );
+
+    _node0Anim = _stagger(0.00, 0.28);
+    _line0Anim = _stagger(0.18, 0.46, Curves.easeInOut);
+    _node1Anim = _stagger(0.40, 0.66);
+    _line1Anim = _stagger(0.60, 0.86, Curves.easeInOut);
+    _node2Anim = _stagger(0.78, 1.00);
+
+    _controller.forward();
+  }
+
+  Animation<double> _stagger(
+    double start,
+    double end, [
+    Curve curve = Curves.easeOutBack,
+  ]) {
+    return CurvedAnimation(
+      parent: _controller,
+      curve: Interval(start, end, curve: curve),
+    );
+  }
+
+  @override
+  void didUpdateWidget(
+    covariant _ContactUpdateProgressBar oldWidget,
+  ) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.status != widget.status) {
+      _controller
+        ..reset()
+        ..forward();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  // ----------------------------------------------------------
+  // STATUS DERIVED STATE
+  // ----------------------------------------------------------
+
+  bool get _isPending =>
+      widget.status == ContactUpdateStatusMapping.pending;
+
+  bool get _isRejected =>
+      widget.status == ContactUpdateStatusMapping.rejected;
+
+  bool get _isApproved =>
+      widget.status == ContactUpdateStatusMapping.approved;
+
+  Color get _green => _statusApproved;
+
+  Color get _amber => _statusPending;
+
+  Color get _red => _statusRejected;
+
+  // ----------------------------------------------------------
+  // BUILD
+  // ----------------------------------------------------------
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, _) {
+        final line1Fill =
+            _isPending ? 0.0 : _line1Anim.value;
+
+        final line1Color =
+            _isRejected ? _red : _green;
+
+        return Column(
+          children: [
+            // ---- NODES + CONNECTING LINES ----
+
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final stepWidth =
+                    constraints.maxWidth / 3.0;
+
+                return SizedBox(
+                  height: 64,
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      // line 0 (always green)
+                      Positioned(
+                        left:
+                            stepWidth / 2.0,
+                        top: 13,
+                        width: stepWidth,
+                        height: 4,
+                        child: _ProgressLine(
+                          fill: _line0Anim.value,
+                          color: _green,
+                        ),
+                      ),
+
+                      // line 1
+                      Positioned(
+                        left:
+                            stepWidth * 1.5,
+                        top: 13,
+                        width: stepWidth,
+                        height: 4,
+                        child: _ProgressLine(
+                          fill: line1Fill,
+                          color: line1Color,
+                        ),
+                      ),
+
+                      // step 0 — Request Submitted
+                      Positioned(
+                        left: 0,
+                        top: 0,
+                        width: stepWidth,
+                        child: _buildStep(
+                          value: _node0Anim.value,
+                          filled: true,
+                          color: _green,
+                          icon: Icons.check_rounded,
+                          label: 'Request Submitted',
+                          labelColor: _green,
+                        ),
+                      ),
+
+                      // step 1 — Under Review
+                      Positioned(
+                        left: stepWidth,
+                        top: 0,
+                        width: stepWidth,
+                        child: _buildStep(
+                          value: _node1Anim.value,
+                          filled: true,
+                          color: _isPending
+                              ? _amber
+                              : _green,
+                          icon: _isPending
+                              ? Icons.hourglass_top_rounded
+                              : Icons.check_rounded,
+                          label: 'Under Review',
+                          labelColor: _isPending
+                              ? _amber
+                              : _green,
+                        ),
+                      ),
+
+                      // step 2 — Approved / Rejected / Upcoming
+                      Positioned(
+                        left: stepWidth * 2,
+                        top: 0,
+                        width: stepWidth,
+                        child: _buildStep(
+                          value: _node2Anim.value,
+                          filled: !_isPending,
+                          color: _isRejected
+                              ? _red
+                              : _isApproved
+                                  ? _green
+                                  : _statusTrack,
+                          icon: _isRejected
+                              ? Icons.close_rounded
+                              : _isApproved
+                                  ? Icons.check_rounded
+                                  : Icons.circle,
+                          label: _isRejected
+                              ? 'Rejected'
+                              : 'Approved',
+                          labelColor: _isRejected
+                              ? _red
+                              : _isApproved
+                                  ? _green
+                                  : Colors.black38,
+                          smallDot: _isPending,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // ----------------------------------------------------------
+  // SINGLE STEP (node + label)
+  // ----------------------------------------------------------
+
+  Widget _buildStep({
+    required double value,
+    required bool filled,
+    required Color color,
+    required IconData icon,
+    required String label,
+    required Color labelColor,
+    bool smallDot = false,
+  }) {
+    final t = value.clamp(0.0, 1.0).toDouble();
+
+    final nodeColor = filled
+        ? color
+        : Colors.black.withValues(alpha: 0.12);
+
+    final iconColor =
+        filled ? Colors.white : Colors.black38;
+
+    final iconSize = smallDot ? 6.0 : 15.0;
+
+    final nodeIcon =
+        smallDot ? Icons.circle : icon;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Opacity(
+          opacity: t,
+          child: Transform.scale(
+            scale: 0.35 + 0.65 * t,
+            child: Container(
+              width: 30,
+              height: 30,
+              decoration: BoxDecoration(
+                color: nodeColor,
+                shape: BoxShape.circle,
+                border: filled
+                    ? null
+                    : Border.all(
+                        color: color.withValues(
+                          alpha: 0.30,
+                        ),
+                      ),
+              ),
+              child: Icon(
+                nodeIcon,
+                size: iconSize,
+                color: iconColor,
+              ),
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 6),
+
+        Opacity(
+          opacity: t,
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 10.5,
+              fontWeight: FontWeight.w600,
+              color: labelColor,
+              height: 1.3,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ============================================================
+// PROGRESS LINE (connecting track between nodes)
+//
+// Filled from left to right. The track colour is always
+// visible as a faint background.
+// ============================================================
+
+class _ProgressLine extends StatelessWidget {
+  final double fill;
+  final Color color;
+
+  const _ProgressLine({
+    required this.fill,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: _statusTrack,
+        borderRadius: BorderRadius.circular(2),
+      ),
+      alignment: Alignment.centerLeft,
+      child: FractionallySizedBox(
+        widthFactor: fill.clamp(0.0, 1.0).toDouble(),
+        heightFactor: 1,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+      ),
+    );
   }
 }

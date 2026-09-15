@@ -849,14 +849,11 @@ class ContactUpdateProvider extends GetxController {
         ContactUpdateStatusMapping.rejected,
       );
 
-  /// Phone form is locked while a pending or approved workflow is
-  /// the latest workflow state. Rejected unlocks it for a new
-  /// request. No status behaviour is enabled until the backend
-  /// confirms the mapping.
-  bool get isPhoneUpdateLocked =>
-      ContactUpdateStatusMapping.isBackendConfirmed &&
-      phoneUpdateStatus.value != null &&
-      !isPhoneUpdateRejected;
+  /// The phone form is hidden while the latest workflow is pending
+  /// (status 1). Approved (2) and Rejected (3) do NOT lock the
+  /// form: the user may submit another update again. No status
+  /// behaviour is enabled until the backend confirms the mapping.
+  bool get isPhoneUpdateLocked => isPhoneUpdatePending;
 
   bool get isAddressUpdatePending => _matchesStatus(
         addressUpdateStatus.value?.status,
@@ -873,13 +870,10 @@ class ContactUpdateProvider extends GetxController {
         ContactUpdateStatusMapping.rejected,
       );
 
-  /// Address form is locked while a pending or approved workflow is
-  /// the latest workflow state. Rejected unlocks it for a new
-  /// request.
-  bool get isAddressUpdateLocked =>
-      ContactUpdateStatusMapping.isBackendConfirmed &&
-      addressUpdateStatus.value != null &&
-      !isAddressUpdateRejected;
+  /// The address form is hidden while the latest workflow is
+  /// pending (status 1). Approved (2) and Rejected (3) do NOT lock
+  /// the form: the user may submit another update again.
+  bool get isAddressUpdateLocked => isAddressUpdatePending;
 
   // ============================================================
   // API ERROR MESSAGE
