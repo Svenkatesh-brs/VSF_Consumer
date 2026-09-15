@@ -193,6 +193,21 @@ class _ContactUpdateScreenState
     }
   }
 
+  // ------------------------------------------------------------
+  // ADDRESS TAB — PULL TO REFRESH
+  //
+  // Refreshes BOTH the authoritative saved address (loan
+  // dashboard) and the address update workflow status card so a
+  // pull keeps every part of the tab in sync. The status is force
+  // refetched so the provider's once-per-visit guard does not
+  // swallow the refresh.
+  // ------------------------------------------------------------
+
+  Future<void> _refreshAddressTab() async {
+    await loanController.retry();
+    await contactController.fetchAddressUpdateStatus(force: true);
+  }
+
   void _prefillAddressFields() {
     final initial =
         contactController.initialAddressRequest;
@@ -1123,6 +1138,10 @@ class _ContactUpdateScreenState
       final isPhonePending =
           contactController.isPhoneUpdateLocked;
 
+      final isPhoneFlowActive =
+          hasPhoneStatus ||
+          step != PhoneUpdateStep.enterNewPhone;
+
       final phoneForm = step == PhoneUpdateStep.enterNewPhone
           ? _buildNewPhoneForm(isSaving)
           : step == PhoneUpdateStep.verifyCurrentPhone
@@ -1157,7 +1176,7 @@ class _ContactUpdateScreenState
                 ],
               ),
 
-              if (hasPhoneStatus) ...[
+              if (isPhoneFlowActive) ...[
                 const SizedBox(height: 16),
                 _buildPhoneStatusCard(),
               ],
@@ -1375,7 +1394,7 @@ class _ContactUpdateScreenState
           contactController.isAddressUpdateLocked;
 
       return RefreshIndicator(
-        onRefresh: loanController.retry,
+        onRefresh: _refreshAddressTab,
         color: AppColors.lightBlue,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(
@@ -1830,24 +1849,53 @@ class _ContactUpdateScreenState
   // ============================================================
 
   Widget _buildPhoneStatusCard() {
-    final status = contactController.phoneUpdateStatus.value;
+    final step =
+        contactController.phoneUpdateStep.value;
+    final status =
+        contactController.phoneUpdateStatus.value;
 
-    if (status == null) {
+    final otpActive =
+        step != PhoneUpdateStep.enterNewPhone;
+
+    if (!otpActive && status == null) {
       return const SizedBox.shrink();
     }
+
+    final detailRows = <Widget>[
+      if (status != null)
+        _buildRequestRow(
+          label: 'Requested Number',
+          value: status.newPhone,
+        )
+      else
+        Padding(
+          padding: const EdgeInsets.only(bottom: 2),
+          child: Text(
+            'Complete the OTP verification below '
+            'to submit your update request.',
+            style: TextStyle(
+              fontSize: 12.5,
+              height: 1.5,
+              color: Colors.black.withValues(
+                alpha: 0.6,
+              ),
+            ),
+          ),
+        ),
+    ];
 
     return _buildWorkflowStatusCard(
       icon: Icons.sms_rounded,
       title: 'Mobile Number Update',
       subtitle: 'Update Request',
-      status: status.status,
-      detailRows: [
-        _buildRequestRow(
-          label: 'Requested Number',
-          value: status.newPhone,
-        ),
-      ],
-      comments: status.comments,
+      progress: _PhoneUpdateProgressBar(
+        step: step,
+        status: status,
+      ),
+      detailRows: detailRows,
+      comments: status?.comments ?? '',
+      status: status?.status,
+      showStatusRow: status != null,
     );
   }
 
@@ -1890,9 +1938,12 @@ class _ContactUpdateScreenState
       icon: Icons.sms_rounded,
       title: 'Address Update',
       subtitle: 'Update Request',
-      status: status.status,
+      progress: _ContactUpdateProgressBar(
+        status: status.status,
+      ),
       detailRows: detailRows,
       comments: status.comments,
+      status: status.status,
     );
   }
 
@@ -1908,9 +1959,11 @@ class _ContactUpdateScreenState
     required IconData icon,
     required String title,
     required String subtitle,
-    required int status,
+    required Widget progress,
     required List<Widget> detailRows,
     required String comments,
+    int? status,
+    bool showStatusRow = true,
   }) {
     return Container(
       width: double.infinity,
@@ -1939,7 +1992,7 @@ class _ContactUpdateScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _ContactUpdateProgressBar(status: status),
+          progress,
 
           const SizedBox(height: 16),
 
@@ -1998,26 +2051,28 @@ class _ContactUpdateScreenState
 
           _buildWorkflowDetailBox(detailRows),
 
-          const SizedBox(height: 14),
+          if (showStatusRow && status != null) ...[
+            const SizedBox(height: 14),
 
-          Row(
-            children: [
-              Text(
-                'Status',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black.withValues(
-                    alpha: 0.45,
+            Row(
+              children: [
+                Text(
+                  'Status',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black.withValues(
+                      alpha: 0.45,
+                    ),
                   ),
                 ),
-              ),
 
-              const Spacer(),
+                const Spacer(),
 
-              _buildStatusBadge(status),
-            ],
-          ),
+                _buildStatusBadge(status),
+              ],
+            ),
+          ],
 
           if (comments.trim().isNotEmpty) ...[
             const SizedBox(height: 14),
@@ -2849,6 +2904,416 @@ class _ContactUpdateProgressBarState
               fontWeight: FontWeight.w600,
               color: labelColor,
               height: 1.3,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ============================================================
+// PHONE UPDATE PROGRESS BAR (7 STAGES)
+//
+// 7-stage rendition of the phone update journey:
+//   1. OTP Sent to Current Number
+//   2. Current Number Verified
+//   3. OTP Sent to New Number
+//   4. New Number Verified
+//   5. Request Submitted
+//   6. Under Review
+//   7. Approved / Rejected
+//
+// Stages 1-4 are driven by the shared OTP workflow
+// (PhoneUpdateStep); stages 5-7 by the backend workflow status.
+// Rendered as two rows (OTP stages top, request stages bottom)
+// so all seven labels stay readable on phone widths. Reuses the
+// same node/line animation language as _ContactUpdateProgressBar.
+// ============================================================
+
+enum _PhoneStageState { upcoming, active, done, rejected }
+
+class _PhoneUpdateProgressBar extends StatefulWidget {
+  final PhoneUpdateStep step;
+
+  final PhoneUpdateStatusModel? status;
+
+  const _PhoneUpdateProgressBar({
+    required this.step,
+    this.status,
+  });
+
+  @override
+  State<_PhoneUpdateProgressBar> createState() =>
+      _PhoneUpdateProgressBarState();
+}
+
+class _PhoneUpdateProgressBarState
+    extends State<_PhoneUpdateProgressBar>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  late final List<Animation<double>> _nodeAnims;
+
+  late final List<Animation<double>> _lineAnims;
+
+  static const List<String> _otpLabels = [
+    'OTP Sent to Current Number',
+    'Verify OTP',
+    'OTP Sent to New Number',
+    'Verify OTP',
+  ];
+
+  static const List<String> _requestLabels = [
+    'Request Submitted',
+    'Under Review',
+    'Approved / Rejected',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    );
+
+    _nodeAnims = List.generate(
+      7,
+      (i) => _stagger(i * 0.13, (i * 0.13) + 0.12),
+    );
+
+    _lineAnims = List.generate(
+      5,
+      (i) => _stagger(
+        (i * 0.13) + 0.06,
+        (i * 0.13) + 0.20,
+        Curves.easeInOut,
+      ),
+    );
+
+    _controller.forward();
+  }
+
+  Animation<double> _stagger(
+    double start,
+    double end, [
+    Curve curve = Curves.easeOutBack,
+  ]) {
+    return CurvedAnimation(
+      parent: _controller,
+      curve: Interval(start, end, curve: curve),
+    );
+  }
+
+  @override
+  void didUpdateWidget(
+    covariant _PhoneUpdateProgressBar oldWidget,
+  ) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.step != widget.step ||
+        oldWidget.status?.status !=
+            widget.status?.status) {
+      _controller
+        ..reset()
+        ..forward();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  // ----------------------------------------------------------
+  // STAGE STATE DERIVATION
+  // ----------------------------------------------------------
+
+  List<_PhoneStageState> get _otpStages {
+    switch (widget.step) {
+      case PhoneUpdateStep.verifyCurrentPhone:
+        return const [
+          _PhoneStageState.done,
+          _PhoneStageState.active,
+          _PhoneStageState.upcoming,
+          _PhoneStageState.upcoming,
+        ];
+      case PhoneUpdateStep.verifyNewPhone:
+        return const [
+          _PhoneStageState.done,
+          _PhoneStageState.done,
+          _PhoneStageState.done,
+          _PhoneStageState.active,
+        ];
+      case PhoneUpdateStep.enterNewPhone:
+        // OTP flow finished (step reset to initial). If there is
+        // a workflow request all OTP stages completed; otherwise
+        // the card is hidden and these values are unused.
+        return const [
+          _PhoneStageState.done,
+          _PhoneStageState.done,
+          _PhoneStageState.done,
+          _PhoneStageState.done,
+        ];
+    }
+  }
+
+  List<_PhoneStageState> get _requestStages {
+    // While the OTP flow is still running, request stages 5-7 are
+    // deliberately kept "upcoming" so a stale backend approval
+    // from a previous request is never shown as current progress.
+    final otpActive =
+        widget.step != PhoneUpdateStep.enterNewPhone;
+
+    if (otpActive) {
+      return const [
+        _PhoneStageState.upcoming,
+        _PhoneStageState.upcoming,
+        _PhoneStageState.upcoming,
+      ];
+    }
+
+    final status = widget.status?.status;
+
+    if (status == null) {
+      return const [
+        _PhoneStageState.upcoming,
+        _PhoneStageState.upcoming,
+        _PhoneStageState.upcoming,
+      ];
+    }
+
+    switch (status) {
+      case ContactUpdateStatusMapping.pending:
+        return const [
+          _PhoneStageState.done,
+          _PhoneStageState.active,
+          _PhoneStageState.upcoming,
+        ];
+      case ContactUpdateStatusMapping.approved:
+        return const [
+          _PhoneStageState.done,
+          _PhoneStageState.done,
+          _PhoneStageState.done,
+        ];
+      case ContactUpdateStatusMapping.rejected:
+        return const [
+          _PhoneStageState.done,
+          _PhoneStageState.done,
+          _PhoneStageState.rejected,
+        ];
+      default:
+        return const [
+          _PhoneStageState.upcoming,
+          _PhoneStageState.upcoming,
+          _PhoneStageState.upcoming,
+        ];
+    }
+  }
+
+  // ----------------------------------------------------------
+  // CONNECTING LINE STATE
+  // ----------------------------------------------------------
+
+  double _lineFill(
+    List<_PhoneStageState> stages,
+    int toIndex,
+  ) {
+    if (stages[toIndex] == _PhoneStageState.upcoming) {
+      return 0.0;
+    }
+
+    return 1.0;
+  }
+
+  Color _lineColor(
+    List<_PhoneStageState> stages,
+    int toIndex,
+  ) {
+    if (stages[toIndex] == _PhoneStageState.rejected) {
+      return _statusRejected;
+    }
+
+    return _statusApproved;
+  }
+
+  // ----------------------------------------------------------
+  // BUILD
+  // ----------------------------------------------------------
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, _) {
+        final otp = _otpStages;
+        final req = _requestStages;
+
+        return Column(
+          children: [
+            _buildStageRow(
+              stages: otp,
+              labels: _otpLabels,
+              nodeAnims: _nodeAnims.sublist(0, 4),
+              lineAnims: _lineAnims.sublist(0, 3),
+            ),
+
+            const SizedBox(height: 18),
+
+            _buildStageRow(
+              stages: req,
+              labels: _requestLabels,
+              nodeAnims: _nodeAnims.sublist(4, 7),
+              lineAnims: _lineAnims.sublist(3, 5),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildStageRow({
+    required List<_PhoneStageState> stages,
+    required List<String> labels,
+    required List<Animation<double>> nodeAnims,
+    required List<Animation<double>> lineAnims,
+  }) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final stepWidth =
+            constraints.maxWidth / stages.length;
+
+        return SizedBox(
+          height: 64,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              for (var i = 0;
+                  i < lineAnims.length;
+                  i++)
+                Positioned(
+                  left: stepWidth * (i + 0.5),
+                  top: 13,
+                  width: stepWidth,
+                  height: 4,
+                  child: _ProgressLine(
+                    fill: _lineFill(stages, i + 1),
+                    color: _lineColor(stages, i + 1),
+                  ),
+                ),
+
+              for (var i = 0;
+                  i < stages.length;
+                  i++)
+                Positioned(
+                  left: stepWidth * i,
+                  top: 0,
+                  width: stepWidth,
+                  child: _buildStep(
+                    value: nodeAnims[i].value,
+                    state: stages[i],
+                    label: labels[i],
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // ----------------------------------------------------------
+  // SINGLE STEP (node + label)
+  // ----------------------------------------------------------
+
+  Widget _buildStep({
+    required double value,
+    required _PhoneStageState state,
+    required String label,
+  }) {
+    final t = value.clamp(0.0, 1.0).toDouble();
+
+    final filled = state != _PhoneStageState.upcoming;
+
+    final Color nodeColor;
+    final Color labelColor;
+    final IconData icon;
+    final bool smallDot;
+
+    switch (state) {
+      case _PhoneStageState.done:
+        nodeColor = _statusApproved;
+        labelColor = _statusApproved;
+        icon = Icons.check_rounded;
+        smallDot = false;
+      case _PhoneStageState.active:
+        nodeColor = _statusPending;
+        labelColor = _statusPending;
+        icon = Icons.hourglass_top_rounded;
+        smallDot = false;
+      case _PhoneStageState.rejected:
+        nodeColor = _statusRejected;
+        labelColor = _statusRejected;
+        icon = Icons.close_rounded;
+        smallDot = false;
+      case _PhoneStageState.upcoming:
+        nodeColor = _statusTrack;
+        labelColor = Colors.black38;
+        icon = Icons.circle;
+        smallDot = true;
+    }
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Opacity(
+          opacity: t,
+          child: Transform.scale(
+            scale: 0.35 + 0.65 * t,
+            child: Container(
+              width: 30,
+              height: 30,
+              decoration: BoxDecoration(
+                color: filled
+                    ? nodeColor
+                    : Colors.black.withValues(
+                        alpha: 0.12,
+                      ),
+                shape: BoxShape.circle,
+                border: filled
+                    ? null
+                    : Border.all(
+                        color: nodeColor.withValues(
+                          alpha: 0.30,
+                        ),
+                      ),
+              ),
+              child: Icon(
+                smallDot ? Icons.circle : icon,
+                size: smallDot ? 6.0 : 15.0,
+                color: filled ? Colors.white : Colors.black38,
+              ),
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 6),
+
+        Opacity(
+          opacity: t,
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 9.0,
+              fontWeight: FontWeight.w600,
+              color: labelColor,
+              height: 1.25,
             ),
           ),
         ),
