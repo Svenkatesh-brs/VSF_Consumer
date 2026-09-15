@@ -110,6 +110,31 @@ class _ContactUpdateScreenState
     _otpController = TextEditingController();
 
     _prefillAddressFields();
+
+    // ----------------------------------------------------------
+    // WORKFLOW STATUS FETCH TRIGGERS
+    //
+    // Phone status is queried when the screen opens (Phone is the
+    // default tab). Address status is queried the first time the
+    // Address tab is displayed. Both are guarded in the provider
+    // so widget rebuilds never repeat the request. After a
+    // successful submission the corresponding status is force
+    // refetched so the latest workflow state appears.
+    // ----------------------------------------------------------
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        contactController.fetchPhoneUpdateStatus();
+      }
+    });
+
+    _tabController.addListener(_onTabChanged);
+  }
+
+  void _onTabChanged() {
+    if (_tabController.index == 1) {
+      contactController.fetchAddressUpdateStatus();
+    }
   }
 
   void _prefillAddressFields() {
@@ -314,6 +339,8 @@ class _ContactUpdateScreenState
 
       _showPhoneSuccessPopup();
 
+      contactController.fetchPhoneUpdateStatus(force: true);
+
       if (!mounted) {
         return;
       }
@@ -414,6 +441,8 @@ class _ContactUpdateScreenState
     _addressSuccessHandled = true;
     _clearAddressFields();
     _showAddressSuccessPopup();
+
+    contactController.fetchAddressUpdateStatus(force: true);
   }
 
   // ============================================================
@@ -997,6 +1026,18 @@ class _ContactUpdateScreenState
               .loanDetails.value?.borrower?.phone ??
           '';
 
+      final hasPhoneStatus =
+          contactController.phoneUpdateStatus.value != null;
+
+      final isPhoneLocked =
+          contactController.isPhoneUpdateLocked;
+
+      final phoneForm = step == PhoneUpdateStep.enterNewPhone
+          ? _buildNewPhoneForm(isSaving, isPhoneLocked)
+          : step == PhoneUpdateStep.verifyCurrentPhone
+              ? _buildCurrentPhoneOtpCard(isSaving)
+              : _buildNewPhoneOtpCard(isSaving);
+
       return RefreshIndicator(
         onRefresh: loanController.retry,
         color: AppColors.lightBlue,
@@ -1025,15 +1066,16 @@ class _ContactUpdateScreenState
                 ],
               ),
 
+              if (hasPhoneStatus) ...[
+                const SizedBox(height: 16),
+                _buildPhoneStatusCard(),
+              ],
+
               const SizedBox(height: 16),
 
-              if (step == PhoneUpdateStep.enterNewPhone)
-                _buildNewPhoneForm(isSaving)
-              else if (step ==
-                  PhoneUpdateStep.verifyCurrentPhone)
-                _buildCurrentPhoneOtpCard(isSaving)
-              else
-                _buildNewPhoneOtpCard(isSaving),
+              isPhoneLocked
+                  ? _buildLockedForm(phoneForm)
+                  : phoneForm,
             ],
           ),
         ),
@@ -1045,7 +1087,7 @@ class _ContactUpdateScreenState
   // PHONE TAB — STEP 1: NEW NUMBER FORM
   // ============================================================
 
-  Widget _buildNewPhoneForm(bool isSaving) {
+  Widget _buildNewPhoneForm(bool isSaving, bool isLocked) {
     return AppFormCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1066,6 +1108,7 @@ class _ContactUpdateScreenState
             prefixIcon: const Icon(
               Icons.phone_outlined,
             ),
+            enabled: !isLocked,
           ),
 
           const SizedBox(height: 24),
@@ -1073,7 +1116,7 @@ class _ContactUpdateScreenState
           AppSubmitButton(
             label: 'Update Phone',
             isLoading: isSaving,
-            onTap: _submitPhone,
+            onTap: isLocked ? null : _submitPhone,
           ),
         ],
       ),
@@ -1249,9 +1292,19 @@ class _ContactUpdateScreenState
                 children: [
                   _buildSavedAddressCard(),
 
+                  if (contactController.addressUpdateStatus.value !=
+                      null) ...[
+                    const SizedBox(height: 16),
+                    _buildAddressStatusCard(),
+                  ],
+
                   const SizedBox(height: 16),
 
-                  _buildAddressForm(isSaving),
+                  contactController.isAddressUpdateLocked
+                      ? _buildLockedForm(
+                          _buildAddressForm(isSaving),
+                        )
+                      : _buildAddressForm(isSaving),
                 ],
               )
             : _buildNoAddressCard(),
@@ -1543,6 +1596,99 @@ class _ContactUpdateScreenState
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  // ============================================================
+  // PHONE WORKFLOW STATUS CARD
+  //
+  // Read-only view over the latest phone update request fetched
+  // from POST /api/v1/compliant/query (issueType 7). It shows the
+  // requested number, the backend-confirmed status label and the
+  // backend comments. It never edits nor replaces the current
+  // phone.
+  // ============================================================
+
+  Widget _buildPhoneStatusCard() {
+    final status = contactController.phoneUpdateStatus.value;
+
+    if (status == null) {
+      return const SizedBox.shrink();
+    }
+
+    return _buildCurrentContactCard(
+      icon: Icons.pending_actions_outlined,
+      title: 'Phone Update Request',
+      rows: [
+        _buildInfoRow(
+          label: 'New Number',
+          value: status.newPhone,
+        ),
+        _buildInfoRow(
+          label: 'Status',
+          value: ContactUpdateStatusMapping.label(status.status),
+        ),
+        _buildInfoRow(
+          label: 'Comments',
+          value: status.comments,
+        ),
+      ],
+    );
+  }
+
+  // ============================================================
+  // ADDRESS WORKFLOW STATUS CARD
+  //
+  // Read-only view over the latest address update request fetched
+  // from POST /api/v1/compliant/query (issueType 6). It shows a
+  // safe summary of the requested address, the backend-confirmed
+  // status label and the backend comments. It never edits nor
+  // replaces the current saved address.
+  // ============================================================
+
+  Widget _buildAddressStatusCard() {
+    final status = contactController.addressUpdateStatus.value;
+
+    if (status == null) {
+      return const SizedBox.shrink();
+    }
+
+    return _buildCurrentContactCard(
+      icon: Icons.home_work_outlined,
+      title: 'Address Update Request',
+      rows: [
+        _buildInfoRow(
+          label: 'New Address',
+          value: status.newAddressSummary,
+        ),
+        _buildInfoRow(
+          label: 'Status',
+          value: ContactUpdateStatusMapping.label(status.status),
+        ),
+        _buildInfoRow(
+          label: 'Comments',
+          value: status.comments,
+        ),
+      ],
+    );
+  }
+
+  // ============================================================
+  // LOCKED FORM OVERLAY
+  //
+  // Visually disables a locked form while preserving its layout.
+  // AbsorbPointer blocks all interaction; combined with the
+  // per-field `enabled` / null `onTap` passed down from the build
+  // methods it cannot be bypassed through the UI.
+  // ============================================================
+
+  Widget _buildLockedForm(Widget form) {
+    return Opacity(
+      opacity: 0.55,
+      child: AbsorbPointer(
+        absorbing: true,
+        child: form,
       ),
     );
   }

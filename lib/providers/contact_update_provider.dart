@@ -95,6 +95,40 @@ class ContactUpdateProvider extends GetxController {
   final successMessage = RxnString();
 
   // ============================================================
+  // WORKFLOW STATUS STATE (READ-ONLY)
+  //
+  // Latest Contact Update workflow state from
+  // POST /api/v1/compliant/query. This is WORKFLOW data only: it
+  // describes a requested phone/address change, its status and the
+  // backend comments. It is NEVER used to overwrite authoritative
+  // customer data.
+  //
+  // Authoritative data (current phone / saved address) remains in
+  // LoanDashboardProvider.loanDetails and is never mutated here;
+  // StorageService is never touched by this feature.
+  // ============================================================
+
+  final phoneUpdateStatus = Rxn<PhoneUpdateStatusModel>();
+
+  final addressUpdateStatus = Rxn<AddressUpdateStatusModel>();
+
+  final isFetchingPhoneStatus = false.obs;
+
+  final isFetchingAddressStatus = false.obs;
+
+  /// Fetched-once-per-screen-visit guards: each workflow status is
+  /// queried at most once unless [force] is used (e.g. right after
+  /// a successful request creation). This prevents repeated,
+  /// unnecessary requests across widget rebuilds.
+  bool _phoneStatusFetched = false;
+
+  bool _phoneStatusInFlight = false;
+
+  bool _addressStatusFetched = false;
+
+  bool _addressStatusInFlight = false;
+
+  // ============================================================
   // PHONE UPDATE (OTP) STATE
   //
   // Fully independent of AuthProvider's login OTP state so the
@@ -232,6 +266,13 @@ class ContactUpdateProvider extends GetxController {
 
   Future<bool> beginPhoneUpdate(String newPhone) async {
     if (isLoading.value) {
+      return false;
+    }
+
+    if (isPhoneUpdateLocked) {
+      errorMessage.value =
+          'Your phone update request is under review.';
+      successMessage.value = null;
       return false;
     }
 
@@ -644,6 +685,13 @@ class ContactUpdateProvider extends GetxController {
   Future<bool> updateAddress(
     AddressUpdateRequest request,
   ) async {
+    if (isAddressUpdateLocked) {
+      errorMessage.value =
+          'Your address update request is under review.';
+      successMessage.value = null;
+      return false;
+    }
+
     final id = addressId;
 
     if (id.isEmpty) {
@@ -683,6 +731,155 @@ class ContactUpdateProvider extends GetxController {
       isLoading.value = false;
     }
   }
+
+  // ============================================================
+  // FETCH PHONE UPDATE STATUS
+  //
+  // Queries the latest phone workflow request. A null payload /
+  // success:false without data means no request exists yet; that
+  // is a neutral state (the normal form stays visible), NOT an
+  // error. Real transport/backend failures surface through the
+  // existing errorMessage convention.
+  // ============================================================
+
+  Future<void> fetchPhoneUpdateStatus({bool force = false}) async {
+    if (_phoneStatusInFlight || (!force && _phoneStatusFetched)) {
+      return;
+    }
+
+    _phoneStatusFetched = true;
+    _phoneStatusInFlight = true;
+    isFetchingPhoneStatus.value = true;
+
+    try {
+      final response =
+          await _contactUpdateService.queryPhoneUpdateStatus();
+
+      final data = response.data;
+
+      if (data == null) {
+        phoneUpdateStatus.value = null;
+        return;
+      }
+
+      phoneUpdateStatus.value = data;
+    } catch (error) {
+      phoneUpdateStatus.value = null;
+      errorMessage.value = _getErrorMessage(error);
+    } finally {
+      isFetchingPhoneStatus.value = false;
+      _phoneStatusInFlight = false;
+    }
+  }
+
+  // ============================================================
+  // FETCH ADDRESS UPDATE STATUS
+  //
+  // Same behavior as the phone variant, against issueType 6.
+  // ============================================================
+
+  Future<void> fetchAddressUpdateStatus({bool force = false}) async {
+    if (_addressStatusInFlight || (!force && _addressStatusFetched)) {
+      return;
+    }
+
+    _addressStatusFetched = true;
+    _addressStatusInFlight = true;
+    isFetchingAddressStatus.value = true;
+
+    try {
+      final response =
+          await _contactUpdateService.queryAddressUpdateStatus();
+
+      final data = response.data;
+
+      if (data == null) {
+        addressUpdateStatus.value = null;
+        return;
+      }
+
+      addressUpdateStatus.value = data;
+    } catch (error) {
+      addressUpdateStatus.value = null;
+      errorMessage.value = _getErrorMessage(error);
+    } finally {
+      isFetchingAddressStatus.value = false;
+      _addressStatusInFlight = false;
+    }
+  }
+
+  // ============================================================
+  // WORKFLOW STATUS HELPERS
+  //
+  // Central place for the status mapping. Every helper reads
+  // exclusively from ContactUpdateStatusMapping, so the
+  // backend-confirmed values are the single source of truth.
+  //
+  // Until the backend confirms the mapping (isBackendConfirmed =
+  // true), ALL of these resolve to "unlocked / no match": no
+  // status meaning is guessed. Once the confirmed values are
+  // filled in, pending and approved lock their forms and rejected
+  // unlocks them without any UI change.
+  // ============================================================
+
+  bool _matchesStatus(int? actual, int? expected) {
+    if (!ContactUpdateStatusMapping.isBackendConfirmed) {
+      return false;
+    }
+
+    if (expected == null) {
+      return false;
+    }
+
+    return actual == expected;
+  }
+
+  bool get isPhoneUpdatePending => _matchesStatus(
+        phoneUpdateStatus.value?.status,
+        ContactUpdateStatusMapping.pending,
+      );
+
+  bool get isPhoneUpdateApproved => _matchesStatus(
+        phoneUpdateStatus.value?.status,
+        ContactUpdateStatusMapping.approved,
+      );
+
+  bool get isPhoneUpdateRejected => _matchesStatus(
+        phoneUpdateStatus.value?.status,
+        ContactUpdateStatusMapping.rejected,
+      );
+
+  /// Phone form is locked while a pending or approved workflow is
+  /// the latest workflow state. Rejected unlocks it for a new
+  /// request. No status behaviour is enabled until the backend
+  /// confirms the mapping.
+  bool get isPhoneUpdateLocked =>
+      ContactUpdateStatusMapping.isBackendConfirmed &&
+      phoneUpdateStatus.value != null &&
+      !isPhoneUpdateRejected;
+
+  bool get isAddressUpdatePending => _matchesStatus(
+        addressUpdateStatus.value?.status,
+        ContactUpdateStatusMapping.pending,
+      );
+
+  bool get isAddressUpdateApproved => _matchesStatus(
+        addressUpdateStatus.value?.status,
+        ContactUpdateStatusMapping.approved,
+      );
+
+  bool get isAddressUpdateRejected => _matchesStatus(
+        addressUpdateStatus.value?.status,
+        ContactUpdateStatusMapping.rejected,
+      );
+
+  /// Address form is locked while a pending or approved workflow is
+  /// the latest workflow state. Rejected unlocks it for a new
+  /// request.
+  bool get isAddressUpdateLocked =>
+      ContactUpdateStatusMapping.isBackendConfirmed &&
+      addressUpdateStatus.value != null &&
+      !isAddressUpdateRejected;
 
   // ============================================================
   // API ERROR MESSAGE

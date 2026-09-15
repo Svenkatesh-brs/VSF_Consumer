@@ -173,6 +173,54 @@ class ContactUpdateService {
   }
 
   // ============================================================
+  // QUERY PHONE UPDATE STATUS
+  //
+  //   POST /api/v1/compliant/query
+  //   { "issueType": 7 }
+  //
+  // Read-only workflow query. ApiService automatically attaches
+  // the existing Bearer token (this path is not part of the OTP
+  // login exclusion list).
+  // ============================================================
+
+  Future<PhoneUpdateStatusResponse> queryPhoneUpdateStatus() async {
+    final response = await _apiService.post(
+      AppConstants.compliantQuery,
+      data: ContactUpdateStatusRequest(
+        issueType: ContactUpdateStatusRequest.phoneUpdate,
+      ).toJson(),
+    );
+
+    return _parseStatusResponse(
+      response.data,
+      PhoneUpdateStatusResponse.fromJson,
+      statusCode: response.statusCode,
+    );
+  }
+
+  // ============================================================
+  // QUERY ADDRESS UPDATE STATUS
+  //
+  //   POST /api/v1/compliant/query
+  //   { "issueType": 6 }
+  // ============================================================
+
+  Future<AddressUpdateStatusResponse> queryAddressUpdateStatus() async {
+    final response = await _apiService.post(
+      AppConstants.compliantQuery,
+      data: ContactUpdateStatusRequest(
+        issueType: ContactUpdateStatusRequest.addressUpdate,
+      ).toJson(),
+    );
+
+    return _parseStatusResponse(
+      response.data,
+      AddressUpdateStatusResponse.fromJson,
+      statusCode: response.statusCode,
+    );
+  }
+
+  // ============================================================
   // RESPONSE VALIDATION
   //
   // Handles the success envelope with "data": null without
@@ -213,6 +261,31 @@ class ContactUpdateService {
 
     if (raw is Map) {
       return PhoneOtpVerifyResponse.fromJson(
+        Map<String, dynamic>.from(raw),
+      );
+    }
+
+    throw ApiException(
+      statusCode: statusCode,
+      message: 'Invalid response received from server.',
+    );
+  }
+
+  // ============================================================
+  // WORKFLOW STATUS RESPONSE VALIDATION
+  // ============================================================
+
+  T _parseStatusResponse<T>(
+    dynamic raw,
+    T Function(Map<String, dynamic>) fromJson, {
+    int? statusCode,
+  }) {
+    if (raw is Map<String, dynamic>) {
+      return fromJson(raw);
+    }
+
+    if (raw is Map) {
+      return fromJson(
         Map<String, dynamic>.from(raw),
       );
     }

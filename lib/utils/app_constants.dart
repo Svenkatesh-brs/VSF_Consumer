@@ -86,6 +86,12 @@ abstract class AppConstants {
   static const String updateAddress = '/api/v1/consumer/customer/address/';
 
   // ============================================================
+  // CONTACT UPDATE WORKFLOW QUERY API
+  // ============================================================
+
+  static const String compliantQuery = '/api/v1/compliant/query';
+
+  // ============================================================
   // PHONE OTP API
   // ============================================================
 

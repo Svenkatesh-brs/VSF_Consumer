@@ -211,3 +211,280 @@ class PhoneOtpVerifyResponse {
     );
   }
 }
+
+// ============================================================
+// CONTACT UPDATE WORKFLOW STATUS REQUEST
+//
+//   POST /api/v1/compliant/query
+//
+// The single query endpoint is shared by both Contact Update
+// workflows; the requested workflow is selected by issueType:
+//   7 -> Phone update
+//   6 -> Address update
+//
+// These issueType values belong exclusively to the Contact Update
+// workflow query and must NOT be added to ComplaintCreateRequest.
+// ============================================================
+
+class ContactUpdateStatusRequest {
+  final int issueType;
+
+  const ContactUpdateStatusRequest({
+    required this.issueType,
+  });
+
+  static const int phoneUpdate = 7;
+
+  static const int addressUpdate = 6;
+
+  Map<String, dynamic> toJson() {
+    return {
+      'issueType': issueType,
+    };
+  }
+}
+
+// ============================================================
+// CONTACT UPDATE STATUS MAPPING  *** BACKEND CONFIRMATION REQUIRED ***
+//
+// The meaning of the status integer returned by
+// POST /api/v1/compliant/query is NOT documented in the codebase.
+//
+// The ComplaintModel mapping (1 = Pending, 2 = Approved,
+// 3 = Rejected) MUST NOT be assumed to apply here: Contact Update
+// workflow status is a separate domain.
+//
+// Until the backend developer confirms the exact mapping:
+//   - isBackendConfirmed stays false
+//   - pending / approved / rejected stay null
+//   - all form-locking helpers resolve to "unlocked"
+//   - the status card shows the raw integer (no invented label)
+//
+// To enable the workflow locking: fill the three status constants
+// below with the backend-confirmed values and set
+// isBackendConfirmed = true. No other code change is required;
+// the UI and provider read this mapping exclusively.
+// ============================================================
+
+class ContactUpdateStatusMapping {
+  /// Whether the backend has confirmed the workflow status meaning.
+  static const bool isBackendConfirmed = false;
+
+  /// Backend-confirmed "pending" status value; null until confirmed.
+  static const int? pending = null;
+
+  /// Backend-confirmed "approved" status value; null until confirmed.
+  static const int? approved = null;
+
+  /// Backend-confirmed "rejected" status value; null until confirmed.
+  static const int? rejected = null;
+
+  /// Human label for a workflow status value.
+  ///
+  /// Uses the backend-confirmed mapping when available; otherwise
+  /// falls back to the raw integer rather than inventing a label.
+  static String label(int status) {
+    if (isBackendConfirmed) {
+      if (pending != null && status == pending) {
+        return 'Pending';
+      }
+
+      if (approved != null && status == approved) {
+        return 'Approved';
+      }
+
+      if (rejected != null && status == rejected) {
+        return 'Rejected';
+      }
+    }
+
+    return '$status';
+  }
+}
+
+// ============================================================
+// PHONE UPDATE STATUS
+//
+// "data" payload of the workflow query for issueType 7.
+// ============================================================
+
+class PhoneUpdateStatusModel {
+  final String id;
+  final String newPhone;
+  final String comments;
+  final int status;
+
+  const PhoneUpdateStatusModel({
+    required this.id,
+    required this.newPhone,
+    required this.comments,
+    required this.status,
+  });
+
+  factory PhoneUpdateStatusModel.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return PhoneUpdateStatusModel(
+      id: _toString(json['id']),
+      newPhone: _toString(json['newPhone']),
+      comments: _toString(json['comments']),
+      status: _toInt(json['status']),
+    );
+  }
+}
+
+class PhoneUpdateStatusResponse {
+  final bool success;
+  final String message;
+  final PhoneUpdateStatusModel? data;
+
+  const PhoneUpdateStatusResponse({
+    required this.success,
+    required this.message,
+    this.data,
+  });
+
+  factory PhoneUpdateStatusResponse.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    final rawData = json['data'];
+
+    return PhoneUpdateStatusResponse(
+      success: json['success'] == true,
+      message: _toString(json['message']),
+      data: rawData is Map
+          ? PhoneUpdateStatusModel.fromJson(
+              Map<String, dynamic>.from(rawData),
+            )
+          : null,
+    );
+  }
+}
+
+// ============================================================
+// ADDRESS UPDATE STATUS
+//
+// "data" payload of the workflow query for issueType 6.
+//
+// oldAddress / newAddress are kept as raw maps: their schema is
+// backend-owned and intentionally NOT forced into LoanAddress.
+// The UI only reads known display fields via newAddressSummary.
+// ============================================================
+
+class AddressUpdateStatusModel {
+  final String id;
+  final Map<String, dynamic>? oldAddress;
+  final Map<String, dynamic>? newAddress;
+  final String comments;
+  final int status;
+
+  const AddressUpdateStatusModel({
+    required this.id,
+    required this.oldAddress,
+    required this.newAddress,
+    required this.comments,
+    required this.status,
+  });
+
+  factory AddressUpdateStatusModel.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return AddressUpdateStatusModel(
+      id: _toString(json['id']),
+      oldAddress: _asMap(json['oldAddress']),
+      newAddress: _asMap(json['newAddress']),
+      comments: _toString(json['comments']),
+      status: _toInt(json['status']),
+    );
+  }
+
+  /// Concise, safe summary of the requested address for the status
+  /// card. Unknown or null keys are simply skipped.
+  String get newAddressSummary {
+    final address = newAddress;
+
+    if (address == null) {
+      return '-';
+    }
+
+    final parts = <String>[
+      address['houseNumber'],
+      address['buildingName'],
+      address['streetName'],
+      address['addressLine1'],
+      address['village'],
+      address['district'],
+      address['city'],
+      address['state'],
+      address['pincode'],
+    ].whereType<String>().map((value) => value.trim()).where(
+          (value) => value.isNotEmpty,
+        ).toList();
+
+    return parts.isEmpty ? '-' : parts.join(', ');
+  }
+}
+
+class AddressUpdateStatusResponse {
+  final bool success;
+  final String message;
+  final AddressUpdateStatusModel? data;
+
+  const AddressUpdateStatusResponse({
+    required this.success,
+    required this.message,
+    this.data,
+  });
+
+  factory AddressUpdateStatusResponse.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    final rawData = json['data'];
+
+    return AddressUpdateStatusResponse(
+      success: json['success'] == true,
+      message: _toString(json['message']),
+      data: rawData is Map
+          ? AddressUpdateStatusModel.fromJson(
+              Map<String, dynamic>.from(rawData),
+            )
+          : null,
+    );
+  }
+}
+
+// ============================================================
+// SAFE JSON HELPERS
+// ============================================================
+
+String _toString(dynamic value) {
+  if (value == null) {
+    return '';
+  }
+
+  return value.toString();
+}
+
+int _toInt(dynamic value) {
+  if (value is int) {
+    return value;
+  }
+
+  if (value is num) {
+    return value.toInt();
+  }
+
+  if (value is String) {
+    return int.tryParse(value.trim()) ?? 0;
+  }
+
+  return 0;
+}
+
+Map<String, dynamic>? _asMap(dynamic value) {
+  if (value is Map) {
+    return Map<String, dynamic>.from(value);
+  }
+
+  return null;
+}
