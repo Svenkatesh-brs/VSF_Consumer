@@ -208,6 +208,24 @@ class _ContactUpdateScreenState
     await contactController.fetchAddressUpdateStatus(force: true);
   }
 
+  // ------------------------------------------------------------
+  // PHONE TAB — PULL TO REFRESH
+  //
+  // Mirrors the Address-tab refresh pattern. Refreshes the loan
+  // dashboard (authoritative phone number source) AND force-
+  // refetches the phone workflow status so the progress bar and
+  // status badge reflect the latest backend state immediately.
+  //
+  // fetchPhoneUpdateStatus only writes to phoneUpdateStatus and
+  // never touches the OTP state (phoneUpdateStep, timers, etc.)
+  // so this is safe to call at any point in the OTP flow.
+  // ------------------------------------------------------------
+
+  Future<void> _refreshPhoneTab() async {
+    await loanController.retry();
+    await contactController.fetchPhoneUpdateStatus(force: true);
+  }
+
   void _prefillAddressFields() {
     final initial =
         contactController.initialAddressRequest;
@@ -1149,7 +1167,7 @@ class _ContactUpdateScreenState
               : _buildNewPhoneOtpCard(isSaving);
 
       return RefreshIndicator(
-        onRefresh: loanController.retry,
+        onRefresh: _refreshPhoneTab,
         color: AppColors.lightBlue,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(
