@@ -103,6 +103,12 @@ class _ContactUpdateScreenState
 
   bool _phoneSuccessHandled = false;
 
+  /// Whether the "Current Saved Address" card details are
+  /// expanded. Kept expanded by default; the card header toggles
+  /// it with an animated chevron (AnimatedRotation) and smooth
+  /// height animation (AnimatedSize).
+  bool _savedAddressExpanded = false;
+
   @override
   void initState() {
     super.initState();
@@ -1417,78 +1423,192 @@ class _ContactUpdateScreenState
   //
   // Read-only view over the address already parsed from the
   // Loan Dashboard response.
+  //
+  // Collapsible: the header stays always visible and toggles the
+  // 15 address detail rows below it. Nesting uses AnimatedSize
+  // while the chevron rotates via AnimatedRotation. Expanded by
+  // default. Same visual design as the shared card container.
   // ============================================================
 
   Widget _buildSavedAddressCard() {
     final address =
         contactController.currentAddress;
 
-    return _buildCurrentContactCard(
-      icon: Icons.home_outlined,
-      title: 'Current Saved Address',
-      rows: [
-        _buildInfoRow(
-          label: 'House Number',
-          value: address?.houseNumber ?? '',
+    final rows = <Widget>[
+      _buildInfoRow(
+        label: 'House Number',
+        value: address?.houseNumber ?? '',
+      ),
+      _buildInfoRow(
+        label: 'Floor Number',
+        value: address?.floorNumber ?? '',
+      ),
+      _buildInfoRow(
+        label: 'Building Name',
+        value: address?.buildingName ?? '',
+      ),
+      _buildInfoRow(
+        label: 'Apartment Name',
+        value: address?.apartmentName ?? '',
+      ),
+      _buildInfoRow(
+        label: 'Street Name',
+        value: address?.streetName ?? '',
+      ),
+      _buildInfoRow(
+        label: 'Address Line 1',
+        value: address?.addressLine1 ?? '',
+      ),
+      _buildInfoRow(
+        label: 'Address Line 2',
+        value: address?.addressLine2 ?? '',
+      ),
+      _buildInfoRow(
+        label: 'Landmark',
+        value: address?.landmark ?? '',
+      ),
+      _buildInfoRow(
+        label: 'Village',
+        value: address?.village ?? '',
+      ),
+      _buildInfoRow(
+        label: 'District',
+        value: address?.district ?? '',
+      ),
+      _buildInfoRow(
+        label: 'City',
+        value: address?.city ?? '',
+      ),
+      _buildInfoRow(
+        label: 'State',
+        value: address?.state ?? '',
+      ),
+      _buildInfoRow(
+        label: 'Country',
+        value: address?.country ?? '',
+      ),
+      _buildInfoRow(
+        label: 'Pincode',
+        value: address?.pincode ?? '',
+      ),
+      _buildInfoRow(
+        label: 'Address Type',
+        value: address?.addressType ?? '',
+      ),
+    ];
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.white.withValues(alpha: 0.82),
+            Colors.white.withValues(alpha: 0.48),
+          ],
         ),
-        _buildInfoRow(
-          label: 'Floor Number',
-          value: address?.floorNumber ?? '',
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.60),
         ),
-        _buildInfoRow(
-          label: 'Building Name',
-          value: address?.buildingName ?? '',
-        ),
-        _buildInfoRow(
-          label: 'Apartment Name',
-          value: address?.apartmentName ?? '',
-        ),
-        _buildInfoRow(
-          label: 'Street Name',
-          value: address?.streetName ?? '',
-        ),
-        _buildInfoRow(
-          label: 'Address Line 1',
-          value: address?.addressLine1 ?? '',
-        ),
-        _buildInfoRow(
-          label: 'Address Line 2',
-          value: address?.addressLine2 ?? '',
-        ),
-        _buildInfoRow(
-          label: 'Landmark',
-          value: address?.landmark ?? '',
-        ),
-        _buildInfoRow(
-          label: 'Village',
-          value: address?.village ?? '',
-        ),
-        _buildInfoRow(
-          label: 'District',
-          value: address?.district ?? '',
-        ),
-        _buildInfoRow(
-          label: 'City',
-          value: address?.city ?? '',
-        ),
-        _buildInfoRow(
-          label: 'State',
-          value: address?.state ?? '',
-        ),
-        _buildInfoRow(
-          label: 'Country',
-          value: address?.country ?? '',
-        ),
-        _buildInfoRow(
-          label: 'Pincode',
-          value: address?.pincode ?? '',
-        ),
-        _buildInfoRow(
-          label: 'Address Type',
-          value: address?.addressType ?? '',
-        ),
-      ],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.07),
+            blurRadius: 20,
+            offset: const Offset(0, 9),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ---- HEADER (always visible) ----
+
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: _toggleSavedAddress,
+            child: Row(
+              children: [
+                Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: AppColors.lightBlue.withValues(
+                      alpha: 0.10,
+                    ),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.home_outlined,
+                    size: 20,
+                    color: AppColors.lightBlue,
+                  ),
+                ),
+
+                const SizedBox(width: 10),
+
+                const Expanded(
+                  child: Text(
+                    'Current Saved Address',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.lightBlue,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(width: 6),
+
+                AnimatedRotation(
+                  turns: _savedAddressExpanded ? 0.5 : 0.0,
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeInOut,
+                  child: const Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    size: 22,
+                    color: AppColors.lightBlue,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // ---- COLLAPSIBLE DETAIL ROWS ----
+
+          AnimatedSize(
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeInOut,
+            alignment: Alignment.topCenter,
+            child: ClipRect(
+              child: _savedAddressExpanded
+                  ? Column(
+                      crossAxisAlignment:
+                          CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 16),
+                        ...rows,
+                      ],
+                    )
+                  : const SizedBox(
+                      width: double.infinity,
+                      height: 0,
+                    ),
+            ),
+          ),
+        ],
+      ),
     );
+  }
+
+  /// Toggles the expanded/collapsed state of the
+  /// "Current Saved Address" details.
+  void _toggleSavedAddress() {
+    setState(() {
+      _savedAddressExpanded = !_savedAddressExpanded;
+    });
   }
 
   // ============================================================
