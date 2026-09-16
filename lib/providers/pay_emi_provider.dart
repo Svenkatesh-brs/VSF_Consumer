@@ -17,18 +17,29 @@ class PayEmiProvider extends GetxController {
 
   final Rxn<PayEmiModel> paymentInfo = Rxn<PayEmiModel>();
 
-  final RxList<Uint8List> qrImages = <Uint8List>[].obs;
+  // QR image at index N always corresponds to the PayEmiFile at
+  // index N in [files]. Failures are stored as null so the index
+  // correspondence is never broken.
+  final RxList<Uint8List?> qrImages = <Uint8List?>[].obs;
   final RxBool isLoading = false.obs;
 
   final RxString errorMessage = ''.obs;
+
+  // Index of the currently selected QR inside the swipeable
+  // carousel. Keeps the selected QR and its metadata in sync.
+  final RxInt selectedQrIndex = 0.obs;
 
   // ============================================================
   // GETTERS
   // ============================================================
 
+  List<String> get contactNumbers => paymentInfo.value?.contactNumbers ?? [];
+
   List<String> get paymentNumbers => paymentInfo.value?.paymentNumbers ?? [];
 
   List<String> get upiIds => paymentInfo.value?.upiIds ?? [];
+
+  List<PayEmiFile> get files => paymentInfo.value?.files ?? [];
 
   bool get hasQrImages => qrImages.isNotEmpty;
   bool get hasPaymentInfo => paymentInfo.value != null;
@@ -79,36 +90,53 @@ class PayEmiProvider extends GetxController {
       paymentInfo.value = info;
 
       // ========================================================
-      // LOAD QR IMAGE
+      // LOAD QR IMAGES
+      //
+      // Each file's QR image is loaded using its own `did`.
+      // A failed QR is stored as null so its index still matches
+      // the corresponding PayEmiFile, keeping the QR, its name,
+      // its UPI ID and the swipe position in sync.
       // ========================================================
       qrImages.clear();
 
-      for (final fileId in info.files) {
+      for (final file in info.files) {
         try {
-          print('Loading QR: $fileId');
-
-          final imageBytes = await _payEmiService.getQrImage(fileId);
-
-          print('QR loaded: $fileId | bytes: ${imageBytes.length}');
+          final imageBytes = await _payEmiService.getQrImage(file.did);
 
           if (imageBytes.isNotEmpty) {
             qrImages.add(Uint8List.fromList(imageBytes));
+          } else {
+            qrImages.add(null);
           }
-        } catch (e) {
-          print('QR failed: $fileId');
-          print('QR error: $e');
+        } catch (_) {
+          qrImages.add(null);
         }
+      }
+
+      if (selectedQrIndex.value >= 0 && selectedQrIndex.value >= files.length) {
+        selectedQrIndex.value = files.isEmpty ? 0 : files.length - 1;
       }
     } catch (e) {
       if (showLoading) {
         errorMessage.value = e.toString();
         paymentInfo.value = null;
         qrImages.clear();
+        selectedQrIndex.value = 0;
       }
     } finally {
       if (showLoading) {
         isLoading.value = false;
       }
+    }
+  }
+
+  // ============================================================
+  // SELECTED QR INDEX
+  // ============================================================
+
+  void selectQrIndex(int index) {
+    if (index >= 0 && index < files.length) {
+      selectedQrIndex.value = index;
     }
   }
 

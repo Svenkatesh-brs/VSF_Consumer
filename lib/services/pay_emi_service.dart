@@ -23,13 +23,30 @@ class PayEmiService {
     final responseData = response.data;
 
     if (responseData is! Map<String, dynamic>) {
-      throw Exception('Invalid payment information response');
+      throw ApiException(message: 'Unable to load payment details');
+    }
+
+    final message = responseData['message']?.toString() ?? '';
+    final error = responseData['error']?.toString() ?? '';
+
+    final success = responseData['success'] as bool? ?? false;
+
+    if (!success) {
+      throw ApiException(
+        message: message.isNotEmpty
+            ? message
+            : (error.isNotEmpty ? error : 'Unable to load payment details'),
+      );
     }
 
     final companyData = responseData['data'];
 
     if (companyData is! Map<String, dynamic>) {
-      throw Exception('Payment information not found');
+      throw ApiException(
+        message: error.isNotEmpty
+            ? error
+            : (message.isNotEmpty ? message : 'Payment information not found'),
+      );
     }
 
     return PayEmiModel.fromJson(companyData);
@@ -39,13 +56,13 @@ class PayEmiService {
   // QR IMAGE
   // ============================================================
 
-  Future<List<int>> getQrImage(String fileId) async {
-    if (fileId.trim().isEmpty) {
+  Future<List<int>> getQrImage(String did) async {
+    if (did.trim().isEmpty) {
       throw Exception('QR image file is not available');
     }
 
     final response = await _apiService.get(
-      '${AppConstants.consumerMedia}$fileId',
+      '${AppConstants.consumerMedia}$did',
       responseType: ResponseType.bytes,
     );
 

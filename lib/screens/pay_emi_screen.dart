@@ -5,6 +5,7 @@ import 'package:lottie/lottie.dart';
 import 'dart:typed_data';
 
 import '../providers/pay_emi_provider.dart';
+import '../models/pay_emi_model.dart';
 import '../utils/app_colors.dart';
 import '../utils/app_theme.dart';
 import '../widgets/app_background.dart';
@@ -107,6 +108,8 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
             _buildUpiSection(),
             const SizedBox(height: 22),
             _buildPaymentNumbersSection(),
+            const SizedBox(height: 22),
+            _buildContactNumbersSection(),
             const SizedBox(height: 22),
             _buildInstructionsCard(),
           ],
@@ -215,7 +218,7 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
           ),
           const SizedBox(height: 20),
           _buildQrImage(),
-          const SizedBox(height: 18),
+          const SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
             decoration: BoxDecoration(
@@ -252,14 +255,28 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
   }
 
   Widget _buildQrImage() {
-    final images = controller.qrImages;
+    final files = controller.files;
 
-    if (images.isEmpty) {
-      return _buildQrUnavailable();
+    if (files.isEmpty) {
+      return SizedBox(
+        width: 230,
+        height: 230,
+        child: _buildQrUnavailable(),
+      );
     }
 
-    if (images.length == 1) {
-      return _buildSingleQrImage(images.first);
+    if (files.length == 1) {
+      final image = controller.qrImages.isEmpty
+          ? null
+          : controller.qrImages.first;
+
+      return Column(
+        children: [
+          _buildQrImageFrame(image),
+          const SizedBox(height: 14),
+          _buildQrMetadata(files.first),
+        ],
+      );
     }
 
     return Column(
@@ -267,62 +284,142 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
         SizedBox(
           height: 250,
           child: PageView.builder(
-            itemCount: images.length,
+            itemCount: files.length,
             controller: PageController(viewportFraction: 0.88),
+            onPageChanged: controller.selectQrIndex,
             itemBuilder: (context, index) {
+              final image = index < controller.qrImages.length
+                  ? controller.qrImages[index]
+                  : null;
+
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 6),
-                child: _buildSingleQrImage(images[index]),
+                child: _buildQrImageFrame(image),
               );
             },
           ),
         ),
         const SizedBox(height: 10),
+        Obx(
+          () => _buildQrMetadata(files[controller.selectedQrIndex.value]),
+        ),
+        const SizedBox(height: 10),
         Text(
-          'Swipe to view all ${images.length} QR codes',
+          'Swipe to view all ${files.length} QR codes',
           style: AppTheme.style.copyWith(fontSize: 11.5, color: AppColors.hint),
         ),
       ],
     );
   }
 
-  Widget _buildSingleQrImage(Uint8List image) {
-  return Container(
-    width: 230,
-    height: 230,
-    padding: const EdgeInsets.all(14),
-    decoration: BoxDecoration(
-      color: AppColors.white,
-      borderRadius: BorderRadius.circular(22),
-      border: Border.all(
-        color: AppColors.tintColor,
-        width: 1.5,
-      ),
-      boxShadow: [
-        BoxShadow(
-          color: AppColors.lightBlack.withValues(alpha: 0.07),
-          blurRadius: 18,
-          offset: const Offset(0, 7),
-        ),
-      ],
-    ),
-    child: ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: Image.memory(
-        image,
-        fit: BoxFit.contain,
-        errorBuilder: (_, _, _) {
-          return _buildQrUnavailable();
-        },
-      ),
-    ),
-  );
-}
-
-  Widget _buildQrUnavailable() {
+  Widget _buildQrImageFrame(Uint8List? image) {
     return Container(
       width: 230,
       height: 230,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: AppColors.tintColor,
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.lightBlack.withValues(alpha: 0.07),
+            blurRadius: 18,
+            offset: const Offset(0, 7),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: image == null
+            ? _buildQrUnavailable()
+            : Image.memory(
+                image,
+                fit: BoxFit.contain,
+                errorBuilder: (_, _, _) {
+                  return _buildQrUnavailable();
+                },
+              ),
+      ),
+    );
+  }
+
+  // ============================================================
+  // SELECTED QR METADATA
+  //
+  // Shows the name and UPI ID of the currently selected QR.
+  // These update together with the swiped QR because both are
+  // derived from the same selected index into the files list.
+  // ============================================================
+
+  Widget _buildQrMetadata(PayEmiFile file) {
+    final name = file.name.trim();
+    final upi = file.upiId.trim();
+
+    if (name.isEmpty && upi.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: AppColors.tintColor.withValues(alpha: 0.45),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: AppColors.primary.withValues(alpha: 0.25),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (name.isNotEmpty) ...[
+            Text(
+              'Pay with $name',
+              style: AppTheme.style.copyWith(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: AppColors.lightBlue,
+              ),
+            ),
+            const SizedBox(height: 4),
+          ],
+          if (upi.isNotEmpty)
+            Row(
+              children: [
+                const Icon(
+                  Icons.alternate_email_rounded,
+                  color: AppColors.secondary,
+                  size: 19,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    upi,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTheme.style.copyWith(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.lightBlue,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                _buildCopyButton(upi),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQrUnavailable() {
+    return Container(
+      constraints: const BoxConstraints.expand(),
       decoration: BoxDecoration(
         color: AppColors.tintColor.withValues(alpha: 0.35),
         borderRadius: BorderRadius.circular(18),
@@ -350,7 +447,19 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
   // ============================================================
 
   Widget _buildUpiSection() {
-    final upiIds = controller.upiIds;
+    final fileUpiIds = controller.files
+        .map((file) => file.upiId.trim())
+        .where((value) => value.isNotEmpty)
+        .toSet();
+
+    // Top-level UPI IDs that are not already represented by a
+    // QR-specific file.upiId. QR-specific UPI is shown inside the
+    // Scan & Pay card instead of being duplicated here.
+    final upiIds = controller.upiIds
+        .map((value) => value.trim())
+        .where((value) => value.isNotEmpty && !fileUpiIds.contains(value))
+        .toSet()
+        .toList();
 
     if (upiIds.isEmpty) {
       return const SizedBox.shrink();
@@ -361,11 +470,38 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
       subtitle: 'Copy a UPI ID and pay from your UPI app',
       icon: Icons.alternate_email_rounded,
       children: [
-        ...upiIds.asMap().entries.map(
-          (entry) => _buildCopyableItem(
-            value: entry.value,
+        ...upiIds.map(
+          (value) => _buildCopyableItem(
+            value: value,
             label: 'UPI ID',
             icon: Icons.alternate_email_rounded,
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ============================================================
+  // CONTACT NUMBERS
+  // ============================================================
+
+  Widget _buildContactNumbersSection() {
+    final numbers = controller.contactNumbers;
+
+    if (numbers.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return _buildPaymentDetailSection(
+      title: 'Contact Numbers',
+      subtitle: 'Contact these numbers for payment support',
+      icon: Icons.support_agent_rounded,
+      children: [
+        ...numbers.asMap().entries.map(
+          (entry) => _buildCopyableItem(
+            value: entry.value,
+            label: 'Contact Number',
+            icon: Icons.support_agent_rounded,
           ),
         ),
       ],
