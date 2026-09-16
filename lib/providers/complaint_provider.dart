@@ -43,7 +43,7 @@ class ComplaintProvider extends GetxController {
   // ============================================================
 
   final selectedStatus =
-      ComplaintModel.pending.obs;
+      ComplaintModel.all.obs;
 
   // ============================================================
   // PAGINATION
@@ -94,8 +94,10 @@ class ComplaintProvider extends GetxController {
   // ============================================================
 
   void setStatus(int status) {
-    if (status < ComplaintModel.pending ||
-        status > ComplaintModel.rejected) {
+    if (status != ComplaintModel.all &&
+        status != ComplaintModel.pending &&
+        status != ComplaintModel.approved &&
+        status != ComplaintModel.rejected) {
       return;
     }
 
@@ -156,9 +158,10 @@ class ComplaintProvider extends GetxController {
         urgent: isUrgent.value,
         issueType: selectedIssueType.value,
         loanId: _currentLoanId,
-        // No file handling exists yet; preserve the current
-        // empty-string value the documentation shows for "file".
-        file: '',
+        // The current UI has no attachment picker/upload flow. The API
+        // requires an array of uploaded file IDs, so submit an empty array
+        // until attachments are supported by the existing app flow.
+        file: const <String>[],
       );
 
       final response = await _complaintService.createComplaint(
@@ -240,10 +243,10 @@ class ComplaintProvider extends GetxController {
         complaints.clear();
         totalComplaints.value = 0;
 
-        // The backend reports "no complaints found" with
-        // success:false and an empty list; that is a valid
-        // empty-list state, not a technical error.
-        if (response.data.isEmpty) {
+        // The backend reports "No complaints found" with success:false and
+        // an empty list. Preserve that as an empty state, but surface other
+        // failures (including an invalid status filter) to the user.
+        if (response.data.isEmpty && _isNoComplaintsResponse(response)) {
           errorMessage.value = null;
           return;
         }
@@ -256,7 +259,15 @@ class ComplaintProvider extends GetxController {
         return;
       }
 
-      complaints.assignAll(response.data);
+      final sortedComplaints = [...response.data]
+        ..sort((first, second) {
+          final firstDate = first.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+          final secondDate = second.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+
+          return firstDate.compareTo(secondDate);
+        });
+
+      complaints.assignAll(sortedComplaints);
 
       currentPage.value = response.page;
       recordsPerPage.value = response.recordsPerPage;
@@ -276,6 +287,11 @@ class ComplaintProvider extends GetxController {
         isLoading.value = false;
       }
     }
+  }
+
+  bool _isNoComplaintsResponse(ComplaintListResponse response) {
+    return response.total == 0 &&
+        response.message.trim().toLowerCase().contains('no complaints found');
   }
 
   // ============================================================
@@ -348,11 +364,14 @@ class ComplaintProvider extends GetxController {
 
   String get selectedStatusLabel {
     switch (selectedStatus.value) {
+      case ComplaintModel.all:
+        return 'All';
+
       case ComplaintModel.pending:
         return 'Pending';
 
       case ComplaintModel.approved:
-        return 'Approved';
+        return 'Resolved';
 
       case ComplaintModel.rejected:
         return 'Rejected';
@@ -369,7 +388,7 @@ class ComplaintProvider extends GetxController {
   String get selectedIssueTypeLabel {
     switch (selectedIssueType.value) {
       case ComplaintCreateRequest.billingOrPayment:
-        return 'Billing or Payment';
+        return 'Billing Or Payment';
 
       case ComplaintCreateRequest.documents:
         return 'Documents';
@@ -381,7 +400,7 @@ class ComplaintProvider extends GetxController {
         return 'Vehicle Related';
 
       case ComplaintCreateRequest.technicalAndStaff:
-        return 'Technical & Staff';
+        return 'Technical And Staff';
 
       case ComplaintCreateRequest.other:
         return 'Other';

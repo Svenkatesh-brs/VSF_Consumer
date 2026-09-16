@@ -11,6 +11,7 @@ class ComplaintModel {
     required this.issueType,
     required this.status,
     required this.file,
+    required this.comments,
     required this.createdBy,
     required this.createdAt,
     required this.updatedAt,
@@ -22,7 +23,8 @@ class ComplaintModel {
   final bool urgent;
   final int issueType;
   final int status;
-  final String file;
+  final List<String> file;
+  final String comments;
   final String createdBy;
   final DateTime? createdAt;
   final DateTime? updatedAt;
@@ -34,19 +36,25 @@ class ComplaintModel {
   static const int pending = 1;
   static const int approved = 2;
   static const int rejected = 3;
+  static const int all = 0;
 
   String get statusLabel {
     switch (status) {
       case pending:
         return 'Pending';
       case approved:
-        return 'Approved';
+        return 'Resolved';
       case rejected:
         return 'Rejected';
       default:
         return 'Unknown';
     }
   }
+
+  String get issueTypeLabel =>
+      ComplaintCreateRequest.issueTypeLabelFor(issueType);
+
+  bool get hasComments => comments.trim().isNotEmpty;
 
   // ------------------------------------------------------------
   // FROM JSON
@@ -62,7 +70,8 @@ class ComplaintModel {
       urgent: _toBool(json['urgent']),
       issueType: _toInt(json['issueType']),
       status: _toInt(json['status']),
-      file: _toString(json['file']),
+      file: _toStringList(json['file']),
+      comments: _toString(json['comments']),
       createdBy: _toString(json['createdBy']),
       createdAt: _toDateTime(json['createdAt']),
       updatedAt: _toDateTime(json['updatedAt']),
@@ -82,6 +91,7 @@ class ComplaintModel {
       'issueType': issueType,
       'status': status,
       'file': file,
+      'comments': comments,
       'createdBy': createdBy,
       'createdAt': createdAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
@@ -98,7 +108,7 @@ class ComplaintCreateRequest {
     required this.description,
     required this.urgent,
     required this.issueType,
-    required this.loanId,
+    this.loanId = '',
     required this.file,
   });
 
@@ -106,7 +116,7 @@ class ComplaintCreateRequest {
   final bool urgent;
   final int issueType;
   final String loanId;
-  final String file;
+  final List<String> file;
 
   // ------------------------------------------------------------
   // ISSUE TYPES
@@ -129,10 +139,12 @@ class ComplaintCreateRequest {
     other,
   ];
 
-  String get issueTypeLabel {
+  String get issueTypeLabel => issueTypeLabelFor(issueType);
+
+  static String issueTypeLabelFor(int issueType) {
     switch (issueType) {
       case billingOrPayment:
-        return 'Billing or Payment';
+        return 'Billing Or Payment';
       case documents:
         return 'Documents';
       case serviceQuality:
@@ -140,7 +152,7 @@ class ComplaintCreateRequest {
       case vehicleRelated:
         return 'Vehicle Related';
       case technicalAndStaff:
-        return 'Technical & Staff';
+        return 'Technical And Staff';
       case other:
         return 'Other';
       default:
@@ -208,7 +220,7 @@ class ComplaintListRequest {
     required this.status,
     required this.page,
     required this.recordsPerPage,
-    required this.loanId,
+    this.loanId = '',
   });
 
   final int status;
@@ -348,4 +360,15 @@ DateTime? _toDateTime(dynamic value) {
   }
 
   return null;
+}
+
+List<String> _toStringList(dynamic value) {
+  if (value is! List) {
+    return const <String>[];
+  }
+
+  return value
+      .where((item) => item != null)
+      .map((item) => item.toString())
+      .toList();
 }

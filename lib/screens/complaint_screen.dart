@@ -23,6 +23,8 @@ class _ComplaintScreenState extends State<ComplaintScreen>
 
   late final TabController _tabController;
 
+  bool _isFormVisible = false;
+
   @override
   void initState() {
     super.initState();
@@ -40,6 +42,12 @@ class _ComplaintScreenState extends State<ComplaintScreen>
     });
 
     _tabController = TabController(length: 2, vsync: this);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() => _isFormVisible = true);
+      }
+    });
   }
 
   @override
@@ -166,7 +174,7 @@ class _ComplaintScreenState extends State<ComplaintScreen>
   String _issueTypeLabel(int value) {
     switch (value) {
       case ComplaintCreateRequest.billingOrPayment:
-        return 'Billing or Payment';
+        return 'Billing Or Payment';
 
       case ComplaintCreateRequest.documents:
         return 'Documents';
@@ -178,7 +186,7 @@ class _ComplaintScreenState extends State<ComplaintScreen>
         return 'Vehicle Related';
 
       case ComplaintCreateRequest.technicalAndStaff:
-        return 'Technical & Staff';
+        return 'Technical And Staff';
 
       case ComplaintCreateRequest.other:
         return 'Other';
@@ -226,22 +234,34 @@ class _ComplaintScreenState extends State<ComplaintScreen>
                         });
                       }
 
-                      return SingleChildScrollView(
-                        physics: const BouncingScrollPhysics(),
-                        padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildIntro(),
+                      return AnimatedOpacity(
+                        duration: const Duration(milliseconds: 320),
+                        curve: Curves.easeOutCubic,
+                        opacity: _isFormVisible ? 1 : 0,
+                        child: AnimatedSlide(
+                          duration: const Duration(milliseconds: 320),
+                          curve: Curves.easeOutCubic,
+                          offset: _isFormVisible
+                              ? Offset.zero
+                              : const Offset(0, 0.025),
+                          child: SingleChildScrollView(
+                            physics: const BouncingScrollPhysics(),
+                            padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildIntro(),
 
-                            const SizedBox(height: 20),
+                                const SizedBox(height: 20),
 
-                            _buildComplaintCard(),
+                                _buildComplaintCard(),
 
-                            const SizedBox(height: 24),
+                                const SizedBox(height: 24),
 
-                            _buildComplaintHistoryButton(),
-                          ],
+                                _buildComplaintHistoryButton(),
+                              ],
+                            ),
+                          ),
                         ),
                       );
                     }),
@@ -621,12 +641,19 @@ class _ComplaintScreenState extends State<ComplaintScreen>
 
   Widget _buildUrgentSwitch() {
     return Obx(() {
-      return Container(
+      return AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.45),
+          color: controller.isUrgent.value
+              ? AppColors.buttonEnd.withValues(alpha: 0.08)
+              : Colors.white.withValues(alpha: 0.45),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.black.withValues(alpha: 0.06)),
+          border: Border.all(
+            color: controller.isUrgent.value
+                ? AppColors.buttonEnd.withValues(alpha: 0.18)
+                : Colors.black.withValues(alpha: 0.06),
+          ),
         ),
         child: Row(
           children: [

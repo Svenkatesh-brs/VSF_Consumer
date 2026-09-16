@@ -18,6 +18,7 @@ class ComplaintListScreen extends StatefulWidget {
 class _ComplaintListScreenState
     extends State<ComplaintListScreen> {
   late final ComplaintProvider controller;
+  final _expandedComplaintKeys = <String>{};
 
   @override
   void initState() {
@@ -137,7 +138,7 @@ class _ComplaintListScreenState
         return 'Pending';
 
       case ComplaintModel.approved:
-        return 'Approved';
+        return 'Resolved';
 
       case ComplaintModel.rejected:
         return 'Rejected';
@@ -200,8 +201,11 @@ class _ComplaintListScreenState
         ),
 
         Obx(
-          () => controller.totalComplaints.value > 0
-              ? Container(
+          () => AnimatedSwitcher(
+            duration: const Duration(milliseconds: 220),
+            child: controller.totalComplaints.value > 0
+                ? Container(
+                    key: const ValueKey('complaint-count'),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 10,
                     vertical: 6,
@@ -220,8 +224,9 @@ class _ComplaintListScreenState
                       color: AppColors.lightBlue,
                     ),
                   ),
-                )
-              : const SizedBox.shrink(),
+                  )
+                : const SizedBox.shrink(key: ValueKey('no-complaint-count')),
+          ),
         ),
       ],
     );
@@ -274,37 +279,61 @@ class _ComplaintListScreenState
   // ============================================================
 
   Widget _buildListContent() {
+    late final Widget content;
+    late final String state;
+
     if (controller.isLoading.value &&
         controller.complaints.isEmpty) {
-      return const Padding(
+      content = const Padding(
         padding: EdgeInsets.only(top: 60),
         child: Center(
           child: CircularProgressIndicator(),
         ),
       );
-    }
-
-    if (controller.errorMessage.value != null &&
+      state = 'loading';
+    } else if (controller.errorMessage.value != null &&
         controller.complaints.isEmpty) {
-      return _buildErrorState();
+      content = _buildErrorState();
+      state = 'error';
+    } else if (controller.complaints.isEmpty) {
+      content = _buildEmptyState();
+      state = 'empty';
+    } else {
+      content = Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ...controller.complaints.asMap().entries.map(
+                (entry) => _buildComplaintCard(
+                  entry.value,
+                  entry.key +
+                      1 +
+                      ((controller.currentPage.value - 1) *
+                          controller.recordsPerPage.value),
+                ),
+              ),
+          const SizedBox(height: 8),
+          _buildPagination(),
+        ],
+      );
+      state =
+          'list-${controller.currentPage.value}-${controller.selectedStatus.value}';
     }
 
-    if (controller.complaints.isEmpty) {
-      return _buildEmptyState();
-    }
-
-    return Column(
-      crossAxisAlignment:
-          CrossAxisAlignment.start,
-      children: [
-        ...controller.complaints.map(
-          _buildComplaintCard,
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 280),
+      switchInCurve: Curves.easeOutCubic,
+      switchOutCurve: Curves.easeInCubic,
+      transitionBuilder: (child, animation) => FadeTransition(
+        opacity: animation,
+        child: SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0, 0.025),
+            end: Offset.zero,
+          ).animate(animation),
+          child: child,
         ),
-
-        const SizedBox(height: 8),
-
-        _buildPagination(),
-      ],
+      ),
+      child: KeyedSubtree(key: ValueKey(state), child: content),
     );
   }
 
@@ -313,61 +342,60 @@ class _ComplaintListScreenState
   // ============================================================
 
   Widget _buildStatusFilter() {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 14,
-        vertical: 2,
-      ),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(
-          alpha: 0.58,
-        ),
-        borderRadius:
-            BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.black.withValues(
-            alpha: 0.06,
+    return Obx(() {
+      final isAllSelected =
+          controller.selectedStatus.value == ComplaintModel.all;
+
+      return AnimatedContainer(
+        duration: const Duration(milliseconds: 220),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
+        decoration: BoxDecoration(
+          color: isAllSelected
+              ? AppColors.lightBlue.withValues(alpha: 0.08)
+              : Colors.white.withValues(alpha: 0.58),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isAllSelected
+                ? AppColors.lightBlue.withValues(alpha: 0.18)
+                : Colors.black.withValues(alpha: 0.06),
           ),
         ),
-      ),
-      child: Row(
-        children: [
-          const Icon(
-            Icons.filter_list_rounded,
-            size: 19,
-            color: AppColors.lightBlue,
-          ),
-
-          const SizedBox(width: 8),
-
-          const Text(
-            'Status',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: Colors.black87,
+        child: Row(
+          children: [
+            const Icon(
+              Icons.filter_list_rounded,
+              size: 19,
+              color: AppColors.lightBlue,
             ),
-          ),
-
-          const Spacer(),
-
-          Obx(
-            () => DropdownButtonHideUnderline(
+            const SizedBox(width: 8),
+            const Text(
+              'Status',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: Colors.black87,
+              ),
+            ),
+            const Spacer(),
+            DropdownButtonHideUnderline(
               child: DropdownButton<int>(
-                value:
-                    controller.selectedStatus.value,
+                value: controller.selectedStatus.value,
                 icon: const Icon(
                   Icons.keyboard_arrow_down_rounded,
                   size: 20,
                 ),
                 items: const [
                   DropdownMenuItem(
+                    value: ComplaintModel.all,
+                    child: Text('All'),
+                  ),
+                  DropdownMenuItem(
                     value: ComplaintModel.pending,
                     child: Text('Pending'),
                   ),
                   DropdownMenuItem(
                     value: ComplaintModel.approved,
-                    child: Text('Approved'),
+                    child: Text('Resolved'),
                   ),
                   DropdownMenuItem(
                     value: ComplaintModel.rejected,
@@ -381,10 +409,10 @@ class _ComplaintListScreenState
                 },
               ),
             ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
+    });
   }
 
   // ============================================================
@@ -393,11 +421,16 @@ class _ComplaintListScreenState
 
   Widget _buildComplaintCard(
     ComplaintModel complaint,
+    int serialNumber,
   ) {
-    final statusColor =
-        _statusColor(complaint.status);
+    final statusColor = _statusColor(complaint.status);
+    final expansionKey = complaint.id.isNotEmpty
+        ? complaint.id
+        : 'complaint-$serialNumber';
+    final isExpanded = _expandedComplaintKeys.contains(expansionKey);
 
-    return Container(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 220),
       margin: const EdgeInsets.only(
         bottom: 14,
       ),
@@ -433,82 +466,94 @@ class _ComplaintListScreenState
         ],
       ),
       child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ------------------------------------------------------
-          // TOP ROW
-          // ------------------------------------------------------
-
-          Row(
-            crossAxisAlignment:
-                CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  color: statusColor.withValues(
-                    alpha: 0.11,
+          InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: () {
+              setState(() {
+                if (isExpanded) {
+                  _expandedComplaintKeys.remove(expansionKey);
+                } else {
+                  _expandedComplaintKeys.add(expansionKey);
+                }
+              });
+            },
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: statusColor.withValues(alpha: 0.11),
+                    shape: BoxShape.circle,
                   ),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  _statusIcon(
-                    complaint.status,
+                  child: Icon(
+                    _statusIcon(complaint.status),
+                    size: 21,
+                    color: statusColor,
                   ),
-                  size: 21,
-                  color: statusColor,
                 ),
-              ),
-
-              const SizedBox(width: 11),
-
-              Expanded(
-                child: Column(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Complaint',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight:
-                            FontWeight.w700,
-                        color:
-                            AppColors.lightBlue,
-                      ),
-                    ),
-
-                    const SizedBox(height: 4),
-
-                    if (complaint.id.isNotEmpty)
+                const SizedBox(width: 11),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Text(
-                        'ID: ${complaint.id}',
-                        maxLines: 2,
-                        overflow:
-                            TextOverflow.ellipsis,
+                        'Complaint #$serialNumber',
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.lightBlue,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        'Created: ${_formatDate(complaint.createdAt)}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           fontSize: 10,
                           color: Colors.black45,
                         ),
                       ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-
-              _buildStatusBadge(
-                complaint.status,
-              ),
-            ],
+                _buildStatusBadge(complaint.status),
+                const SizedBox(width: 4),
+                AnimatedRotation(
+                  duration: const Duration(milliseconds: 220),
+                  turns: isExpanded ? 0.5 : 0,
+                  child: const Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    color: AppColors.lightBlue,
+                  ),
+                ),
+              ],
+            ),
           ),
+          AnimatedCrossFade(
+            duration: const Duration(milliseconds: 220),
+            sizeCurve: Curves.easeInOut,
+            crossFadeState: isExpanded
+                ? CrossFadeState.showSecond
+                : CrossFadeState.showFirst,
+            firstChild: const SizedBox.shrink(),
+            secondChild: _buildComplaintDetails(complaint),
+          ),
+        ],
+      ),
+    );
+  }
 
-          const SizedBox(height: 17),
-
-          // ------------------------------------------------------
-          // DESCRIPTION
-          // ------------------------------------------------------
-
+  Widget _buildComplaintDetails(ComplaintModel complaint) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 17),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
           const Text(
             'Description',
             style: TextStyle(
@@ -517,13 +562,9 @@ class _ComplaintListScreenState
               color: Colors.black45,
             ),
           ),
-
           const SizedBox(height: 5),
-
           Text(
-            complaint.description.isNotEmpty
-                ? complaint.description
-                : '-',
+            complaint.description.isNotEmpty ? complaint.description : '-',
             style: const TextStyle(
               fontSize: 14,
               height: 1.45,
@@ -531,37 +572,103 @@ class _ComplaintListScreenState
               color: Colors.black87,
             ),
           ),
-
           const SizedBox(height: 15),
-
-          // ------------------------------------------------------
-          // CREATED / UPDATED
-          // ------------------------------------------------------
-
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _buildDetailChip(
+                icon: Icons.category_outlined,
+                label: complaint.issueTypeLabel,
+              ),
+              if (complaint.urgent)
+                _buildDetailChip(
+                  icon: Icons.priority_high_rounded,
+                  label: 'Urgent',
+                  color: AppColors.buttonEnd,
+                ),
+            ],
+          ),
+          if (complaint.hasComments) ...[
+            const SizedBox(height: 15),
+            const Text(
+              'Comments',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: Colors.black45,
+              ),
+            ),
+            const SizedBox(height: 5),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: complaint.status == ComplaintModel.rejected
+                    ? Colors.redAccent.withValues(alpha: 0.07)
+                    : Colors.white.withValues(alpha: 0.45),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                complaint.comments.trim(),
+                style: const TextStyle(
+                  fontSize: 13,
+                  height: 1.4,
+                  color: Colors.black87,
+                ),
+              ),
+            ),
+          ],
+          const SizedBox(height: 15),
           Row(
             children: [
               Expanded(
                 child: _buildDateInfo(
                   icon: Icons.calendar_today_outlined,
                   label: 'Created',
-                  value: _formatDate(
-                    complaint.createdAt,
-                  ),
+                  value: _formatDate(complaint.createdAt),
                 ),
               ),
-
-              const SizedBox(width: 12),
-
-              Expanded(
-                child: _buildDateInfo(
-                  icon: Icons.update_rounded,
-                  label: 'Updated',
-                  value: _formatDate(
-                    complaint.updatedAt,
+              if (complaint.status != ComplaintModel.pending) ...[
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildDateInfo(
+                    icon: Icons.support_agent_rounded,
+                    label: 'Response Date',
+                    value: _formatDate(complaint.updatedAt),
                   ),
                 ),
-              ),
+              ],
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailChip({
+    required IconData icon,
+    required String label,
+    Color color = AppColors.lightBlue,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.09),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: color),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
           ),
         ],
       ),
@@ -758,8 +865,10 @@ class _ComplaintListScreenState
         const SizedBox(height: 7),
 
         Text(
-          'There are no complaints under the '
-          '${controller.selectedStatusLabel.toLowerCase()} status.',
+          controller.selectedStatus.value == ComplaintModel.all
+              ? 'There are no complaints to show right now.'
+              : 'There are no complaints under the '
+                  '${controller.selectedStatusLabel.toLowerCase()} status.',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 13,
