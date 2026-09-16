@@ -9,7 +9,8 @@ class PayEmiProvider extends GetxController {
   final PayEmiService _payEmiService;
 
   PayEmiProvider({required PayEmiService payEmiService})
-    : _payEmiService = payEmiService;
+      // ignore: prefer_initializing_formals
+      : _payEmiService = payEmiService;
 
   // ============================================================
   // STATE
@@ -35,11 +36,17 @@ class PayEmiProvider extends GetxController {
 
   List<String> get contactNumbers => paymentInfo.value?.contactNumbers ?? [];
 
-  List<String> get paymentNumbers => paymentInfo.value?.paymentNumbers ?? [];
-
-  List<String> get upiIds => paymentInfo.value?.upiIds ?? [];
-
   List<PayEmiFile> get files => paymentInfo.value?.files ?? [];
+
+  PayEmiFile? get selectedFile {
+    final list = files;
+    if (list.isEmpty) return null;
+    final index = selectedQrIndex.value;
+    if (index >= 0 && index < list.length) {
+      return list[index];
+    }
+    return list.first;
+  }
 
   bool get hasQrImages => qrImages.isNotEmpty;
   bool get hasPaymentInfo => paymentInfo.value != null;
@@ -87,34 +94,37 @@ class PayEmiProvider extends GetxController {
     try {
       final info = await _payEmiService.getPaymentInfo();
 
-      paymentInfo.value = info;
-
       // ========================================================
       // LOAD QR IMAGES
       //
+      // Pre-allocate loadedImages matching info.files length.
       // Each file's QR image is loaded using its own `did`.
-      // A failed QR is stored as null so its index still matches
-      // the corresponding PayEmiFile, keeping the QR, its name,
-      // its UPI ID and the swipe position in sync.
+      // A failed QR is stored as null at its exact index so its
+      // position strictly matches the corresponding PayEmiFile,
+      // keeping the QR, name, UPI ID, payment number and swipe
+      // position synchronized.
       // ========================================================
-      qrImages.clear();
+      final loadedImages = List<Uint8List?>.filled(info.files.length, null);
 
-      for (final file in info.files) {
+      for (int i = 0; i < info.files.length; i++) {
+        final file = info.files[i];
         try {
-          final imageBytes = await _payEmiService.getQrImage(file.did);
-
-          if (imageBytes.isNotEmpty) {
-            qrImages.add(Uint8List.fromList(imageBytes));
-          } else {
-            qrImages.add(null);
+          if (file.did.trim().isNotEmpty) {
+            final imageBytes = await _payEmiService.getQrImage(file.did);
+            if (imageBytes.isNotEmpty) {
+              loadedImages[i] = Uint8List.fromList(imageBytes);
+            }
           }
         } catch (_) {
-          qrImages.add(null);
+          loadedImages[i] = null;
         }
       }
 
-      if (selectedQrIndex.value >= 0 && selectedQrIndex.value >= files.length) {
-        selectedQrIndex.value = files.isEmpty ? 0 : files.length - 1;
+      paymentInfo.value = info;
+      qrImages.assignAll(loadedImages);
+
+      if (selectedQrIndex.value >= info.files.length) {
+        selectedQrIndex.value = info.files.isEmpty ? 0 : info.files.length - 1;
       }
     } catch (e) {
       if (showLoading) {

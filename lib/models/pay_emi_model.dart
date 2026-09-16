@@ -1,11 +1,13 @@
 class PayEmiFile {
   final String name;
   final String upiId;
+  final String paymentNumber;
   final String did;
 
   const PayEmiFile({
     this.name = '',
     this.upiId = '',
+    this.paymentNumber = '',
     this.did = '',
   });
 
@@ -13,6 +15,7 @@ class PayEmiFile {
     return PayEmiFile(
       name: json['name']?.toString() ?? '',
       upiId: json['upiId']?.toString() ?? '',
+      paymentNumber: json['paymentNumber']?.toString() ?? '',
       did: json['did']?.toString() ?? '',
     );
   }
@@ -20,15 +23,11 @@ class PayEmiFile {
 
 class PayEmiModel {
   final List<String> contactNumbers;
-  final List<String> paymentNumbers;
-  final List<String> upiIds;
   final List<PayEmiFile> files;
 
   const PayEmiModel({
-    required this.contactNumbers,
-    required this.paymentNumbers,
-    required this.upiIds,
-    required this.files,
+    this.contactNumbers = const [],
+    this.files = const [],
   });
 
   factory PayEmiModel.fromJson(Map<String, dynamic> json) {
@@ -36,12 +35,6 @@ class PayEmiModel {
 
     return PayEmiModel(
       contactNumbers: (json['contactNumbers'] as List<dynamic>? ?? [])
-          .map((item) => item.toString())
-          .toList(),
-      paymentNumbers: (json['paymentNumbers'] as List<dynamic>? ?? [])
-          .map((item) => item.toString())
-          .toList(),
-      upiIds: (json['upiIds'] as List<dynamic>? ?? [])
           .map((item) => item.toString())
           .toList(),
       files: (fileItems is List<dynamic> ? fileItems : <dynamic>[])

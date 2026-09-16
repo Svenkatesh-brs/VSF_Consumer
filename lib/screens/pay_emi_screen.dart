@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
-import 'dart:typed_data';
 
 import '../providers/pay_emi_provider.dart';
 import '../models/pay_emi_model.dart';
@@ -104,10 +103,6 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
             _buildIntro(),
             const SizedBox(height: 20),
             _buildQrCard(),
-            const SizedBox(height: 22),
-            _buildUpiSection(),
-            const SizedBox(height: 22),
-            _buildPaymentNumbersSection(),
             const SizedBox(height: 22),
             _buildContactNumbersSection(),
             const SizedBox(height: 22),
@@ -272,6 +267,10 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
 
       return Column(
         children: [
+          if (files.first.name.trim().isNotEmpty) ...[
+            _buildProviderBadge(files.first.name.trim()),
+            const SizedBox(height: 12),
+          ],
           _buildQrImageFrame(image),
           const SizedBox(height: 14),
           _buildQrMetadata(files.first),
@@ -281,11 +280,26 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
 
     return Column(
       children: [
+        Obx(() {
+          final index = controller.selectedQrIndex.value;
+          final currentFile = index < files.length ? files[index] : files.first;
+          final name = currentFile.name.trim();
+          if (name.isEmpty) {
+            return const SizedBox.shrink();
+          }
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: _buildProviderBadge(name),
+          );
+        }),
         SizedBox(
           height: 250,
           child: PageView.builder(
             itemCount: files.length,
-            controller: PageController(viewportFraction: 0.88),
+            controller: PageController(
+              viewportFraction: 0.88,
+              initialPage: controller.selectedQrIndex.value.clamp(0, files.length - 1),
+            ),
             onPageChanged: controller.selectQrIndex,
             itemBuilder: (context, index) {
               final image = index < controller.qrImages.length
@@ -301,7 +315,11 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
         ),
         const SizedBox(height: 10),
         Obx(
-          () => _buildQrMetadata(files[controller.selectedQrIndex.value]),
+          () {
+            final index = controller.selectedQrIndex.value;
+            final currentFile = index < files.length ? files[index] : files.first;
+            return _buildQrMetadata(currentFile);
+          },
         ),
         const SizedBox(height: 10),
         Text(
@@ -309,6 +327,27 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
           style: AppTheme.style.copyWith(fontSize: 11.5, color: AppColors.hint),
         ),
       ],
+    );
+  }
+
+  Widget _buildProviderBadge(String name) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+      decoration: BoxDecoration(
+        color: AppColors.tintColor,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: AppColors.primary.withValues(alpha: 0.25),
+        ),
+      ),
+      child: Text(
+        name,
+        style: AppTheme.style.copyWith(
+          fontSize: 13,
+          fontWeight: FontWeight.w700,
+          color: AppColors.lightBlue,
+        ),
+      ),
     );
   }
 
@@ -350,16 +389,16 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
   // ============================================================
   // SELECTED QR METADATA
   //
-  // Shows the name and UPI ID of the currently selected QR.
+  // Shows the UPI ID and payment number of the currently selected QR.
   // These update together with the swiped QR because both are
   // derived from the same selected index into the files list.
   // ============================================================
 
   Widget _buildQrMetadata(PayEmiFile file) {
-    final name = file.name.trim();
     final upi = file.upiId.trim();
+    final paymentNumber = file.paymentNumber.trim();
 
-    if (name.isEmpty && upi.isEmpty) {
+    if (upi.isEmpty && paymentNumber.isEmpty) {
       return const SizedBox.shrink();
     }
 
@@ -376,17 +415,6 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (name.isNotEmpty) ...[
-            Text(
-              'Pay with $name',
-              style: AppTheme.style.copyWith(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: AppColors.lightBlue,
-              ),
-            ),
-            const SizedBox(height: 4),
-          ],
           if (upi.isNotEmpty)
             Row(
               children: [
@@ -397,19 +425,77 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Text(
-                    upi,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTheme.style.copyWith(
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.lightBlue,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'UPI ID',
+                        style: AppTheme.style.copyWith(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.hint,
+                        ),
+                      ),
+                      const SizedBox(height: 1),
+                      Text(
+                        upi,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTheme.style.copyWith(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.lightBlue,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(width: 6),
                 _buildCopyButton(upi),
+              ],
+            ),
+          if (upi.isNotEmpty && paymentNumber.isNotEmpty)
+            Divider(
+              height: 16,
+              color: AppColors.inputBorder.withValues(alpha: 0.35),
+            ),
+          if (paymentNumber.isNotEmpty)
+            Row(
+              children: [
+                const Icon(
+                  Icons.phone_android_rounded,
+                  color: AppColors.secondary,
+                  size: 19,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Payment Number',
+                        style: AppTheme.style.copyWith(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.hint,
+                        ),
+                      ),
+                      const SizedBox(height: 1),
+                      Text(
+                        paymentNumber,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTheme.style.copyWith(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.lightBlue,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 6),
+                _buildCopyButton(paymentNumber),
               ],
             ),
         ],
@@ -443,45 +529,6 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
   }
 
   // ============================================================
-  // UPI SECTION
-  // ============================================================
-
-  Widget _buildUpiSection() {
-    final fileUpiIds = controller.files
-        .map((file) => file.upiId.trim())
-        .where((value) => value.isNotEmpty)
-        .toSet();
-
-    // Top-level UPI IDs that are not already represented by a
-    // QR-specific file.upiId. QR-specific UPI is shown inside the
-    // Scan & Pay card instead of being duplicated here.
-    final upiIds = controller.upiIds
-        .map((value) => value.trim())
-        .where((value) => value.isNotEmpty && !fileUpiIds.contains(value))
-        .toSet()
-        .toList();
-
-    if (upiIds.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    return _buildPaymentDetailSection(
-      title: 'Pay using UPI',
-      subtitle: 'Copy a UPI ID and pay from your UPI app',
-      icon: Icons.alternate_email_rounded,
-      children: [
-        ...upiIds.map(
-          (value) => _buildCopyableItem(
-            value: value,
-            label: 'UPI ID',
-            icon: Icons.alternate_email_rounded,
-          ),
-        ),
-      ],
-    );
-  }
-
-  // ============================================================
   // CONTACT NUMBERS
   // ============================================================
 
@@ -502,33 +549,6 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
             value: entry.value,
             label: 'Contact Number',
             icon: Icons.support_agent_rounded,
-          ),
-        ),
-      ],
-    );
-  }
-
-  // ============================================================
-  // PAYMENT NUMBERS
-  // ============================================================
-
-  Widget _buildPaymentNumbersSection() {
-    final numbers = controller.paymentNumbers;
-
-    if (numbers.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    return _buildPaymentDetailSection(
-      title: 'Payment Numbers',
-      subtitle: 'Use any available payment number when required',
-      icon: Icons.phone_android_rounded,
-      children: [
-        ...numbers.asMap().entries.map(
-          (entry) => _buildCopyableItem(
-            value: entry.value,
-            label: 'Payment Number',
-            icon: Icons.phone_android_rounded,
           ),
         ),
       ],
@@ -733,56 +753,52 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
   // ============================================================
 
   Widget _buildLoadingState() {
-  return LayoutBuilder(
-    builder: (context, constraints) {
-      return SingleChildScrollView(
-        physics: const NeverScrollableScrollPhysics(),
-        child: SizedBox(
-          height: constraints.maxHeight,
-          width: double.infinity,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Lottie.asset(
-                'assets/animations/pay_emi_loading.json',
-                width: 320,
-                height: 320,
-                fit: BoxFit.contain,
-                repeat: true,
-              ),
-
-              const SizedBox(height: 8),
-
-              Text(
-                'Loading payment details',
-                style: AppTheme.style.copyWith(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.lightBlue,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          physics: const NeverScrollableScrollPhysics(),
+          child: SizedBox(
+            height: constraints.maxHeight,
+            width: double.infinity,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Lottie.asset(
+                  'assets/animations/pay_emi_loading.json',
+                  width: 320,
+                  height: 320,
+                  fit: BoxFit.contain,
+                  repeat: true,
                 ),
-              ),
-
-              const SizedBox(height: 6),
-
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 30),
-                child: Text(
-                  'Please wait while we fetch the latest payment information.',
-                  textAlign: TextAlign.center,
+                const SizedBox(height: 8),
+                Text(
+                  'Loading payment details',
                   style: AppTheme.style.copyWith(
-                    fontSize: 12,
-                    color: AppColors.hint,
-                    height: 1.4,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.lightBlue,
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 6),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 30),
+                  child: Text(
+                    'Please wait while we fetch the latest payment information.',
+                    textAlign: TextAlign.center,
+                    style: AppTheme.style.copyWith(
+                      fontSize: 12,
+                      color: AppColors.hint,
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-      );
-    },
-  );
-}
+        );
+      },
+    );
+  }
 
   // ============================================================
   // ERROR

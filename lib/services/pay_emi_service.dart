@@ -9,6 +9,7 @@ class PayEmiService {
 
   PayEmiService({
     required ApiService apiService,
+    // ignore: prefer_initializing_formals
   }) : _apiService = apiService;
 
   // ============================================================
@@ -43,9 +44,9 @@ class PayEmiService {
 
     if (companyData is! Map<String, dynamic>) {
       throw ApiException(
-        message: error.isNotEmpty
-            ? error
-            : (message.isNotEmpty ? message : 'Payment information not found'),
+        message: message.isNotEmpty
+            ? message
+            : (error.isNotEmpty ? error : 'Payment information not found'),
       );
     }
 
