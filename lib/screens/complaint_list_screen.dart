@@ -305,10 +305,10 @@ class _ComplaintListScreenState
           ...controller.complaints.asMap().entries.map(
                 (entry) => _buildComplaintCard(
                   entry.value,
-                  entry.key +
-                      1 +
-                      ((controller.currentPage.value - 1) *
-                          controller.recordsPerPage.value),
+                  controller.totalComplaints.value -
+                    entry.key -
+                    ((controller.currentPage.value - 1) *
+                      controller.recordsPerPage.value),
                 ),
               ),
           const SizedBox(height: 8),
@@ -518,6 +518,20 @@ class _ComplaintListScreenState
                           color: Colors.black45,
                         ),
                       ),
+                      if (!isExpanded) ...[
+                        const SizedBox(height: 3),
+                        Text(
+                          complaint.description.trim().isNotEmpty
+                              ? complaint.description.trim()
+                              : '-',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: Colors.black54,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),

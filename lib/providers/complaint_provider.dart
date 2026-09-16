@@ -264,7 +264,7 @@ class ComplaintProvider extends GetxController {
           final firstDate = first.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
           final secondDate = second.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
 
-          return firstDate.compareTo(secondDate);
+          return secondDate.compareTo(firstDate);
         });
 
       complaints.assignAll(sortedComplaints);
