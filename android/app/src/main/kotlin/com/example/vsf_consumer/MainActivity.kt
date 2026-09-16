@@ -14,30 +14,35 @@ import java.io.File
 import java.io.FileOutputStream
 
 /**
- * Hosts the "vsf_consumer/receipt_saver" method channel used by
- * ReceiptPdfService to save receipt PDFs into the device's
- * public Downloads folder.
+ * Hosts two method channels:
+ *
+ *  - "vsf_consumer/receipt_saver"  -> savePdf  (receipt PDFs to Downloads)
+ *  - "vsf_consumer/qr_image_saver" -> saveImage (QR PNGs to Pictures/VSF)
  *
  * Storage strategy (no MANAGE_EXTERNAL_STORAGE anywhere):
  *
- *  - Android 10 (API 29)+: MediaStore.Downloads insert via the
- *    ContentResolver. Scoped-storage compliant and requires NO
- *    runtime permission.
- *  - Android 9 (API 28) and below: direct write into the public
- *    Downloads directory, covered by the legacy
- *    WRITE_EXTERNAL_STORAGE permission (declared in the
- *    manifest with maxSdkVersion=28 and requested at runtime
- *    only when actually needed).
+ *  - Android 10 (API 29)+: MediaStore inserts via the ContentResolver
+ *    (Downloads for PDFs, Images under Pictures/VSF for QRs).
+ *    Scoped-storage compliant, requires NO runtime permission.
+ *  - Android 9 (API 28) and below: direct write into the legacy
+ *    public Downloads/Pictures directories, guarded by
+ *    WRITE_EXTERNAL_STORAGE (declared in the manifest with
+ *    maxSdkVersion=28 and requested at runtime only when needed).
  */
 class MainActivity : FlutterActivity() {
 
     companion object {
         private const val CHANNEL_NAME = "vsf_consumer/receipt_saver"
         private const val SAVE_PDF_METHOD = "savePdf"
+
+        private const val IMAGE_CHANNEL_NAME = "vsf_consumer/qr_image_saver"
+        private const val SAVE_IMAGE_METHOD = "saveImage"
+
         private const val PERMISSION_REQUEST_CODE = 4711
     }
 
-    /** Pending legacy-API save while a permission dialog shows. */
+    /** Which pending legacy save ("savePdf" or "saveImage") awaits permission. */
+    private var pendingMethod: String? = null
     private var pendingBytes: ByteArray? = null
     private var pendingFileName: String? = null
     private var pendingResult: MethodChannel.Result? = null
@@ -45,6 +50,7 @@ class MainActivity : FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
 
+        // Receipt PDF saver -> public Downloads.
         MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
             CHANNEL_NAME,
@@ -67,11 +73,36 @@ class MainActivity : FlutterActivity() {
                 else -> result.notImplemented()
             }
         }
+
+        // Separate channel for QR image downloads: image saving is
+        // never mixed with the receipt-PDF saver above.
+        MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            IMAGE_CHANNEL_NAME,
+        ).setMethodCallHandler { call, result ->
+            when (call.method) {
+                SAVE_IMAGE_METHOD -> {
+                    val bytes = call.argument<ByteArray>("bytes")
+                    val fileName = call.argument<String>("fileName")
+
+                    if (bytes == null || fileName.isNullOrEmpty()) {
+                        result.error(
+                            "INVALID_ARGUMENT",
+                            "bytes and fileName are required.",
+                            null,
+                        )
+                    } else {
+                        saveImage(bytes, fileName, result)
+                    }
+                }
+                else -> result.notImplemented()
+            }
+        }
     }
 
-    // ------------------------------------------------------------
-    // SAVE ENTRY POINT
-    // ------------------------------------------------------------
+    // ============================================================
+    // PDF (RECEIPT) -> DOWNLOADS
+    // ============================================================
 
     private fun savePdf(
         bytes: ByteArray,
@@ -79,10 +110,8 @@ class MainActivity : FlutterActivity() {
         result: MethodChannel.Result,
     ) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            // Modern scoped storage: MediaStore.Downloads, no
-            // permission required.
             try {
-                result.success(saveViaMediaStore(fileName, bytes))
+                result.success(saveViaMediaStoreDownloads(fileName, bytes))
             } catch (e: Exception) {
                 result.error(
                     "SAVE_FAILED",
@@ -93,21 +122,57 @@ class MainActivity : FlutterActivity() {
             return
         }
 
-        // Legacy devices (API <= 28): direct public-Downloads
-        // write guarded by WRITE_EXTERNAL_STORAGE.
-        val granted =
-            ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            ) == PackageManager.PERMISSION_GRANTED
-
-        if (granted) {
+        if (hasStoragePermission()) {
             saveViaLegacyDownloads(bytes, fileName, result)
             return
         }
 
-        // Stash the request and ask once; the completion continues
-        // in onRequestPermissionsResult.
+        stashAndRequest(SAVE_PDF_METHOD, bytes, fileName, result)
+    }
+
+    // ============================================================
+    // QR IMAGE -> PICTURES/VSF
+    // ============================================================
+
+    private fun saveImage(
+        bytes: ByteArray,
+        fileName: String,
+        result: MethodChannel.Result,
+    ) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            try {
+                result.success(saveViaMediaStoreImages(fileName, bytes))
+            } catch (e: Exception) {
+                result.error(
+                    "SAVE_FAILED",
+                    e.message ?: "Unable to save QR image to Pictures.",
+                    null,
+                )
+            }
+            return
+        }
+
+        if (hasStoragePermission()) {
+            saveViaLegacyPictures(bytes, fileName, result)
+            return
+        }
+
+        stashAndRequest(SAVE_IMAGE_METHOD, bytes, fileName, result)
+    }
+
+    private fun hasStoragePermission(): Boolean =
+        ActivityCompat.checkSelfPermission(
+            this,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+        ) == PackageManager.PERMISSION_GRANTED
+
+    private fun stashAndRequest(
+        method: String,
+        bytes: ByteArray,
+        fileName: String,
+        result: MethodChannel.Result,
+    ) {
+        pendingMethod = method
         pendingBytes = bytes
         pendingFileName = fileName
         pendingResult = result
@@ -120,10 +185,10 @@ class MainActivity : FlutterActivity() {
     }
 
     // ------------------------------------------------------------
-    // ANDROID 10+: MEDIASTORE.DOWNLOADS (NO PERMISSION NEEDED)
+    // MODERN: MEDIASTORE.DOWNLOADS (PDF, API 29+)
     // ------------------------------------------------------------
 
-    private fun saveViaMediaStore(
+    private fun saveViaMediaStoreDownloads(
         fileName: String,
         bytes: ByteArray,
     ): String {
@@ -138,9 +203,7 @@ class MainActivity : FlutterActivity() {
         val uri = resolver.insert(
             MediaStore.Downloads.EXTERNAL_CONTENT_URI,
             values,
-        ) ?: throw IllegalStateException(
-            "Could not create the Downloads entry.",
-        )
+        ) ?: throw IllegalStateException("Could not create the Downloads entry.")
 
         try {
             resolver.openOutputStream(uri)?.use { output ->
@@ -154,7 +217,6 @@ class MainActivity : FlutterActivity() {
             values.put(MediaStore.Downloads.IS_PENDING, 0)
             resolver.update(uri, values, null, null)
         } catch (e: Exception) {
-            // Do not leave a pending/partial entry behind.
             runCatching { resolver.delete(uri, null, null) }
             throw e
         }
@@ -165,7 +227,51 @@ class MainActivity : FlutterActivity() {
     }
 
     // ------------------------------------------------------------
-    // ANDROID 9 AND BELOW: DIRECT PUBLIC DOWNLOADS WRITE
+    // MODERN: MEDIASTORE.IMAGES (QR, API 29+)
+    // ------------------------------------------------------------
+
+    private fun saveViaMediaStoreImages(
+        fileName: String,
+        bytes: ByteArray,
+    ): String {
+        val resolver = contentResolver
+
+        val values = ContentValues().apply {
+            put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
+            put(MediaStore.Images.Media.MIME_TYPE, "image/png")
+            put(MediaStore.Images.Media.IS_PENDING, 1)
+            put(
+                MediaStore.Images.Media.RELATIVE_PATH,
+                "${Environment.DIRECTORY_PICTURES}/VSF",
+            )
+        }
+
+        val uri = resolver.insert(
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+            values,
+        ) ?: throw IllegalStateException("Could not create the Pictures entry.")
+
+        try {
+            resolver.openOutputStream(uri)?.use { output ->
+                output.write(bytes)
+                output.flush()
+            } ?: throw IllegalStateException(
+                "Could not open the Pictures output stream.",
+            )
+
+            values.clear()
+            values.put(MediaStore.Images.Media.IS_PENDING, 0)
+            resolver.update(uri, values, null, null)
+        } catch (e: Exception) {
+            runCatching { resolver.delete(uri, null, null) }
+            throw e
+        }
+
+        return "Pictures/VSF/$fileName"
+    }
+
+    // ------------------------------------------------------------
+    // LEGACY (API <= 28): DIRECT PUBLIC DOWNLOADS WRITE
     // ------------------------------------------------------------
 
     private fun saveViaLegacyDownloads(
@@ -182,15 +288,12 @@ class MainActivity : FlutterActivity() {
                 downloadsDir.mkdirs()
             }
 
-            // Avoid overwriting an earlier receipt with the same
-            // name: append " (n)" before the extension.
             var target = File(downloadsDir, fileName)
             var counter = 1
             while (target.exists()) {
                 val dotIndex = fileName.lastIndexOf('.')
                 val base = if (dotIndex > 0) fileName.substring(0, dotIndex) else fileName
                 val extension = if (dotIndex > 0) fileName.substring(dotIndex) else ""
-
                 target = File(downloadsDir, "$base ($counter)$extension")
                 counter++
             }
@@ -211,6 +314,50 @@ class MainActivity : FlutterActivity() {
     }
 
     // ------------------------------------------------------------
+    // LEGACY (API <= 28): DIRECT PUBLIC PICTURES WRITE
+    // ------------------------------------------------------------
+
+    private fun saveViaLegacyPictures(
+        bytes: ByteArray,
+        fileName: String,
+        result: MethodChannel.Result,
+    ) {
+        try {
+            val picturesBase = Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES,
+            )
+
+            val vsfDir = File(picturesBase, "VSF")
+            if (!vsfDir.exists()) {
+                vsfDir.mkdirs()
+            }
+
+            var target = File(vsfDir, fileName)
+            var counter = 1
+            while (target.exists()) {
+                val dotIndex = fileName.lastIndexOf('.')
+                val base = if (dotIndex > 0) fileName.substring(0, dotIndex) else fileName
+                val extension = if (dotIndex > 0) fileName.substring(dotIndex) else ""
+                target = File(vsfDir, "$base ($counter)$extension")
+                counter++
+            }
+
+            FileOutputStream(target).use { output ->
+                output.write(bytes)
+                output.flush()
+            }
+
+            result.success(target.absolutePath)
+        } catch (e: Exception) {
+            result.error(
+                "SAVE_FAILED",
+                e.message ?: "Unable to save QR image to Pictures.",
+                null,
+            )
+        }
+    }
+
+    // ------------------------------------------------------------
     // LEGACY RUNTIME-PERMISSION CALLBACK
     // ------------------------------------------------------------
 
@@ -225,10 +372,12 @@ class MainActivity : FlutterActivity() {
             return
         }
 
+        val method = pendingMethod
         val result = pendingResult
         val bytes = pendingBytes
         val fileName = pendingFileName
 
+        pendingMethod = null
         pendingResult = null
         pendingBytes = null
         pendingFileName = null
@@ -240,11 +389,15 @@ class MainActivity : FlutterActivity() {
         if (grantResults.isNotEmpty() &&
             grantResults[0] == PackageManager.PERMISSION_GRANTED
         ) {
-            saveViaLegacyDownloads(bytes, fileName, result)
+            if (method == SAVE_IMAGE_METHOD) {
+                saveViaLegacyPictures(bytes, fileName, result)
+            } else {
+                saveViaLegacyDownloads(bytes, fileName, result)
+            }
         } else {
             result.error(
                 "PERMISSION_DENIED",
-                "Storage permission was denied, so the receipt could not be saved to Downloads.",
+                "Storage permission was denied.",
                 null,
             )
         }

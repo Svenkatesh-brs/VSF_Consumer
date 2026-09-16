@@ -2,33 +2,47 @@ import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../models/pay_emi_model.dart';
 
 class PayEmiQrService {
   static const MethodChannel _saverChannel = MethodChannel(
-    'vsf_consumer/receipt_saver',
+    'vsf_consumer/qr_image_saver',
   );
 
-  /// Launches the device's UPI payment app with prefilled UPI ID.
-  static Future<bool> launchUpi({
-    required String upiId,
-    String payeeName = 'VSF EMI',
+  /// Saves the already-loaded QR image for [file] as a PNG into
+  /// the device's Pictures folder (Android) and returns the
+  /// user-visible location (e.g. "Pictures/VSF/VSF_Payment_QR_Gpay.png").
+  ///
+  /// No new network request is made: the caller passes the same
+  /// [qrImageBytes] that are already displayed for the selected QR.
+  static Future<String> saveQrImage({
+    required PayEmiFile file,
+    required Uint8List qrImageBytes,
   }) async {
-    final cleanUpi = upiId.trim();
-    if (cleanUpi.isEmpty) {
-      return false;
-    }
-
-    final uri = Uri.parse(
-      'upi://pay?pa=$cleanUpi&pn=${Uri.encodeComponent(payeeName)}&cu=INR',
-    );
+    final cleanName = file.name.replaceAll(RegExp(r'[^A-Za-z0-9_]'), '');
+    final fileName = cleanName.isNotEmpty
+        ? 'VSF_Payment_QR_$cleanName.png'
+        : 'VSF_Payment_QR.png';
 
     try {
-      return await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } catch (_) {
-      return false;
+      final location = await _saverChannel.invokeMethod<String>(
+        'saveImage',
+        <String, dynamic>{
+          'bytes': qrImageBytes,
+          'fileName': fileName,
+        },
+      );
+
+      if (location == null || location.isEmpty) {
+        throw StateError('The QR image was saved but no location was returned.');
+      }
+
+      return location;
+    } on MissingPluginException {
+      throw UnsupportedError(
+        'Saving the QR image to storage is only supported on Android.',
+      );
     }
   }
 
@@ -152,38 +166,6 @@ class PayEmiQrService {
     );
 
     return doc.save();
-  }
-
-  /// Saves the QR code slip to public Downloads folder.
-  static Future<String> saveQrToDownloads({
-    required PayEmiFile file,
-    required Uint8List? qrImageBytes,
-  }) async {
-    final pdfBytes = await buildQrPdf(
-      file: file,
-      qrImageBytes: qrImageBytes,
-    );
-
-    final cleanName = file.name.replaceAll(RegExp(r'[^A-Za-z0-9_]'), '');
-    final fileName = cleanName.isNotEmpty
-        ? 'VSF_Payment_QR_$cleanName.pdf'
-        : 'VSF_Payment_QR.pdf';
-
-    try {
-      final location = await _saverChannel.invokeMethod<String>(
-        'savePdf',
-        <String, dynamic>{
-          'bytes': pdfBytes,
-          'fileName': fileName,
-        },
-      );
-
-      return location ?? 'Downloads/$fileName';
-    } on MissingPluginException {
-      // Fall back to system share / print
-      await Printing.sharePdf(bytes: pdfBytes, filename: fileName);
-      return 'Shared ($fileName)';
-    }
   }
 
   /// Shares the QR code slip via system share sheet (WhatsApp, etc.).
