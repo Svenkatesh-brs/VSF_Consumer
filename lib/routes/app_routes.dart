@@ -5,6 +5,8 @@ abstract class AppRoutes {
 
   static const otp = '/otp';
 
+  static const languageSelection = '/language-selection';
+
   static const home = '/home';
 
   static const loanDashboard = '/loan-dashboard';

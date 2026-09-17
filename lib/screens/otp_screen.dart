@@ -218,7 +218,7 @@ class _OtpScreenState extends State<OtpScreen>
       return;
     }
 
-    Get.offNamed(AppRoutes.home);
+    Get.offNamed(AppRoutes.languageSelection);
   }
 
   // ------------------------------------------------------------

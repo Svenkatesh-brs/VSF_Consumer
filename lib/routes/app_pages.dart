@@ -16,6 +16,7 @@ import '../screens/help_screen.dart';
 import '../screens/loan_dashboard_screen.dart';
 import '../screens/loan_details_screen.dart';
 import '../screens/login_screen.dart';
+import '../screens/language_selection_screen.dart';
 import '../screens/otp_screen.dart';
 import '../screens/receipt_preview_screen.dart';
 import '../screens/splash_screen.dart';
@@ -39,6 +40,14 @@ abstract class AppPages {
     // OTP
     // ==========================================================
     GetPage(name: AppRoutes.otp, page: () => const OtpScreen()),
+
+    // ==========================================================
+    // LANGUAGE SELECTION
+    // ==========================================================
+    GetPage(
+      name: AppRoutes.languageSelection,
+      page: () => const LanguageSelectionScreen(),
+    ),
 
     // ==========================================================
     // HOME
