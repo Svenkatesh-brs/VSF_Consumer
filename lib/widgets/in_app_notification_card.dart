@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import '../models/in_app_notification_model.dart';
 import '../utils/app_colors.dart';
@@ -138,23 +139,29 @@ class InAppNotificationCard extends StatelessWidget {
         DateTime.now().difference(date.toLocal());
 
     if (difference.inMinutes < 1) {
-      return 'Just now';
+      return 'just_now'.tr;
     }
 
     if (difference.inMinutes < 60) {
-      return '${difference.inMinutes}m ago';
+      return 'minutes_ago'.trParams({
+        'count': difference.inMinutes.toString(),
+      });
     }
 
     if (difference.inHours < 24) {
-      return '${difference.inHours}h ago';
+      return 'hours_ago'.trParams({
+        'count': difference.inHours.toString(),
+      });
     }
 
     if (difference.inDays == 1) {
-      return 'Yesterday';
+      return 'yesterday'.tr;
     }
 
     if (difference.inDays < 7) {
-      return '${difference.inDays}d ago';
+      return 'days_ago'.trParams({
+        'count': difference.inDays.toString(),
+      });
     }
 
     return '${date.day}/${date.month}/${date.year}';

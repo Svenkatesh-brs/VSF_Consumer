@@ -63,4 +63,22 @@ const Map<String, String> languageSelectionTe = {
   'error_timeout': 'అభ్యర్థనకు సమయం ముగిసింది. దయచేసి మళ్లీ ప్రయత్నించండి.',
   'error_connection': 'సర్వర్‌కు కనెక్ట్ కాలేకపోయాము.',
   'error_session_expired': 'మీ సెషన్ ముగిసింది. దయచేసి మళ్లీ లాగిన్ చేయండి.',
+  
+  //In app Notifications
+  'notification': 'నోటిఫికేషన్',
+  'unread': 'చదవనివి',
+  'seen': 'చూసినవి',
+  'no_new_notifications': 'కొత్త నోటిఫికేషన్లు లేవు',
+  'all_caught_up': 'మీరు అన్ని నోటిఫికేషన్లను చూశారు',
+  'no_notifications_seen': 'ఇంకా నోటిఫికేషన్లు చూడలేదు',
+  'opened_notifications_here': 'మీరు తెరిచిన నోటిఫికేషన్లు ఇక్కడ కనిపిస్తాయి',
+  'just_now': 'ఇప్పుడే',
+  'minutes_ago': '@count నిమిషాల క్రితం',
+  'hours_ago': '@count గంటల క్రితం',
+  'yesterday': 'నిన్న',
+  'days_ago': '@count రోజుల క్రితం',
+  'error_unable_load_notifications': 'నోటిఫికేషన్లను లోడ్ చేయలేకపోయాము.',
+  'error_unable_refresh_notifications': 'నోటిఫికేషన్లను రిఫ్రెష్ చేయలేకపోయాము.',
+  'error_mark_read': 'నోటిఫికేషన్‌ను చదివినదిగా గుర్తించలేకపోయాము.',
+  'error_update_notification': 'నోటిఫికేషన్‌ను నవీకరించలేకపోయాము.',
 };

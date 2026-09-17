@@ -66,7 +66,7 @@ class InAppNotificationProvider extends GetxController {
       print('Error: $e');
       print('===============================================');
 
-      errorMessage.value = 'Unable to load notifications.';
+      errorMessage.value = 'error_unable_load_notifications'.tr;
     } finally {
       isLoading.value = false;
     }
@@ -95,7 +95,7 @@ class InAppNotificationProvider extends GetxController {
       currentPage.value = response.page;
       total.value = response.total;
     } catch (e) {
-      errorMessage.value = 'Unable to refresh notifications.';
+      errorMessage.value = 'error_unable_refresh_notifications'.tr;
     } finally {
       isRefreshing.value = false;
     }
@@ -157,8 +157,8 @@ class InAppNotificationProvider extends GetxController {
       notifications[index] = previous;
 
       Get.snackbar(
-        'Notification',
-        'Unable to mark notification as read.',
+        'notification'.tr,
+        'error_mark_read'.tr,
         snackPosition: SnackPosition.BOTTOM,
       );
     }
@@ -190,8 +190,8 @@ class InAppNotificationProvider extends GetxController {
       notifications[index] = previous;
 
       Get.snackbar(
-        'Notification',
-        'Unable to update notification.',
+        'notification'.tr,
+        'error_update_notification'.tr,
         snackPosition: SnackPosition.BOTTOM,
       );
     }

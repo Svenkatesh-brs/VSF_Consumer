@@ -19,8 +19,8 @@ class InAppNotificationScreen extends GetView<
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text(
-            'Notifications',
+          title: Text(
+            'notifications'.tr,
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w700,
@@ -67,9 +67,8 @@ class InAppNotificationScreen extends GetView<
               _NotificationList(
                 notifications:
                     controller.unreadNotifications,
-                emptyTitle: 'No new notifications',
-                emptySubtitle:
-                    'You are all caught up',
+                emptyTitle: 'no_new_notifications'.tr,
+                emptySubtitle: 'all_caught_up'.tr,
                 emptyIcon:
                     Icons.mark_email_read_outlined,
                 onTap: _showNotification,
@@ -80,11 +79,8 @@ class InAppNotificationScreen extends GetView<
               _NotificationList(
                 notifications:
                     controller.seenNotifications,
-                emptyTitle:
-                    'No notifications seen yet',
-                emptySubtitle:
-                    'Notifications you open will '
-                    'appear here',
+                emptyTitle: 'no_notifications_seen'.tr,
+                emptySubtitle: 'opened_notifications_here'.tr,
                 emptyIcon:
                     Icons.notifications_off_outlined,
                 onTap: _showNotification,
@@ -199,13 +195,13 @@ class _SegmentedTabBar extends StatelessWidget {
         tabs: [
           Obx(
             () => _TabItem(
-              label: 'Unread',
+              label: 'unread'.tr,
               showCount: controller.unreadCount > 0,
               count: controller.unreadCount,
             ),
           ),
-          const _TabItem(
-            label: 'Seen',
+          _TabItem(
+            label: 'seen'.tr,
             showCount: false,
             count: 0,
           ),
@@ -473,7 +469,7 @@ class _ErrorState extends StatelessWidget {
                 backgroundColor: AppColors.lightBlue,
                 foregroundColor: Colors.white,
               ),
-              child: const Text('Try again'),
+              child: Text('try_again'.tr),
             ),
           ],
         ),
