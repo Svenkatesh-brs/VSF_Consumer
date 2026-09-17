@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../providers/language_selection_provider.dart';
 import '../routes/app_routes.dart';
 import '../utils/app_colors.dart';
 import '../widgets/app_background.dart';
@@ -73,16 +74,35 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
       _isContinuing = true;
     });
 
-    await Future<void>.delayed(const Duration(milliseconds: 360));
+    try {
+      final languageProvider = Get.find<LanguageSelectionProvider>();
 
-    if (!mounted) {
-      return;
+      // Save the selected language and update the app locale.
+      await languageProvider.changeLanguage(_selectedLanguage.code);
+
+      if (!mounted) return;
+
+      await Future<void>.delayed(const Duration(milliseconds: 360));
+
+      if (!mounted) return;
+
+      Get.offNamed(
+        AppRoutes.home,
+        arguments: {'language': _selectedLanguage.code},
+      );
+    } catch (error) {
+      if (!mounted) return;
+
+      Get.snackbar(
+        'Error',
+        'Unable to save language. Please try again.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+
+      setState(() {
+        _isContinuing = false;
+      });
     }
-
-    Get.offNamed(
-      AppRoutes.home,
-      arguments: {'language': _selectedLanguage.code},
-    );
   }
 
   Animation<double> _interval(double begin, double end) {
@@ -103,7 +123,10 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
     return FadeTransition(
       opacity: animation,
       child: SlideTransition(
-        position: Tween<Offset>(begin: offset, end: Offset.zero).animate(animation),
+        position: Tween<Offset>(
+          begin: offset,
+          end: Offset.zero,
+        ).animate(animation),
         child: child,
       ),
     );
@@ -128,30 +151,22 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
                   child: _buildBrandMark(),
                 ),
                 const SizedBox(height: 26),
-                _reveal(
-                  begin: 0.12,
-                  end: 0.5,
-                  child: _buildHeading(),
-                ),
+                _reveal(begin: 0.12, end: 0.5, child: _buildHeading()),
                 const SizedBox(height: 26),
                 ..._languages.asMap().entries.map(
-                      (entry) => Padding(
-                        padding: EdgeInsets.only(
-                          bottom: entry.key == _languages.length - 1 ? 0 : 12,
-                        ),
-                        child: _reveal(
-                          begin: 0.28 + (entry.key * 0.09),
-                          end: 0.65 + (entry.key * 0.09),
-                          child: _buildLanguageTile(entry.value),
-                        ),
-                      ),
+                  (entry) => Padding(
+                    padding: EdgeInsets.only(
+                      bottom: entry.key == _languages.length - 1 ? 0 : 12,
                     ),
-                const SizedBox(height: 30),
-                _reveal(
-                  begin: 0.62,
-                  end: 0.96,
-                  child: _buildContinueButton(),
+                    child: _reveal(
+                      begin: 0.28 + (entry.key * 0.09),
+                      end: 0.65 + (entry.key * 0.09),
+                      child: _buildLanguageTile(entry.value),
+                    ),
+                  ),
                 ),
+                const SizedBox(height: 30),
+                _reveal(begin: 0.62, end: 0.96, child: _buildContinueButton()),
                 const SizedBox(height: 15),
                 _reveal(
                   begin: 0.72,
@@ -159,10 +174,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
                   child: const Text(
                     'You can change this later from your profile.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Colors.black45,
-                    ),
+                    style: TextStyle(fontSize: 11, color: Colors.black45),
                   ),
                 ),
               ],
@@ -191,10 +203,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
           ],
         ),
         child: ClipOval(
-          child: Image.asset(
-            'assets/vsf.png',
-            fit: BoxFit.cover,
-          ),
+          child: Image.asset('assets/vsf.png', fit: BoxFit.cover),
         ),
       ),
     );
@@ -290,11 +299,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
                 ),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                language.icon,
-                color: language.color,
-                size: 23,
-              ),
+              child: Icon(language.icon, color: language.color, size: 23),
             ),
             const SizedBox(width: 13),
             Expanded(
@@ -312,10 +317,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
                   const SizedBox(height: 3),
                   Text(
                     language.subtitle,
-                    style: const TextStyle(
-                      fontSize: 11,
-                      color: Colors.black54,
-                    ),
+                    style: const TextStyle(fontSize: 11, color: Colors.black54),
                   ),
                 ],
               ),

@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
 
+import '../providers/language_selection_provider.dart';
+import '../services/language_selection_service.dart';
 import '../providers/auth_provider.dart';
 import '../services/api_service.dart';
 import '../services/auth_service.dart';
@@ -14,9 +16,27 @@ class AppBinding extends Bindings {
     // STORAGE SERVICE
     // ============================================================
 
-    Get.lazyPut<StorageService>(
-      () => StorageService(),
+    Get.lazyPut<StorageService>(() => StorageService(), fenix: true);
+
+    // ============================================================
+    // LANGUAGE SELECTION SERVICE
+    // ============================================================
+
+    Get.lazyPut<LanguageSelectionService>(
+      () =>
+          LanguageSelectionService(storageService: Get.find<StorageService>()),
       fenix: true,
+    );
+
+    // ============================================================
+    // LANGUAGE SELECTION PROVIDER
+    // ============================================================
+
+    Get.put<LanguageSelectionProvider>(
+      LanguageSelectionProvider(
+        languageService: Get.find<LanguageSelectionService>(),
+      ),
+      permanent: true,
     );
 
     // ============================================================
@@ -36,9 +56,7 @@ class AppBinding extends Bindings {
     // ============================================================
 
     Get.lazyPut<NotificationService>(
-      () => NotificationService(
-        apiService: Get.find<ApiService>(),
-      ),
+      () => NotificationService(apiService: Get.find<ApiService>()),
       fenix: true,
     );
 
@@ -47,9 +65,7 @@ class AppBinding extends Bindings {
     // ============================================================
 
     Get.put<AuthService>(
-      AuthService(
-        apiService: Get.find<ApiService>(),
-      ),
+      AuthService(apiService: Get.find<ApiService>()),
       permanent: true,
     );
 

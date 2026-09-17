@@ -12,6 +12,7 @@ class StorageService {
   // ============================================================
 
   static const String _tokenKey = 'auth_token';
+  static const String _languageCodeKey = 'selected_language_code';
 
   // ============================================================
   // BOX INSTANCE
@@ -28,9 +29,7 @@ class StorageService {
       return;
     }
 
-    _box = await Hive.openBox<dynamic>(
-      _boxName,
-    );
+    _box = await Hive.openBox<dynamic>(_boxName);
   }
 
   // ============================================================
@@ -50,10 +49,7 @@ class StorageService {
   Future<void> saveToken(String token) async {
     await _ensureInitialized();
 
-    await _box!.put(
-      _tokenKey,
-      token,
-    );
+    await _box!.put(_tokenKey, token);
   }
 
   // ============================================================
@@ -63,9 +59,7 @@ class StorageService {
   Future<String?> getToken() async {
     await _ensureInitialized();
 
-    final value = _box!.get(
-      _tokenKey,
-    );
+    final value = _box!.get(_tokenKey);
 
     if (value is String && value.isNotEmpty) {
       return value;
@@ -91,9 +85,7 @@ class StorageService {
   Future<void> removeToken() async {
     await _ensureInitialized();
 
-    await _box!.delete(
-      _tokenKey,
-    );
+    await _box!.delete(_tokenKey);
   }
 
   // ============================================================
@@ -104,5 +96,31 @@ class StorageService {
     await _ensureInitialized();
 
     await _box!.clear();
+  }
+
+  // ============================================================
+  // SAVE LANGUAGE
+  // ============================================================
+
+  Future<void> saveLanguageCode(String languageCode) async {
+    await _ensureInitialized();
+
+    await _box!.put(_languageCodeKey, languageCode);
+  }
+
+  // ============================================================
+  // GET SAVED LANGUAGE
+  // ============================================================
+
+  Future<String?> getLanguageCode() async {
+    await _ensureInitialized();
+
+    final value = _box!.get(_languageCodeKey);
+
+    if (value is String && value.isNotEmpty) {
+      return value;
+    }
+
+    return null;
   }
 }
