@@ -1,4 +1,3 @@
-
 const Map<String, String> languageSelectionTe = {
   'app_name': 'VSF Consumer',
   'language': 'భాష',
@@ -28,4 +27,40 @@ const Map<String, String> languageSelectionTe = {
   'welcome': 'స్వాగతం',
   'change_language': 'భాషను మార్చండి',
   'language_updated': 'భాష విజయవంతంగా మార్చబడింది',
+
+  // Home Screen
+  'greeting_morning': 'శుభోదయం',
+  'greeting_afternoon': 'శుభ మధ్యాహ్నం',
+  'greeting_evening': 'శుభ సాయంత్రం',
+
+  'logout_confirmation_title': 'లాగ్ అవుట్',
+  'logout_confirmation_message': 'మీరు నిజంగా లాగ్ అవుట్ చేయాలనుకుంటున్నారా?',
+
+  'loan_overview': 'రుణాల వివరాలు',
+  'quick_overview': 'మీ రుణాల సంక్షిప్త వివరాలు',
+  'total': 'మొత్తం',
+  'active': 'యాక్టివ్',
+  'inactive': 'ఇనాక్టివ్',
+
+  'my_loans': 'నా రుణాలు',
+  'track_vehicle_loans': 'మీ వాహన రుణాలను ట్రాక్ చేయండి',
+  'total_loans': 'మొత్తం రుణాలు',
+
+  'no_loans_available': 'రుణాలు అందుబాటులో లేవు',
+  'no_filter_loans': 'ప్రస్తుతం @filter రుణాలు లేవు',
+  'loan_information_placeholder': 'మీ రుణ వివరాలు ఇక్కడ కనిపిస్తాయి.',
+  'no_loans_at_moment': 'ప్రస్తుతం ఎలాంటి రుణాలు లేవు.',
+
+  'try_again': 'మళ్లీ ప్రయత్నించండి',
+  'loan_number': 'రుణ సంఖ్య',
+  'borrowers': 'రుణగ్రహీతలు',
+  'loan_amount': 'రుణ మొత్తం',
+  'view_details': 'వివరాలను చూడండి',
+  'powered_by': 'Powered By © Nyros Futureworks Pvt Ltd@version@environment',
+  'track_your_vehicle_loans': 'మీ వాహన రుణాలను ట్రాక్ చేయండి',
+  'error_unable_load': 'మీ రుణ వివరాలను లోడ్ చేయలేకపోయాము.',
+  'error_no_customer': 'కస్టమర్ సమాచారం ఏదీ కనుగొనబడలేదు.',
+  'error_timeout': 'అభ్యర్థనకు సమయం ముగిసింది. దయచేసి మళ్లీ ప్రయత్నించండి.',
+  'error_connection': 'సర్వర్‌కు కనెక్ట్ కాలేకపోయాము.',
+  'error_session_expired': 'మీ సెషన్ ముగిసింది. దయచేసి మళ్లీ లాగిన్ చేయండి.',
 };

@@ -145,9 +145,9 @@ class HomeProvider extends GetxController {
 
       if (!response.success) {
         if (showLoading) {
-          errorMessage.value = response.message.isNotEmpty
+            errorMessage.value = response.message.isNotEmpty
               ? response.message
-              : 'Unable to load your loan information.';
+              : 'error_unable_load'.tr;
 
           loans.clear();
           _clearSummary();
@@ -167,8 +167,7 @@ class HomeProvider extends GetxController {
           loans.clear();
           _clearSummary();
 
-          errorMessage.value =
-              'No customer information was found.';
+            errorMessage.value = 'error_no_customer'.tr;
         }
 
         return;
@@ -306,22 +305,22 @@ class HomeProvider extends GetxController {
     final message = error.toString().trim();
 
     if (message.isEmpty) {
-      return 'Unable to load your loan information.';
+      return 'error_unable_load'.tr;
     }
 
     final lowerMessage = message.toLowerCase();
 
     if (lowerMessage.contains('timeout')) {
-      return 'Request timed out. Please try again.';
+      return 'error_timeout'.tr;
     }
 
     if (lowerMessage.contains('connect')) {
-      return 'Unable to connect to the server.';
+      return 'error_connection'.tr;
     }
 
     if (lowerMessage.contains('unauthorized') ||
         lowerMessage.contains('401')) {
-      return 'Your session has expired. Please login again.';
+      return 'error_session_expired'.tr;
     }
 
     return message;

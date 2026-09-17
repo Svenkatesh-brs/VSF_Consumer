@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import '../utils/app_colors.dart';
 import '../utils/app_theme.dart';
@@ -15,19 +16,17 @@ class FooterVersion extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final environmentText =
-        environment.isNotEmpty ? ' -$environment' : '';
-
-    final versionText =
-        version.isNotEmpty ? ': $version' : '';
+    final environmentText = environment.isNotEmpty ? ' -$environment' : '';
+    final versionText = version.isNotEmpty ? ': $version' : '';
 
     return Padding(
       padding: const EdgeInsets.only(top: 6),
       child: Center(
         child: Text(
-          'Powered By © Nyros Futureworks Pvt Ltd'
-          '$versionText'
-          '$environmentText',
+          'powered_by'.trParams({
+            'version': versionText,
+            'environment': environmentText,
+          }),
           style: AppTheme.style.copyWith(
             fontSize: 12,
             fontWeight: FontWeight.w600,

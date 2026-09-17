@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import '../../utils/app_colors.dart';
 
@@ -92,9 +93,9 @@ class HomeLoanCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Loan Number',
-                        style: TextStyle(
+                      Text(
+                        'loan_number'.tr,
+                        style: const TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w500,
                           color: Colors.black45,
@@ -176,7 +177,7 @@ class HomeLoanCard extends StatelessWidget {
                 Expanded(
                   child: _InfoItem(
                     icon: Icons.person_outline,
-                    label: 'Borrowers',
+                    label: 'borrowers'.tr,
                     value: borrowers.join(', '),
                   ),
                 ),
@@ -186,7 +187,7 @@ class HomeLoanCard extends StatelessWidget {
                 Expanded(
                   child: _InfoItem(
                     icon: Icons.account_balance_wallet_outlined,
-                    label: 'Loan Amount',
+                    label: 'loan_amount'.tr,
                     value: formattedAmount,
                     valueColor: AppColors.lightBlue,
                   ),
@@ -203,8 +204,8 @@ class HomeLoanCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Text(
-                  'View Details',
-                  style: TextStyle(
+                  'view_details'.tr,
+                  style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: AppColors.buttonEnd,
