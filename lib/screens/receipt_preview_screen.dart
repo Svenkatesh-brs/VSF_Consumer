@@ -161,8 +161,8 @@ class _ReceiptPreviewScreenState
       }
 
       Get.snackbar(
-        'Receipt downloaded successfully',
-        '$fileName saved to $savedLocation',
+        'receipt_downloaded'.tr,
+        'file_saved_to'.trParams({'file': fileName, 'location': savedLocation}),
         snackPosition: SnackPosition.BOTTOM,
         margin: const EdgeInsets.all(16),
         backgroundColor:
@@ -181,10 +181,8 @@ class _ReceiptPreviewScreenState
       }
 
       Get.snackbar(
-        'Receipt',
-        'Direct Downloads saving is only supported on '
-            'Android. The receipt was opened in the share '
-            'sheet instead.',
+        'receipt'.tr,
+        'direct_download_android'.tr,
         snackPosition: SnackPosition.BOTTOM,
         margin: const EdgeInsets.all(16),
         borderRadius: 14,
@@ -197,7 +195,7 @@ class _ReceiptPreviewScreenState
       }
 
       Get.snackbar(
-        'Download failed',
+        'download_failed'.tr,
         _describeError(error),
         snackPosition: SnackPosition.BOTTOM,
         margin: const EdgeInsets.all(16),
@@ -221,7 +219,7 @@ class _ReceiptPreviewScreenState
       }
     }
 
-    return 'The receipt could not be saved to your device.';
+    return 'receipt_save_failed'.tr;
   }
 
   // ============================================================
@@ -241,8 +239,8 @@ class _ReceiptPreviewScreenState
       );
     } catch (_) {
       Get.snackbar(
-        'Receipt',
-        'Unable to open the share sheet. Please try again.',
+        'receipt'.tr,
+        'unable_share_receipt'.tr,
         snackPosition: SnackPosition.BOTTOM,
         margin: const EdgeInsets.all(16),
         borderRadius: 14,
@@ -314,8 +312,8 @@ class _ReceiptPreviewScreenState
               crossAxisAlignment:
                   CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Receipt',
+                Text(
+                  'receipt'.tr,
                   style: TextStyle(
                     fontSize: 23,
                     fontWeight: FontWeight.w700,
@@ -327,7 +325,7 @@ class _ReceiptPreviewScreenState
 
                 Text(
                   receipt.voucherNo.isEmpty
-                      ? 'Voucher --'
+                      ? 'voucher_placeholder'.tr
                       : 'Voucher ${receipt.voucherNo}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -446,8 +444,8 @@ class _ReceiptPreviewScreenState
 
               const SizedBox(height: 3),
 
-              const Text(
-                'Payment Receipt',
+              Text(
+                'payment_receipt'.tr,
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.w500,
@@ -541,7 +539,7 @@ class _ReceiptPreviewScreenState
           children: [
             Expanded(
               child: _detailCell(
-                'Date',
+                'date'.tr,
                 receipt.dateText,
               ),
             ),
@@ -550,7 +548,7 @@ class _ReceiptPreviewScreenState
 
             Expanded(
               child: _detailCell(
-                'Voucher No.',
+                'voucher_no'.tr,
                 receipt.voucherNo,
               ),
             ),
@@ -562,7 +560,7 @@ class _ReceiptPreviewScreenState
           children: [
             Expanded(
               child: _detailCell(
-                'Customer',
+                'customer'.tr,
                 receipt.customerName,
               ),
             ),
@@ -571,7 +569,7 @@ class _ReceiptPreviewScreenState
 
             Expanded(
               child: _detailCell(
-                'Vehicle',
+                'vehicle'.tr,
                 receipt.vehicleNumber,
               ),
             ),
@@ -583,7 +581,7 @@ class _ReceiptPreviewScreenState
           children: [
             Expanded(
               child: _detailCell(
-                'Instrument No.',
+                'instrument_no'.tr,
                 receipt.instrumentNo,
               ),
             ),
@@ -592,7 +590,7 @@ class _ReceiptPreviewScreenState
 
             Expanded(
               child: _detailCell(
-                'Agreement No.',
+                'agreement_no'.tr,
                 receipt.agreementNo,
               ),
             ),
@@ -604,7 +602,7 @@ class _ReceiptPreviewScreenState
           children: [
             Expanded(
               child: _detailCell(
-                'Agreement Date',
+                'agreement_date'.tr,
                 receipt.agreementDateText,
               ),
             ),
@@ -613,7 +611,7 @@ class _ReceiptPreviewScreenState
 
             Expanded(
               child: _detailCell(
-                'Customer Phone',
+                'customer_phone'.tr,
                 receipt.customerPhone,
               ),
             ),
@@ -663,9 +661,9 @@ class _ReceiptPreviewScreenState
             const BoxDecoration(color: headerColor),
         children: [
           _tablePadding(_tableHeaderText('#')),
-          _tablePadding(_tableHeaderText('Collection Type')),
+          _tablePadding(_tableHeaderText('collection_type'.tr)),
           _tablePadding(
-            _tableHeaderText('Amount', right: true),
+            _tableHeaderText('amount'.tr, right: true),
           ),
         ],
       ),
@@ -702,7 +700,7 @@ class _ReceiptPreviewScreenState
         children: [
           _tablePadding(const Text('')),
           _tablePadding(
-            _tableCellText('Total', bold: true),
+            _tableCellText('total'.tr, bold: true),
           ),
           _tablePadding(
             _tableCellText(
@@ -756,8 +754,8 @@ class _ReceiptPreviewScreenState
         mainAxisAlignment:
             MainAxisAlignment.spaceBetween,
         children: [
-          const Text(
-            'Total Amount Received',
+          Text(
+            'total_amount_received'.tr,
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w800,
@@ -819,7 +817,7 @@ class _ReceiptPreviewScreenState
           mainAxisAlignment:
               MainAxisAlignment.spaceBetween,
           children: [
-            _signatureArea('Customer Signature'),
+            _signatureArea('customer_signature'.tr),
 
             _signatureArea(
               'For ${ReceiptModel.companyName}',
@@ -832,7 +830,7 @@ class _ReceiptPreviewScreenState
 
         Center(
           child: Text(
-            'This is a System Generated Receipt',
+            'system_generated_receipt'.tr,
             style: TextStyle(
               fontSize: 9,
               fontStyle: FontStyle.italic,
@@ -869,7 +867,7 @@ class _ReceiptPreviewScreenState
             ),
             child: IconButton(
               padding: EdgeInsets.zero,
-              tooltip: 'Share',
+              tooltip: 'share'.tr,
               onPressed: _sharePdf,
               icon: const Icon(
                 Icons.share_outlined,
@@ -881,7 +879,7 @@ class _ReceiptPreviewScreenState
 
           Expanded(
             child: AppSubmitButton(
-              label: 'Download PDF',
+              label: 'download_pdf'.tr,
               isLoading: _isDownloading,
               onTap: _downloadPdf,
             ),

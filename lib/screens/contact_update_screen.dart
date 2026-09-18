@@ -582,7 +582,7 @@ class _ContactUpdateScreenState
     }
 
     Get.snackbar(
-      isError ? 'Contact Update' : 'Contact Updated',
+      isError ? 'contact_update'.tr : 'contact_updated'.tr,
       message,
       snackPosition: SnackPosition.BOTTOM,
       margin: const EdgeInsets.all(16),
@@ -697,8 +697,8 @@ class _ContactUpdateScreenState
 
                   const SizedBox(height: 18),
 
-                  const Text(
-                    'Address Request Sent',
+                  Text(
+                    'address_request_sent'.tr,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 17,
@@ -710,7 +710,7 @@ class _ContactUpdateScreenState
                   const SizedBox(height: 10),
 
                   Text(
-                    'Your address update request has been sent to our Customer Support team.',
+                    'address_request_sent_text'.tr,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 13,
@@ -723,7 +723,7 @@ class _ContactUpdateScreenState
                   const SizedBox(height: 6),
 
                   Text(
-                    'Your new address will be reflected in the app once your request is reviewed and approved.',
+                    'address_pending_text'.tr,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 12.5,
@@ -753,8 +753,8 @@ class _ContactUpdateScreenState
                               14,
                             ),
                       ),
-                      child: const Text(
-                        'Got it',
+                      child: Text(
+                        'got_it'.tr,
                         textAlign:
                             TextAlign.center,
                         style: TextStyle(
@@ -878,8 +878,8 @@ class _ContactUpdateScreenState
 
                   const SizedBox(height: 18),
 
-                  const Text(
-                    'Phone Update Request Sent',
+                  Text(
+                    'phone_request_sent'.tr,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 17,
@@ -891,7 +891,7 @@ class _ContactUpdateScreenState
                   const SizedBox(height: 10),
 
                   Text(
-                    'Your phone number update request has been sent to our Customer Support team.',
+                    'phone_request_sent_text'.tr,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 13,
@@ -904,7 +904,7 @@ class _ContactUpdateScreenState
                   const SizedBox(height: 6),
 
                   Text(
-                    'Your new phone number will be reflected in the app once your request is reviewed and approved.',
+                    'phone_pending_text'.tr,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 12.5,
@@ -934,8 +934,8 @@ class _ContactUpdateScreenState
                               14,
                             ),
                       ),
-                      child: const Text(
-                        'Got it',
+                      child: Text(
+                        'got_it'.tr,
                         textAlign:
                             TextAlign.center,
                         style: TextStyle(
@@ -1089,7 +1089,7 @@ class _ContactUpdateScreenState
             fontSize: 13,
             fontWeight: FontWeight.w600,
           ),
-          tabs: const [
+          tabs: [
             Tab(
               height: 42,
               child: FittedBox(
@@ -1103,7 +1103,7 @@ class _ContactUpdateScreenState
                       size: 17,
                     ),
                     SizedBox(width: 7),
-                    Text('Phone Number'),
+                    Text('phone_number'.tr),
                   ],
                 ),
               ),
@@ -1121,7 +1121,7 @@ class _ContactUpdateScreenState
                       size: 17,
                     ),
                     SizedBox(width: 7),
-                    Text('Address'),
+                    Text('address'.tr),
                   ],
                 ),
               ),
@@ -1185,10 +1185,10 @@ class _ContactUpdateScreenState
             children: [
               _buildCurrentContactCard(
                 icon: Icons.phone_outlined,
-                title: 'Registered Phone',
+                title: 'registered_phone'.tr,
                 rows: [
                   _buildInfoRow(
-                    label: 'Current Number',
+                    label: 'current_number'.tr,
                     value: currentPhone,
                   ),
                 ],
@@ -1228,7 +1228,7 @@ class _ContactUpdateScreenState
         children: [
           _buildSectionTitle(
             icon: Icons.edit_outlined,
-            title: 'New Phone Number',
+            title: 'new_phone_number'.tr,
           ),
 
           const SizedBox(height: 20),
@@ -1238,7 +1238,7 @@ class _ContactUpdateScreenState
             keyboardType: TextInputType.phone,
             textInputAction: TextInputAction.done,
             labelText: 'Phone Number',
-            hintText: '10-digit mobile number',
+            hintText: 'ten_digit_mobile'.tr,
             prefixIcon: const Icon(
               Icons.phone_outlined,
             ),
@@ -1247,7 +1247,7 @@ class _ContactUpdateScreenState
           const SizedBox(height: 24),
 
           AppSubmitButton(
-            label: 'Update Phone',
+            label: 'update_phone'.tr,
             isLoading: isSaving,
             onTap: _submitPhone,
           ),
@@ -1267,13 +1267,13 @@ class _ContactUpdateScreenState
         children: [
           _buildSectionTitle(
             icon: Icons.verified_user_outlined,
-            title: 'Verify Current Number',
+            title: 'verify_current_number'.tr,
           ),
 
           const SizedBox(height: 12),
 
           Text(
-            'Enter the OTP sent to your current mobile number.',
+            'otp_current_description'.tr,
             style: TextStyle(
               fontSize: 13,
               height: 1.5,
@@ -1313,13 +1313,13 @@ class _ContactUpdateScreenState
         children: [
           _buildSectionTitle(
             icon: Icons.phone_iphone,
-            title: 'Verify New Number',
+            title: 'verify_new_number'.tr,
           ),
 
           const SizedBox(height: 12),
 
           Text(
-            'Enter the OTP sent to your new mobile number.',
+            'otp_new_description'.tr,
             style: TextStyle(
               fontSize: 13,
               height: 1.5,
@@ -1358,7 +1358,7 @@ class _ContactUpdateScreenState
       keyboardType: TextInputType.number,
       textInputAction: TextInputAction.done,
       labelText: 'OTP',
-      hintText: 'Enter 6-digit OTP',
+      hintText: 'otp_six_digit'.tr,
       prefixIcon: const Icon(
         Icons.verified_outlined,
       ),
@@ -1381,10 +1381,10 @@ class _ContactUpdateScreenState
         child: canResend
             ? TextButton(
                 onPressed: _resendPhoneOtp,
-                child: const Text('Resend OTP'),
+                child: Text('resend_otp'.tr),
               )
             : Text(
-                'Resend OTP in ${countdown}s',
+                'resend_otp_in'.trParams({'count': countdown.toString()}),
                 style: const TextStyle(
                   fontSize: 14,
                   color: Colors.black54,

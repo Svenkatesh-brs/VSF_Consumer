@@ -141,7 +141,7 @@ class _OtpScreenState extends State<OtpScreen>
     final phone = controller.mobileController.text.trim();
 
     if (phone.isEmpty) {
-      controller.errorMessage.value = 'Mobile number is required.';
+      controller.errorMessage.value = 'mobile_number_required'.tr;
 
       _shakeController
         ..reset()
@@ -393,7 +393,7 @@ class _OtpScreenState extends State<OtpScreen>
                             child: IconButton(
                               onPressed: _goBack,
                               icon: const Icon(Icons.arrow_back),
-                              tooltip: 'Back',
+                              tooltip: 'back'.tr,
                             ),
                           ),
                         ),
@@ -447,8 +447,8 @@ class _OtpScreenState extends State<OtpScreen>
                         child: ScreenContentTransition(
                           direction: ContentTransitionDirection.fromLeft,
                           delay: const Duration(milliseconds: 140),
-                          child: const Text(
-                            'Verify OTP',
+                          child: Text(
+                            'verify_otp'.tr,
                             style: TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.w700,
@@ -473,9 +473,8 @@ class _OtpScreenState extends State<OtpScreen>
                           delay: const Duration(milliseconds: 200),
                           child: Text(
                             maskedMobile.isEmpty
-                                ? 'Enter the 6-digit OTP to continue'
-                                : 'Enter the 6-digit OTP sent to +91 '
-                                      '$maskedMobile',
+                                  ? 'otp_description'.tr
+                                  : 'otp_sent_to'.trParams({'mobile': maskedMobile}),
                             style: const TextStyle(
                               fontSize: 14,
                               color: Colors.black54,
@@ -502,8 +501,8 @@ class _OtpScreenState extends State<OtpScreen>
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
-                                  'OTP',
+                                Text(
+                                  'otp'.tr,
                                   style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
@@ -596,7 +595,7 @@ class _OtpScreenState extends State<OtpScreen>
                                 // ------------------------------------------
                                 Obx(
                                   () => AppSubmitButton(
-                                    label: 'Verify',
+                                    label: 'verify'.tr,
                                     isLoading:
                                         controller.isLoading.value ||
                                         _isExiting,
@@ -622,11 +621,12 @@ class _OtpScreenState extends State<OtpScreen>
                                     child: canResend
                                         ? TextButton(
                                             onPressed: _resendOtp,
-                                            child: const Text('Resend OTP'),
+                                            child: Text('resend_otp'.tr),
                                           )
                                         : Text(
-                                            'Resend OTP in '
-                                            '${countdown}s',
+                                            'resend_otp_in'.trParams({
+                                              'count': countdown.toString(),
+                                            }),
                                             style: const TextStyle(
                                               fontSize: 14,
                                               color: Colors.black54,
@@ -690,8 +690,8 @@ class _OtpScreenState extends State<OtpScreen>
                                   ),
                                 ),
                                 const SizedBox(height: 16),
-                                const Text(
-                                  'Verification successful',
+                                Text(
+                                  'verification_successful'.tr,
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.w600,

@@ -209,7 +209,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                       const SizedBox(height: 4),
 
                       Text(
-                        'Voucher '
+                        '${'voucher'.tr} '
                         '${transaction.voucherNo.isEmpty ? '-' : transaction.voucherNo}',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -321,8 +321,8 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
 
             const SizedBox(height: 14),
 
-            const Text(
-              'No transactions found.',
+            Text(
+              'no_transactions'.tr,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 13,
@@ -392,8 +392,8 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                     ),
                     borderRadius: BorderRadius.circular(100),
                   ),
-                  child: const Text(
-                    'Retry',
+                  child: Text(
+                    'retry'.tr,
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
@@ -467,8 +467,8 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Transactions',
+                        Text(
+                          'transactions_title'.tr,
                           style: TextStyle(
                             fontSize: 23,
                             fontWeight: FontWeight.w700,
@@ -480,9 +480,9 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
 
                         Text(
                           transactions.isEmpty
-                              ? 'Payment history'
+                              ? 'payment_history'.tr
                               : '${transactions.length} '
-                                    '${transactions.length == 1 ? 'record' : 'records'}',
+                                    '${transactions.length == 1 ? 'record'.tr : 'records'.tr}',
                           style: const TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w500,
@@ -562,9 +562,9 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                 return _buildErrorView();
               }
 
-              return const AppLoading(
-                message: 'Loading transactions',
-                subtitle: 'Please wait while we fetch your payment history.',
+              return AppLoading(
+                message: 'loading_transactions'.tr,
+                subtitle: 'fetching_payment_history'.tr,
                 size: 300,
               );
             }

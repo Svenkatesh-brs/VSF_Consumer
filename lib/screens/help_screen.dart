@@ -98,9 +98,8 @@ class _HelpScreenState extends State<HelpScreen> {
         scheme: 'tel',
         path: AppConstants.supportPhone,
       ),
-      failureTitle: 'Call Support',
-      failureMessage:
-          'Calling is not available on this device.',
+        failureTitle: 'call_support'.tr,
+        failureMessage: 'calling_unavailable'.tr,
     );
   }
 
@@ -114,9 +113,8 @@ class _HelpScreenState extends State<HelpScreen> {
         'https://wa.me/${AppConstants.supportPhoneIntl}',
       ),
       mode: LaunchMode.externalApplication,
-      failureTitle: 'WhatsApp Support',
-      failureMessage:
-          'WhatsApp is not available on this device.',
+        failureTitle: 'whatsapp_support'.tr,
+        failureMessage: 'whatsapp_unavailable'.tr,
     );
   }
 
@@ -130,7 +128,7 @@ class _HelpScreenState extends State<HelpScreen> {
   void _onHelpTopicTap(String topic) {
     _showSupportMessage(
       topic,
-      'For $topic queries, call or WhatsApp our support team.',
+      'support_topic_message'.trParams({'topic': topic}),
     );
   }
 
@@ -139,8 +137,8 @@ class _HelpScreenState extends State<HelpScreen> {
   // ============================================================
 
   Widget _buildHeroCard() {
-    const coverageChips = <String>[
-      'Loans & EMI',
+    final coverageChips = <String>[
+      'loans_emi'.tr,
       'Payments',
       'Account',
       'Complaints',
@@ -203,12 +201,12 @@ class _HelpScreenState extends State<HelpScreen> {
 
               const SizedBox(width: 14),
 
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Need assistance?',
+                      'need_assistance'.tr,
                       style: TextStyle(
                         fontSize: 16.5,
                         fontWeight: FontWeight.w700,
@@ -219,8 +217,7 @@ class _HelpScreenState extends State<HelpScreen> {
                     SizedBox(height: 5),
 
                     Text(
-                      'Contact our support team for help with loans, '
-                      'payments, receipts and your account information.',
+                      'support_description'.tr,
                       style: TextStyle(
                         fontSize: 11,
                         height: 1.35,
@@ -444,7 +441,7 @@ class _HelpScreenState extends State<HelpScreen> {
         accentColor: const Color(0xFF268B68),
         title: 'Call Support',
         number: AppConstants.supportPhone,
-        subtitle: 'Speak with our support team',
+        subtitle: 'speak_support_team'.tr,
         onTap: _callSupport,
       ),
 
@@ -453,7 +450,7 @@ class _HelpScreenState extends State<HelpScreen> {
         accentColor: const Color(0xFF258F92),
         title: 'WhatsApp Support',
         number: AppConstants.supportPhone,
-        subtitle: 'Chat with our support team',
+        subtitle: 'chat_support_team'.tr,
         onTap: _openWhatsAppSupport,
       ),
     ];
@@ -585,29 +582,28 @@ class _HelpScreenState extends State<HelpScreen> {
         icon: Icons.event_note_outlined,
         accentColor: const Color(0xFF258F92),
         title: 'Loan & EMI',
-        description:
-            'Loan details, EMI schedules and closure information.',
+        description: 'loan_emi_help'.tr,
       ),
 
       _buildHelpTopicCard(
         icon: Icons.receipt_long_outlined,
         accentColor: const Color(0xFF5968BE),
-        title: 'Payments & Receipts',
-        description: 'Payment status, history and receipts.',
+        title: 'payments_receipts'.tr,
+        description: 'payment_status_history_receipts'.tr,
       ),
 
       _buildHelpTopicCard(
         icon: Icons.contact_phone_outlined,
         accentColor: const Color(0xFF6956C8),
-        title: 'Account & Contact Details',
-        description: 'Profile and contact information updates.',
+        title: 'account_contact_details'.tr,
+        description: 'profile_contact_updates'.tr,
       ),
 
       _buildHelpTopicCard(
         icon: Icons.report_problem_outlined,
         accentColor: const Color(0xFFD8893F),
         title: 'Complaints',
-        description: 'Raise or follow up on an issue.',
+        description: 'raise_follow_issue'.tr,
       ),
     ];
   }
@@ -669,13 +665,13 @@ class _HelpScreenState extends State<HelpScreen> {
 
                         const SizedBox(width: 14),
 
-                        const Expanded(
+                        Expanded(
                           child: Column(
                             crossAxisAlignment:
                                 CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Help & Support',
+                                'help_support'.tr,
                                 style: TextStyle(
                                   fontSize: 23,
                                   fontWeight: FontWeight.w700,
@@ -686,7 +682,7 @@ class _HelpScreenState extends State<HelpScreen> {
                               SizedBox(height: 2),
 
                               Text(
-                                "We're here to help",
+                                'were_here_to_help'.tr,
                                 style: TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w500,
@@ -738,7 +734,7 @@ class _HelpScreenState extends State<HelpScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildSectionLabel('Contact us'),
+                        _buildSectionLabel('contact_us'.tr),
 
                         ..._buildContactOptions(),
                       ],
@@ -764,7 +760,7 @@ class _HelpScreenState extends State<HelpScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildSectionLabel('How can we help?'),
+                        _buildSectionLabel('how_can_we_help'.tr),
 
                         ..._buildHelpTopics(),
                       ],

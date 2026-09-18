@@ -170,9 +170,9 @@ class _LoanDashboardScreenState extends State<LoanDashboardScreen> {
         child: SafeArea(
           child: Obx(() {
             if (controller.selectedLoan.value == null) {
-              return const AppLoading(
-                message: 'Loading loan dashboard',
-                subtitle: 'Please wait while we fetch your loan information.',
+              return AppLoading(
+                message: 'loading_loan_dashboard'.tr,
+                subtitle: 'loan_information_placeholder'.tr,
                 size: 300,
               );
             }
@@ -226,12 +226,12 @@ class _LoanDashboardScreenState extends State<LoanDashboardScreen> {
 
                               const SizedBox(width: 14),
 
-                              const Expanded(
+                              Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      'Loan Dashboard',
+                                      'loan_dashboard'.tr,
                                       style: TextStyle(
                                         fontSize: 23,
                                         fontWeight: FontWeight.w700,
@@ -240,7 +240,7 @@ class _LoanDashboardScreenState extends State<LoanDashboardScreen> {
                                     ),
                                     SizedBox(height: 2),
                                     Text(
-                                      'Manage your loan at a glance',
+                                      'manage_loan_glance'.tr,
                                       style: TextStyle(
                                         fontSize: 11,
                                         fontWeight: FontWeight.w500,

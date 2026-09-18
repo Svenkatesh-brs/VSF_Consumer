@@ -288,7 +288,7 @@ class _LoanDetailsScreenState
   ) {
     return _buildSectionCard(
       icon: Icons.account_balance_wallet_outlined,
-      title: 'Loan Summary',
+      title: 'loan_summary'.tr,
       children: [
         Row(
           children: [
@@ -297,8 +297,8 @@ class _LoanDetailsScreenState
                 crossAxisAlignment:
                     CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'LOAN NUMBER',
+                  Text(
+                    'loan_number_label'.tr,
                     style: TextStyle(
                       fontSize: 9.5,
                       fontWeight: FontWeight.w500,
@@ -330,19 +330,19 @@ class _LoanDetailsScreenState
         const SizedBox(height: 14),
 
         _buildInfoRow(
-          label: 'Branch',
+          label: 'branch'.tr,
           value: details.branchName,
         ),
         _buildInfoRow(
-          label: 'Product',
+          label: 'product'.tr,
           value: details.productName,
         ),
         _buildInfoRow(
-          label: 'Loan Type',
+          label: 'loan_type'.tr,
           value: details.loanTypeName,
         ),
         _buildInfoRow(
-          label: 'Loan Scheme',
+          label: 'loan_scheme'.tr,
           value: details.schemeName,
         ),
       ],
@@ -358,15 +358,15 @@ class _LoanDetailsScreenState
   ) {
     return _buildSectionCard(
       icon: Icons.currency_rupee_rounded,
-      title: 'Financial Details',
+      title: 'financial_details'.tr,
       children: [
         _buildInfoRow(
-          label: 'Principal Amount',
+          label: 'principal_amount'.tr,
           value:
               _formatAmount(details.principalAmount),
         ),
         _buildInfoRow(
-          label: 'Interest Rate',
+          label: 'interest_rate'.tr,
           value:
               _formatPercent(details.interestRate),
         ),
@@ -375,11 +375,11 @@ class _LoanDetailsScreenState
           value: _formatPercent(details.irr),
         ),
         _buildInfoRow(
-          label: 'EMI Amount',
+          label: 'emi_amount'.tr,
           value: _formatAmount(details.emiAmount),
         ),
         _buildInfoRow(
-          label: 'Number of Installments',
+          label: 'number_installments'.tr,
           value: details.numberOfInstallments <= 0
               ? '-'
               : details.numberOfInstallments
@@ -398,15 +398,15 @@ class _LoanDetailsScreenState
   ) {
     return _buildSectionCard(
       icon: Icons.calendar_today_outlined,
-      title: 'Important Dates',
+      title: 'important_dates'.tr,
       children: [
         _buildInfoRow(
-          label: 'Agreement Date',
+          label: 'agreement_date'.tr,
           value: controller
               .formatDateMs(details.agreementDateMs),
         ),
         _buildInfoRow(
-          label: 'EMI Start Date',
+          label: 'emi_start_date'.tr,
           value: controller
               .formatDateMs(details.emiStartDateMs),
         ),
@@ -439,10 +439,10 @@ class _LoanDetailsScreenState
 
     return _buildSectionCard(
       icon: Icons.person_outline_rounded,
-      title: 'Borrower',
+      title: 'borrower'.tr,
       children: [
         _buildInfoRow(
-          label: 'Name',
+          label: 'name'.tr,
           value: borrower?.name ?? '',
         ),
         _buildInfoRow(
@@ -450,36 +450,36 @@ class _LoanDetailsScreenState
           value: borrower?.cifId ?? '',
         ),
         _buildInfoRow(
-          label: 'Phone',
+          label: 'phone'.tr,
           value: borrower?.phone ?? '',
         ),
         _buildInfoRow(
-          label: 'Date of Birth',
+          label: 'date_of_birth'.tr,
           value: borrower?.dob ?? '',
         ),
         _buildInfoRow(
-          label: 'Gender',
+          label: 'gender'.tr,
           value: borrower?.gender ?? '',
         ),
         _buildInfoRow(
-          label: 'Relation',
+          label: 'relation'.tr,
           value: borrower?.relation ?? '',
         ),
         _buildInfoRow(
-          label: 'Address',
+          label: 'address'.tr,
           value: addressParts.join(', '),
         ),
         _buildDivider(),
         _buildInfoRow(
-          label: 'Bank Name',
+          label: 'bank_name'.tr,
           value: borrower?.bankName ?? '',
         ),
         _buildInfoRow(
-          label: 'Account Number',
+          label: 'account_number'.tr,
           value: borrower?.accountNumber ?? '',
         ),
         _buildInfoRow(
-          label: 'IFSC Code',
+          label: 'ifsc_code'.tr,
           value: borrower?.ifscCode ?? '',
         ),
       ],
@@ -499,8 +499,8 @@ class _LoanDetailsScreenState
 
     if (guarantors.isEmpty) {
       children.add(
-        const Text(
-          'No guarantor information available.',
+        Text(
+          'no_guarantor_info'.tr,
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w500,
@@ -520,15 +520,15 @@ class _LoanDetailsScreenState
 
         children.addAll([
           _buildInfoRow(
-            label: 'Name',
+            label: 'name'.tr,
             value: guarantor.name,
           ),
           _buildInfoRow(
-            label: 'Relation',
+            label: 'relation'.tr,
             value: guarantor.relation,
           ),
           _buildInfoRow(
-            label: 'Phone',
+            label: 'phone'.tr,
             value: guarantor.phone,
           ),
         ]);
@@ -537,7 +537,7 @@ class _LoanDetailsScreenState
 
     return _buildSectionCard(
       icon: Icons.people_outline_rounded,
-      title: 'Guarantors',
+      title: 'guarantors'.tr,
       children: children,
     );
   }
@@ -553,52 +553,52 @@ class _LoanDetailsScreenState
 
     return _buildSectionCard(
       icon: Icons.two_wheeler_outlined,
-      title: 'Vehicle Details',
+      title: 'vehicle_details'.tr,
       children: [
         _buildInfoRow(
-          label: 'Registration Number',
+          label: 'registration_number'.tr,
           value: asset?.registrationNumber ?? '',
         ),
         _buildInfoRow(
-          label: 'Make',
+          label: 'make'.tr,
           value: asset?.makeName ?? '',
         ),
         _buildInfoRow(
-          label: 'Model',
+          label: 'model'.tr,
           value: asset?.modelName ?? '',
         ),
         _buildInfoRow(
-          label: 'Vehicle Type',
+          label: 'vehicle_type'.tr,
           value: asset?.vehicleType ?? '',
         ),
         _buildInfoRow(
-          label: 'Fuel Type',
+          label: 'fuel_type'.tr,
           value: asset?.fuelType ?? '',
         ),
         _buildInfoRow(
-          label: 'Manufacture Year',
+          label: 'manufacture_year'.tr,
           value: asset?.manufactureYear ?? '',
         ),
         _buildInfoRow(
-          label: 'Engine Number',
+          label: 'engine_number'.tr,
           value: asset?.engineNumber ?? '',
         ),
         _buildInfoRow(
-          label: 'Chassis Number',
+          label: 'chassis_number'.tr,
           value: asset?.chassisNumber ?? '',
         ),
         _buildInfoRow(
-          label: 'Owner Name',
+          label: 'owner_name'.tr,
           value: asset?.ownerName ?? '',
         ),
         _buildInfoRow(
-          label: 'Invoice Amount',
+          label: 'invoice_amount'.tr,
           value: asset == null
               ? ''
               : _formatAmount(asset.invoiceAmount),
         ),
         _buildInfoRow(
-          label: 'On-Road Price',
+          label: 'on_road_price'.tr,
           value: asset == null
               ? ''
               : _formatAmount(asset.onRoadPrice),
@@ -671,8 +671,8 @@ class _LoanDetailsScreenState
                     borderRadius:
                         BorderRadius.circular(100),
                   ),
-                  child: const Text(
-                    'Retry',
+                  child: Text(
+                    'retry'.tr,
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,

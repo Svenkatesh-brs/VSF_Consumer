@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import '../../utils/app_colors.dart';
 
@@ -175,31 +176,31 @@ class _LoanQuickActionsState extends State<LoanQuickActions>
   List<_QuickActionData> get _actions {
     return [
       _QuickActionData(
-        title: 'EMI Schedule',
+        title: 'emi_schedule'.tr,
         icon: Icons.event_note_outlined,
         color: const Color(0xFF258F92),
         onTap: widget.onEmiScheduleTap,
       ),
       _QuickActionData(
-        title: 'Transactions',
+        title: 'transactions'.tr,
         icon: Icons.swap_vert_rounded,
         color: const Color(0xFF3158B8),
         onTap: widget.onTransactionsTap,
       ),
       _QuickActionData(
-        title: 'Contact Update',
+        title: 'contact_update'.tr,
         icon: Icons.contact_phone_outlined,
         color: const Color(0xFF6956C8),
         onTap: widget.onContactUpdateTap,
       ),
       _QuickActionData(
-        title: 'Complaints',
+        title: 'complaints'.tr,
         icon: Icons.report_problem_outlined,
         color: const Color(0xFFD8893F),
         onTap: widget.onComplaintsTap,
       ),
       _QuickActionData(
-        title: 'Help',
+        title: 'help'.tr,
         icon: Icons.help_outline_rounded,
         color: const Color(0xFF268B68),
         onTap: widget.onHelpTap,
@@ -216,8 +217,8 @@ class _LoanQuickActionsState extends State<LoanQuickActions>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Quick Actions',
+        Text(
+          'quick_actions'.tr,
           style: TextStyle(
             fontSize: 17,
             fontWeight: FontWeight.w700,
@@ -227,8 +228,8 @@ class _LoanQuickActionsState extends State<LoanQuickActions>
 
         const SizedBox(height: 4),
 
-        const Text(
-          'Everything you need, at a glance',
+        Text(
+          'everything_at_glance'.tr,
           style: TextStyle(
             fontSize: 10.5,
             fontWeight: FontWeight.w500,

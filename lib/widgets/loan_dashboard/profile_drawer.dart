@@ -72,12 +72,12 @@ class ProfileDrawer extends StatelessWidget {
 
                 const SizedBox(width: 14),
 
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Profile',
+                        'profile'.tr,
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
@@ -86,7 +86,7 @@ class ProfileDrawer extends StatelessWidget {
                       ),
                       SizedBox(height: 3),
                       Text(
-                        'Manage your account',
+                        'manage_account'.tr,
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w500,
@@ -103,13 +103,13 @@ class ProfileDrawer extends StatelessWidget {
 
             _buildDrawerItem(
               icon: Icons.person_outline_rounded,
-              title: 'My Profile',
+              title: 'my_profile'.tr,
               onTap: () {
                 Navigator.pop(context);
 
                 Get.snackbar(
-                  'My Profile',
-                  'Profile will be available soon.',
+                  'my_profile'.tr,
+                  'profile_coming_soon'.tr,
                   snackPosition: SnackPosition.BOTTOM,
                   margin: const EdgeInsets.all(16),
                 );
@@ -124,7 +124,7 @@ class ProfileDrawer extends StatelessWidget {
 
                 Get.snackbar(
                   'Help & Support',
-                  'Support will be available soon.',
+                  'support_coming_soon'.tr,
                   snackPosition: SnackPosition.BOTTOM,
                   margin: const EdgeInsets.all(16),
                 );

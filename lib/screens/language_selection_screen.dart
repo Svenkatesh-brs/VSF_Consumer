@@ -21,7 +21,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
       code: 'en',
       name: 'English',
       nativeName: 'English',
-      subtitle: 'Continue in English',
+      subtitle: 'continue_in_english',
       icon: Icons.language_rounded,
       color: AppColors.lightBlue,
     ),
@@ -29,7 +29,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
       code: 'te',
       name: 'Telugu',
       nativeName: '\u0c24\u0c46\u0c32\u0c41\u0c17\u0c41',
-      subtitle: '\u0c24\u0c46\u0c32\u0c41\u0c17\u0c41\u0c32\u0c4b \u0c15\u0c4a\u0c28\u0c38\u0c3e\u0c17\u0c3f\u0c02\u0c1a\u0c02\u0c21\u0c3f',
+      subtitle: 'continue_in_telugu',
       icon: Icons.auto_awesome_rounded,
       color: AppColors.buttonEnd,
     ),
@@ -37,7 +37,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
       code: 'hi',
       name: 'Hindi',
       nativeName: '\u0939\u093f\u0928\u094d\u0926\u0940',
-      subtitle: '\u0939\u093f\u0928\u094d\u0926\u0940 \u092e\u0947\u0902 \u091c\u093e\u0930\u0940 \u0930\u0916\u0947\u0902',
+      subtitle: 'continue_in_hindi',
       icon: Icons.translate_rounded,
       color: AppColors.secondary,
     ),
@@ -171,8 +171,8 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
                 _reveal(
                   begin: 0.72,
                   end: 1.0,
-                  child: const Text(
-                    'You can change this later from your profile.',
+                  child: Text(
+                    'change_language_later'.tr,
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 11, color: Colors.black45),
                   ),
@@ -218,8 +218,8 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
             color: AppColors.primary.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(30),
           ),
-          child: const Text(
-            'LANGUAGE PREFERENCE',
+          child: Text(
+            'language_preference'.tr,
             style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w700,
@@ -229,8 +229,8 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
           ),
         ),
         const SizedBox(height: 15),
-        const Text(
-          'Make VSF yours',
+        Text(
+          'make_vsf_yours'.tr,
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 28,
@@ -240,7 +240,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
         ),
         const SizedBox(height: 7),
         Text(
-          'Choose the language you are most comfortable with.',
+          'choose_language'.tr,
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 13,
@@ -307,7 +307,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    language.name,
+                    language.name.tr,
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
@@ -316,7 +316,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
                   ),
                   const SizedBox(height: 3),
                   Text(
-                    language.subtitle,
+                    language.subtitle.tr,
                     style: const TextStyle(fontSize: 11, color: Colors.black54),
                   ),
                 ],
@@ -395,12 +395,12 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
                     color: Colors.white,
                   ),
                 )
-              : const Row(
+              : Row(
                   key: ValueKey('continue'),
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Continue',
+                      'continue'.tr,
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,

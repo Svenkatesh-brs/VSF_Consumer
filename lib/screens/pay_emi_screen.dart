@@ -52,7 +52,7 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Pay EMI',
+                  'pay_emi'.tr,
                   style: AppTheme.style.copyWith(
                     fontSize: 22,
                     fontWeight: FontWeight.w700,
@@ -60,7 +60,7 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
                   ),
                 ),
                 Text(
-                  'Make your EMI payment securely',
+                  'pay_emi_subtitle'.tr,
                   style: AppTheme.style.copyWith(
                     fontSize: 11.5,
                     color: AppColors.hint,
@@ -142,7 +142,7 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Complete your EMI payment',
+                'complete_emi_payment'.tr,
                 style: AppTheme.style.copyWith(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
@@ -193,7 +193,7 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Scan & Pay',
+                      'scan_pay'.tr,
                       style: AppTheme.style.copyWith(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
@@ -202,7 +202,7 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Scan this QR using your preferred UPI app',
+                      'scan_qr_upi'.tr,
                       style: AppTheme.style.copyWith(
                         fontSize: 11.5,
                         color: AppColors.hint,
@@ -312,7 +312,7 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
         ),
         const SizedBox(height: 10),
         Text(
-          'Swipe to view all ${files.length} QR codes',
+          'swipe_qr_codes'.trParams({'count': files.length.toString()}),
           style: AppTheme.style.copyWith(fontSize: 11.5, color: AppColors.hint),
         ),
       ],
@@ -451,7 +451,7 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'UPI ID',
+                        'upi_id'.tr,
                         style: AppTheme.style.copyWith(
                           fontSize: 10,
                           fontWeight: FontWeight.w500,
@@ -495,7 +495,7 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Payment Number',
+                        'payment_number'.tr,
                         style: AppTheme.style.copyWith(
                           fontSize: 10,
                           fontWeight: FontWeight.w500,
@@ -618,7 +618,7 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
                           Text(
                             file.name.isNotEmpty
                                 ? file.name
-                                : 'Payment QR Code',
+                                : 'payment_qr_code'.tr,
                             style: AppTheme.style.copyWith(
                               fontSize: 15,
                               fontWeight: FontWeight.w700,
@@ -626,7 +626,7 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
                             ),
                           ),
                           Text(
-                            'Pinch or zoom to view closely',
+                            'zoom_qr'.tr,
                             style: AppTheme.style.copyWith(
                               fontSize: 10.5,
                               color: AppColors.hint,
@@ -672,7 +672,7 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
                     Expanded(
                       child: _buildSecondaryActionButton(
                         icon: Icons.download_rounded,
-                        label: 'Save QR',
+                        label: 'save_qr'.tr,
                         backgroundColor: AppColors.buttonStart,
                         foregroundColor: AppColors.lightBlue,
                         onTap: () {
@@ -685,7 +685,7 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
                     Expanded(
                       child: _buildSecondaryActionButton(
                         icon: Icons.share_rounded,
-                        label: 'Share QR',
+                        label: 'share_qr'.tr,
                         backgroundColor: AppColors.buttonEnd,
                         foregroundColor: AppColors.white,
                         onTap: () {
@@ -716,8 +716,8 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
       );
 
       Get.snackbar(
-        'QR Code Saved',
-        'Saved to $location',
+        'qr_code_saved'.tr,
+      'saved_to'.trParams({'location': location}),
         snackPosition: SnackPosition.BOTTOM,
         margin: const EdgeInsets.all(16),
         backgroundColor: AppColors.lightBlue,
@@ -727,8 +727,8 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
       );
     } catch (_) {
       Get.snackbar(
-        'Save Failed',
-        'Unable to save the QR image. Please check storage permission and try again.',
+        'save_failed'.tr,
+        'unable_save_qr'.tr,
         snackPosition: SnackPosition.BOTTOM,
         margin: const EdgeInsets.all(16),
         backgroundColor: AppColors.lightBlue,
@@ -745,8 +745,8 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
 
     if (!shared) {
       Get.snackbar(
-        'Share',
-        'Unable to open share sheet.',
+        'share'.tr,
+        'unable_share_sheet'.tr,
         snackPosition: SnackPosition.BOTTOM,
         margin: const EdgeInsets.all(16),
         backgroundColor: AppColors.lightBlue,
@@ -768,7 +768,7 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
           const Icon(Icons.qr_code_rounded, color: AppColors.hint, size: 64),
           const SizedBox(height: 10),
           Text(
-            'QR code unavailable',
+            'qr_unavailable'.tr,
             style: AppTheme.style.copyWith(
               fontSize: 12,
               fontWeight: FontWeight.w600,
@@ -792,14 +792,14 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
     }
 
     return _buildPaymentDetailSection(
-      title: 'Contact Numbers',
-      subtitle: 'Contact these numbers for payment support',
+      title: 'contact_numbers'.tr,
+      subtitle: 'payment_support_numbers'.tr,
       icon: Icons.support_agent_rounded,
       children: [
         ...numbers.asMap().entries.map(
           (entry) => _buildContactNumberItem(
             value: entry.value,
-            label: 'Contact Number',
+            label: 'contact_number'.tr,
           ),
         ),
       ],
@@ -967,8 +967,8 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
 
     if (Get.context != null) {
       Get.snackbar(
-        'Call Unavailable',
-        'Unable to open the phone dialer.',
+        'call_unavailable'.tr,
+        'unable_phone_dialer'.tr,
         snackPosition: SnackPosition.BOTTOM,
         margin: const EdgeInsets.all(16),
         backgroundColor: AppColors.lightBlue,
@@ -1026,7 +1026,7 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Payment instructions',
+                  'payment_instructions'.tr,
                   style: AppTheme.style.copyWith(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
@@ -1035,7 +1035,7 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
                 ),
                 const SizedBox(height: 5),
                 Text(
-                  'Complete your payment using the QR code, UPI ID or payment number provided above. Keep your payment confirmation for your records.',
+                  'payment_instructions_text'.tr,
                   style: AppTheme.style.copyWith(
                     fontSize: 11.5,
                     color: AppColors.hint,
@@ -1074,7 +1074,7 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Loading payment details',
+                  'loading_payment_details'.tr,
                   style: AppTheme.style.copyWith(
                     fontSize: 17,
                     fontWeight: FontWeight.w700,
@@ -1085,7 +1085,7 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 30),
                   child: Text(
-                    'Please wait while we fetch the latest payment information.',
+                    'fetching_payment_information'.tr,
                     textAlign: TextAlign.center,
                     style: AppTheme.style.copyWith(
                       fontSize: 12,
@@ -1128,7 +1128,7 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
             ),
             const SizedBox(height: 18),
             Text(
-              'Unable to load payment details',
+              'unable_load_payment_details'.tr,
               textAlign: TextAlign.center,
               style: AppTheme.style.copyWith(
                 fontSize: 16,

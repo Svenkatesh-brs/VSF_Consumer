@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import '../../utils/app_colors.dart';
 
@@ -338,7 +339,7 @@ class _LoanOverviewCardState extends State<LoanOverviewCard>
         child: Row(
           children: [
             _buildEmiSummaryItem(
-              label: 'TOTAL EMIs',
+              label: 'total_emis'.tr,
               value: widget.totalEmis.toString(),
             ),
             _buildEmiSummaryDivider(),
@@ -469,9 +470,9 @@ class _LoanOverviewCardState extends State<LoanOverviewCard>
             children: [
               Row(
                 children: [
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      'Repayment Progress',
+                      'repayment_progress'.tr,
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w500,

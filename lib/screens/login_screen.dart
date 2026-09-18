@@ -201,8 +201,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           const Duration(milliseconds: 400),
                       delay:
                           const Duration(milliseconds: 80),
-                      child: const Text(
-                        'Welcome Back',
+                      child: Text(
+                        'welcome_back'.tr,
                         style: TextStyle(
                           fontSize: 28,
                           fontWeight:
@@ -234,8 +234,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           const Duration(milliseconds: 400),
                       delay:
                           const Duration(milliseconds: 140),
-                      child: const Text(
-                        'Access your vehicle loan information',
+                      child: Text(
+                        'login_description'.tr,
                         style: TextStyle(
                           fontSize: 14,
                           color: Colors.black54,
@@ -271,8 +271,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           crossAxisAlignment:
                               CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Mobile Number',
+                            Text(
+                              'mobile_number'.tr,
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight:
@@ -313,7 +313,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 decoration:
                                     InputDecoration(
                                   hintText:
-                                      'Enter 10-digit mobile number',
+                                      'mobile_number_hint'.tr,
                                   counterText: '',
                                   prefixText:
                                       '+91 ',
@@ -333,7 +333,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                             Obx(
                               () => AppSubmitButton(
-                                label: 'Continue',
+                                label: 'continue'.tr,
                                 isLoading:
                                     controller
                                             .isLoading

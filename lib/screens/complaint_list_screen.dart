@@ -135,16 +135,16 @@ class _ComplaintListScreenState
   String _statusLabel(int status) {
     switch (status) {
       case ComplaintModel.pending:
-        return 'Pending';
+        return 'pending'.tr;
 
       case ComplaintModel.approved:
-        return 'Resolved';
+        return 'resolved'.tr;
 
       case ComplaintModel.rejected:
-        return 'Rejected';
+        return 'rejected'.tr;
 
       default:
-        return 'Unknown';
+        return 'error'.tr;
     }
   }
 
@@ -175,8 +175,8 @@ class _ComplaintListScreenState
             crossAxisAlignment:
                 CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Your Complaints',
+              Text(
+                'your_complaints'.tr,
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w700,
@@ -187,7 +187,7 @@ class _ComplaintListScreenState
               const SizedBox(height: 5),
 
               Text(
-                'Track the complaints you have submitted.',
+                'track_complaints'.tr,
                 style: TextStyle(
                   fontSize: 13,
                   height: 1.4,
@@ -362,50 +362,22 @@ class _ComplaintListScreenState
         ),
         child: Row(
           children: [
-            const Icon(
-              Icons.filter_list_rounded,
-              size: 19,
-              color: AppColors.lightBlue,
-            ),
+            const Icon(Icons.filter_list_rounded, size: 19, color: AppColors.lightBlue),
             const SizedBox(width: 8),
-            const Text(
-              'Status',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: Colors.black87,
-              ),
-            ),
+            Text('status'.tr, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.black87)),
             const Spacer(),
             DropdownButtonHideUnderline(
               child: DropdownButton<int>(
                 value: controller.selectedStatus.value,
-                icon: const Icon(
-                  Icons.keyboard_arrow_down_rounded,
-                  size: 20,
-                ),
-                items: const [
-                  DropdownMenuItem(
-                    value: ComplaintModel.all,
-                    child: Text('All'),
-                  ),
-                  DropdownMenuItem(
-                    value: ComplaintModel.pending,
-                    child: Text('Pending'),
-                  ),
-                  DropdownMenuItem(
-                    value: ComplaintModel.approved,
-                    child: Text('Resolved'),
-                  ),
-                  DropdownMenuItem(
-                    value: ComplaintModel.rejected,
-                    child: Text('Rejected'),
-                  ),
+                icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 20),
+                items: [
+                  DropdownMenuItem(value: ComplaintModel.all, child: Text('all'.tr)),
+                  DropdownMenuItem(value: ComplaintModel.pending, child: Text('pending'.tr)),
+                  DropdownMenuItem(value: ComplaintModel.approved, child: Text('resolved'.tr)),
+                  DropdownMenuItem(value: ComplaintModel.rejected, child: Text('rejected'.tr)),
                 ],
                 onChanged: (value) {
-                  if (value != null) {
-                    controller.setStatus(value);
-                  }
+                  if (value != null) controller.setStatus(value);
                 },
               ),
             ),
@@ -501,7 +473,7 @@ class _ComplaintListScreenState
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Complaint #$serialNumber',
+                        'complaint_number'.trParams({'number': '$serialNumber'}),
                         style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
@@ -510,7 +482,7 @@ class _ComplaintListScreenState
                       ),
                       const SizedBox(height: 3),
                       Text(
-                        'Created: ${_formatDate(complaint.createdAt)}',
+                        '${'created'.tr}: ${_formatDate(complaint.createdAt)}',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
@@ -568,8 +540,8 @@ class _ComplaintListScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Description',
+          Text(
+            'description'.tr,
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w600,
@@ -598,15 +570,15 @@ class _ComplaintListScreenState
               if (complaint.urgent)
                 _buildDetailChip(
                   icon: Icons.priority_high_rounded,
-                  label: 'Urgent',
+                  label: 'urgent'.tr,
                   color: AppColors.buttonEnd,
                 ),
             ],
           ),
           if (complaint.hasComments) ...[
             const SizedBox(height: 15),
-            const Text(
-              'Comments',
+            Text(
+              'comments'.tr,
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
@@ -639,7 +611,7 @@ class _ComplaintListScreenState
               Expanded(
                 child: _buildDateInfo(
                   icon: Icons.calendar_today_outlined,
-                  label: 'Created',
+                  label: 'created'.tr,
                   value: _formatDate(complaint.createdAt),
                 ),
               ),
@@ -648,7 +620,7 @@ class _ComplaintListScreenState
                 Expanded(
                   child: _buildDateInfo(
                     icon: Icons.support_agent_rounded,
-                    label: 'Response Date',
+                    label: 'response_date'.tr,
                     value: _formatDate(complaint.updatedAt),
                   ),
                 ),
@@ -815,7 +787,7 @@ class _ComplaintListScreenState
             ),
 
             Text(
-              'Page ${controller.currentPage.value}',
+              'page'.trParams({'number': '${controller.currentPage.value}'}),
               style: const TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
@@ -866,8 +838,8 @@ class _ComplaintListScreenState
 
         const SizedBox(height: 20),
 
-        const Text(
-          'No Complaints Found',
+        Text(
+          'no_complaints'.tr,
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 19,
@@ -880,9 +852,10 @@ class _ComplaintListScreenState
 
         Text(
           controller.selectedStatus.value == ComplaintModel.all
-              ? 'There are no complaints to show right now.'
-              : 'There are no complaints under the '
-                  '${controller.selectedStatusLabel.toLowerCase()} status.',
+              ? 'no_complaints_message'.tr
+              : 'no_filtered_complaints'.trParams({
+                  'status': controller.selectedStatusLabel,
+                }),
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 13,
@@ -929,8 +902,8 @@ class _ComplaintListScreenState
 
         const SizedBox(height: 20),
 
-        const Text(
-          'Unable to Load Complaints',
+        Text(
+          'unable_load_complaints'.tr,
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 18,
@@ -962,8 +935,8 @@ class _ComplaintListScreenState
               Icons.refresh_rounded,
               size: 18,
             ),
-            label: const Text(
-              'Retry',
+            label: Text(
+              'retry'.tr,
             ),
             style: ElevatedButton.styleFrom(
               backgroundColor:

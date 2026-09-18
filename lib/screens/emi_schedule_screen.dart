@@ -430,8 +430,8 @@ class _EmiScheduleScreenState extends State<EmiScheduleScreen> {
                         ),
                         borderRadius: BorderRadius.circular(100),
                       ),
-                      child: const Text(
-                        'NEXT',
+                      child: Text(
+                        'next'.tr,
                         style: TextStyle(
                           fontSize: 8.5,
                           fontWeight: FontWeight.w800,
@@ -519,9 +519,8 @@ class _EmiScheduleScreenState extends State<EmiScheduleScreen> {
                   borderRadius: BorderRadius.circular(100),
                 ),
                 child: Text(
-                  '${emi.daysOverdue} '
-                  '${emi.daysOverdue == 1 ? 'day' : 'days'} '
-                  'overdue',
+                    (emi.daysOverdue == 1 ? 'day_overdue' : 'days_overdue')
+                      .trParams({'count': emi.daysOverdue.toString()}),
                   style: const TextStyle(
                     fontSize: 8.5,
                     fontWeight: FontWeight.w600,
@@ -539,32 +538,32 @@ class _EmiScheduleScreenState extends State<EmiScheduleScreen> {
   Widget _buildExpandedDetails(EmiItem emi) {
     final detailRows = <Widget>[
       _buildInfoRow(
-        label: 'Principal',
+        label: 'principal'.tr,
         value: _formatAmount(emi.principalComponent),
       ),
       _buildInfoRow(
-        label: 'Interest',
+        label: 'interest'.tr,
         value: _formatAmount(emi.interestComponent),
       ),
       if (emi.insuranceComponent > 0)
         _buildInfoRow(
-          label: 'Insurance',
+          label: 'insurance'.tr,
           value: _formatAmount(emi.insuranceComponent),
         ),
       if (emi.principalOutstanding > 0)
         _buildInfoRow(
-          label: 'Outstanding',
+          label: 'outstanding'.tr,
           value: _formatAmount(emi.principalOutstanding),
         ),
       // _buildInfoRow(label: 'LPC Due', value: _formatAmount(emi.lpcDue)),
-      _buildInfoRow(label: 'Total Paid', value: _formatAmount(emi.totalPaid)),
+      _buildInfoRow(label: 'total_paid'.tr, value: _formatAmount(emi.totalPaid)),
       _buildInfoRow(
-        label: 'Remaining',
+        label: 'remaining'.tr,
         value: _formatAmount(emi.remainingAmount),
       ),
       if (emi.lastPaymentDateMs != null)
         _buildInfoRow(
-          label: 'Last Payment',
+          label: 'last_payment'.tr,
           value: controller.formatDateMs(emi.lastPaymentDateMs),
         ),
     ];
@@ -658,8 +657,8 @@ class _EmiScheduleScreenState extends State<EmiScheduleScreen> {
 
             const SizedBox(height: 14),
 
-            const Text(
-              'No EMI records found.',
+            Text(
+              'no_records'.tr,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 13,
@@ -774,7 +773,7 @@ class _EmiScheduleScreenState extends State<EmiScheduleScreen> {
     final sections = <Widget>[];
 
     if (pastEmis.isNotEmpty) {
-      sections.add(_buildSectionLabel('Past EMIs'));
+      sections.add(_buildSectionLabel('past_emis'.tr));
 
       sections.add(
         _buildTimelineGroup([
@@ -793,7 +792,7 @@ class _EmiScheduleScreenState extends State<EmiScheduleScreen> {
         sections.add(const SizedBox(height: 14));
       }
 
-      sections.add(_buildSectionLabel('Upcoming EMIs'));
+      sections.add(_buildSectionLabel('upcoming_emis'.tr));
 
       sections.add(
         _buildTimelineGroup([
@@ -846,11 +845,11 @@ class _EmiScheduleScreenState extends State<EmiScheduleScreen> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _summaryMetric(value: '${schedule.totalCount}', label: 'TOTAL'),
-              _summaryMetric(value: '${schedule.paidCount}', label: 'PAID'),
+              _summaryMetric(value: '${schedule.totalCount}', label: 'total_metric'.tr),
+              _summaryMetric(value: '${schedule.paidCount}', label: 'paid_metric'.tr),
               _summaryMetric(
                 value: '${schedule.upcomingCount}',
-                label: 'UPCOMING',
+                label: 'upcoming_metric'.tr,
               ),
             ],
           ),
@@ -867,9 +866,8 @@ class _EmiScheduleScreenState extends State<EmiScheduleScreen> {
                 ),
               ),
               child: Text(
-                '${schedule.overdueCount} '
-                '${schedule.overdueCount == 1 ? 'EMI' : 'EMIs'} '
-                'overdue',
+                (schedule.overdueCount == 1 ? 'emi_overdue' : 'emis_overdue')
+                  .trParams({'count': schedule.overdueCount.toString()}),
                 style: const TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
@@ -913,18 +911,18 @@ class _EmiScheduleScreenState extends State<EmiScheduleScreen> {
 
   String _buildSubtitle(EmiScheduleModel schedule) {
     if (schedule.isEmpty) {
-      return 'Payment schedule';
+      return 'payment_schedule'.tr;
     }
 
     final parts = <String>[
-      if (schedule.paidCount > 0) '${schedule.paidCount} paid',
-      if (schedule.overdueCount > 0) '${schedule.overdueCount} overdue',
-      if (schedule.upcomingCount > 0) '${schedule.upcomingCount} upcoming',
+      if (schedule.paidCount > 0) 'paid_summary'.trParams({'count': '${schedule.paidCount}'}),
+      if (schedule.overdueCount > 0) 'overdue_summary'.trParams({'count': '${schedule.overdueCount}'}),
+      if (schedule.upcomingCount > 0) 'upcoming_summary'.trParams({'count': '${schedule.upcomingCount}'}),
     ];
 
     if (parts.isEmpty) {
-      return '${schedule.totalCount} '
-          'record${schedule.totalCount == 1 ? '' : 's'}';
+        return (schedule.totalCount == 1 ? 'record_summary' : 'records_summary')
+          .trParams({'count': '${schedule.totalCount}'});
     }
 
     return parts.join(' · ');
@@ -951,9 +949,9 @@ class _EmiScheduleScreenState extends State<EmiScheduleScreen> {
                 return _buildErrorView();
               }
 
-              return const AppLoading(
-                message: 'Loading EMI schedule',
-                subtitle: 'Please wait while we fetch your payment schedule.',
+              return AppLoading(
+                message: 'loading_emi_schedule'.tr,
+                subtitle: 'fetching_payment_schedule'.tr,
                 size: 300,
               );
             }
@@ -1023,8 +1021,8 @@ class _EmiScheduleScreenState extends State<EmiScheduleScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
-                                  'EMI Schedule',
+                                Text(
+                                  'emi_schedule'.tr,
                                   style: TextStyle(
                                     fontSize: 23,
                                     fontWeight: FontWeight.w700,

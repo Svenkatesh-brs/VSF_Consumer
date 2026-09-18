@@ -58,10 +58,6 @@ class _ComplaintScreenState extends State<ComplaintScreen>
     super.dispose();
   }
 
-  // ============================================================
-  // SUBMIT
-  // ============================================================
-
   Future<void> _submitComplaint() async {
     FocusScope.of(context).unfocus();
 
@@ -88,8 +84,8 @@ class _ComplaintScreenState extends State<ComplaintScreen>
     Get.dialog(
       AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
-        title: const Text(
-          'Complaint Submitted',
+        title: Text(
+          'complaint_submitted'.tr,
           style: TextStyle(
             fontSize: 19,
             fontWeight: FontWeight.w700,
@@ -100,15 +96,15 @@ class _ComplaintScreenState extends State<ComplaintScreen>
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Your complaint has been submitted successfully.',
+            Text(
+              'complaint_success'.tr,
               style: TextStyle(fontSize: 14, color: Colors.black87),
             ),
 
             if (complaint != null && complaint.id.isNotEmpty) ...[
               const SizedBox(height: 14),
-              const Text(
-                'Complaint ID',
+              Text(
+                'complaint_id'.tr,
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
@@ -133,8 +129,8 @@ class _ComplaintScreenState extends State<ComplaintScreen>
               Get.back();
               controller.clearCreateState();
             },
-            child: const Text(
-              'Done',
+            child: Text(
+              'done'.tr,
               style: TextStyle(
                 fontWeight: FontWeight.w700,
                 color: AppColors.buttonEnd,
@@ -157,7 +153,7 @@ class _ComplaintScreenState extends State<ComplaintScreen>
     }
 
     Get.snackbar(
-      'Complaint',
+      'complaint'.tr,
       message,
       snackPosition: SnackPosition.BOTTOM,
       margin: const EdgeInsets.all(16),
@@ -174,22 +170,22 @@ class _ComplaintScreenState extends State<ComplaintScreen>
   String _issueTypeLabel(int value) {
     switch (value) {
       case ComplaintCreateRequest.billingOrPayment:
-        return 'Billing Or Payment';
+        return 'billing_payment'.tr;
 
       case ComplaintCreateRequest.documents:
-        return 'Documents';
+        return 'documents'.tr;
 
       case ComplaintCreateRequest.serviceQuality:
-        return 'Service Quality';
+        return 'service_quality'.tr;
 
       case ComplaintCreateRequest.vehicleRelated:
-        return 'Vehicle Related';
+        return 'vehicle_related'.tr;
 
       case ComplaintCreateRequest.technicalAndStaff:
-        return 'Technical And Staff';
+        return 'technical_staff'.tr;
 
       case ComplaintCreateRequest.other:
-        return 'Other';
+        return 'other'.tr;
 
       default:
         return 'Other';
@@ -311,15 +307,9 @@ class _ComplaintScreenState extends State<ComplaintScreen>
           ),
           labelColor: AppColors.lightBlue,
           unselectedLabelColor: Colors.black45,
-          labelStyle: const TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
-          ),
-          unselectedLabelStyle: const TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-          ),
-          tabs: const [
+          labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+          unselectedLabelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+          tabs: [
             Tab(
               height: 42,
               child: FittedBox(
@@ -327,9 +317,9 @@ class _ComplaintScreenState extends State<ComplaintScreen>
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.report_problem_outlined, size: 17),
-                    SizedBox(width: 7),
-                    Text('Raise Complaint'),
+                    const Icon(Icons.report_problem_outlined, size: 17),
+                    const SizedBox(width: 7),
+                    Text('raise_complaint'.tr),
                   ],
                 ),
               ),
@@ -341,9 +331,9 @@ class _ComplaintScreenState extends State<ComplaintScreen>
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.history_rounded, size: 17),
-                    SizedBox(width: 7),
-                    Text('My Complaints'),
+                    const Icon(Icons.history_rounded, size: 17),
+                    const SizedBox(width: 7),
+                    Text('my_complaints'.tr),
                   ],
                 ),
               ),
@@ -374,9 +364,9 @@ class _ComplaintScreenState extends State<ComplaintScreen>
 
           const SizedBox(width: 4),
 
-          const Expanded(
+          Expanded(
             child: Text(
-              'Complaints',
+              'complaints_title'.tr,
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
@@ -397,8 +387,8 @@ class _ComplaintScreenState extends State<ComplaintScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Raise a Complaint',
+        Text(
+          'raise_complaint'.tr,
           style: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.w700,
@@ -451,7 +441,7 @@ class _ComplaintScreenState extends State<ComplaintScreen>
         children: [
           _buildSectionTitle(
             icon: Icons.report_problem_outlined,
-            title: 'Complaint Details',
+            title: 'complaint_details'.tr,
           ),
 
           const SizedBox(height: 20),
@@ -513,8 +503,8 @@ class _ComplaintScreenState extends State<ComplaintScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Description',
+        Text(
+          'description'.tr,
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
@@ -531,7 +521,7 @@ class _ComplaintScreenState extends State<ComplaintScreen>
           maxLines: 7,
           textInputAction: TextInputAction.newline,
           decoration: InputDecoration(
-            hintText: 'Describe your complaint...',
+            hintText: 'describe_complaint'.tr,
             hintStyle: const TextStyle(fontSize: 13, color: Colors.black38),
             filled: true,
             fillColor: Colors.white.withValues(alpha: 0.55),
@@ -570,8 +560,8 @@ class _ComplaintScreenState extends State<ComplaintScreen>
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Issue Type',
+          Text(
+            'issue_type'.tr,
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
@@ -673,12 +663,12 @@ class _ComplaintScreenState extends State<ComplaintScreen>
 
             const SizedBox(width: 10),
 
-            const Expanded(
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Mark as Urgent',
+                    'mark_urgent'.tr,
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
@@ -687,7 +677,7 @@ class _ComplaintScreenState extends State<ComplaintScreen>
                   ),
                   SizedBox(height: 2),
                   Text(
-                    'Flag this complaint as urgent.',
+                    'urgent_description'.tr,
                     style: TextStyle(fontSize: 10, color: Colors.black45),
                   ),
                 ],
@@ -737,13 +727,13 @@ class _ComplaintScreenState extends State<ComplaintScreen>
                     valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                   ),
                 )
-              : const Row(
+              : Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(Icons.send_rounded, size: 18, color: Colors.white),
                     SizedBox(width: 8),
                     Text(
-                      'Submit Complaint',
+                      'submit_complaint'.tr,
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
