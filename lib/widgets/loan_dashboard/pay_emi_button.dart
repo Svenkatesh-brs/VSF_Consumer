@@ -1,7 +1,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 import '../../utils/app_colors.dart';
 
@@ -369,8 +368,8 @@ class _PayEmiButtonState extends State<PayEmiButton>
                                     children: [
                                       Text(
                                         _isDisabled
-                                            ? 'loan_completed'.tr
-                                            : 'pay_emi'.tr.toUpperCase(),
+                                            ? 'LOAN COMPLETED'
+                                            : 'PAY EMI',
                                         style:
                                             const TextStyle(
                                           fontSize: 14,
@@ -386,8 +385,8 @@ class _PayEmiButtonState extends State<PayEmiButton>
                                       ),
                                       Text(
                                         _isDisabled
-                                            ? 'no_payment_required'.tr
-                                            : 'make_payment_securely'.tr,
+                                            ? 'No payment required'
+                                            : 'Make your payment securely',
                                         maxLines: 1,
                                         overflow:
                                             TextOverflow

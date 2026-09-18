@@ -81,6 +81,25 @@ class _LoanOverviewCardState extends State<LoanOverviewCard>
     return widget.status.toLowerCase() == 'completed';
   }
 
+  String _localizedStatus(String status) {
+    switch (status.trim().toLowerCase()) {
+      case 'active':
+        return 'active'.tr;
+      case 'inactive':
+        return 'inactive'.tr;
+      case 'completed':
+        return 'loan_completed'.tr;
+      case 'pending':
+        return 'pending'.tr;
+      case 'paid':
+        return 'paid_metric'.tr;
+      case 'overdue':
+        return 'overdue_summary'.tr.replaceAll('@count', '').trim();
+      default:
+        return status;
+    }
+  }
+
   // ============================================================
   // INIT
   // ============================================================
@@ -216,7 +235,7 @@ class _LoanOverviewCardState extends State<LoanOverviewCard>
               _buildStatusDot(),
               const SizedBox(width: 7),
               Text(
-                widget.status.toUpperCase(),
+                _localizedStatus(widget.status),
                 style: const TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.w800,
@@ -344,17 +363,17 @@ class _LoanOverviewCardState extends State<LoanOverviewCard>
             ),
             _buildEmiSummaryDivider(),
             _buildEmiSummaryItem(
-              label: 'PAID',
+              label: 'paid_metric'.tr,
               value: widget.paidEmis.toString(),
             ),
             _buildEmiSummaryDivider(),
             _buildEmiSummaryItem(
-              label: 'UPCOMING',
+              label: 'upcoming_metric'.tr,
               value: widget.upcomingEmis.toString(),
             ),
             _buildEmiSummaryDivider(),
             _buildEmiSummaryItem(
-              label: 'OVERDUE',
+              label: 'overdue_summary'.tr.replaceAll('@count', '').trim(),
               value: widget.overdueEmis.toString(),
             ),
           ],
@@ -364,7 +383,8 @@ class _LoanOverviewCardState extends State<LoanOverviewCard>
   }
 
   Widget _buildEmiSummaryItem({required String label, required String value}) {
-    final isOverdue = label == 'OVERDUE' && widget.overdueEmis > 0;
+    final isOverdue = widget.overdueEmis > 0 &&
+      label == 'overdue_summary'.tr.replaceAll('@count', '').trim();
 
     return Expanded(
       child: Column(
@@ -612,9 +632,9 @@ class _LoanOverviewCardState extends State<LoanOverviewCard>
                                   ),
                                 ),
                                 const SizedBox(width: 10),
-                                const Expanded(
+                                Expanded(
                                   child: Text(
-                                    'LOAN OVERVIEW',
+                                    'loan_overview'.tr,
                                     style: TextStyle(
                                       fontSize: 10,
                                       fontWeight: FontWeight.w700,
@@ -696,14 +716,14 @@ class _LoanOverviewCardState extends State<LoanOverviewCard>
                               children: [
                                 _buildStatItem(
                                   icon: Icons.currency_rupee_rounded,
-                                  label: 'LOAN AMOUNT',
+                                  label: 'loan_amount'.tr,
                                   value: _formatAmount(widget.loanAmount),
                                   delay: 0.28,
                                 ),
                                 const SizedBox(width: 10),
                                 _buildStatItem(
                                   icon: Icons.account_balance_wallet_outlined,
-                                  label: 'OUTSTANDING',
+                                  label: 'outstanding'.tr,
                                   value: _formatAmount(
                                     widget.outstandingAmount,
                                   ),
@@ -718,14 +738,14 @@ class _LoanOverviewCardState extends State<LoanOverviewCard>
                               children: [
                                 _buildStatItem(
                                   icon: Icons.payments_outlined,
-                                  label: 'EMI AMOUNT',
+                                  label: 'emi_amount'.tr,
                                   value: _formatAmount(widget.emiAmount),
                                   delay: 0.40,
                                 ),
                                 const SizedBox(width: 10),
                                 _buildStatItem(
                                   icon: Icons.calendar_today_outlined,
-                                  label: 'NEXT EMI',
+                                  label: '${'next'.tr} EMI',
                                   value: widget.nextEmiDate,
                                   delay: 0.46,
                                 ),
