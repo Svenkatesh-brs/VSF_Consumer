@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../providers/auth_provider.dart';
+import '../../providers/language_selection_provider.dart';
+import '../../models/language_selection_model.dart';
 import '../../utils/app_colors.dart';
 
 class ProfileDrawer extends StatelessWidget {
@@ -25,6 +27,115 @@ class ProfileDrawer extends StatelessWidget {
         return ProfileDrawer(avatarAsset: avatarAsset);
       },
     );
+  }
+
+  Future<void> _showLanguagePicker(BuildContext context) async {
+    final languageProvider = Get.find<LanguageSelectionProvider>();
+    var selectedCode = Get.locale?.languageCode ?? languageProvider.languageCode;
+    var isSaving = false;
+
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(22),
+              ),
+              title: Text('select_language'.tr),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: LanguageSelectionModel.supportedLanguages.map(
+                  (language) {
+                    final isSelected = language.languageCode == selectedCode;
+
+                    return ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: Icon(
+                        isSelected
+                            ? Icons.radio_button_checked_rounded
+                            : Icons.radio_button_unchecked_rounded,
+                        color: isSelected
+                            ? AppColors.buttonEnd
+                            : Colors.black26,
+                      ),
+                      title: Text(_languageLabel(language.languageCode)),
+                      subtitle: Text(language.nativeName),
+                      onTap: isSaving
+                          ? null
+                          : () {
+                              setState(
+                                () => selectedCode = language.languageCode,
+                              );
+                            },
+                    );
+                  },
+                ).toList(),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: isSaving
+                      ? null
+                      : () => Navigator.pop(dialogContext),
+                  child: Text('cancel'.tr),
+                ),
+                ElevatedButton(
+                  onPressed: isSaving
+                      ? null
+                      : () async {
+                          setState(() => isSaving = true);
+
+                          try {
+                            await languageProvider.changeLanguage(selectedCode);
+
+                            if (!dialogContext.mounted) return;
+
+                            Navigator.pop(dialogContext);
+                            Get.snackbar(
+                              'language'.tr,
+                              'language_updated'.tr,
+                              snackPosition: SnackPosition.BOTTOM,
+                              margin: const EdgeInsets.all(16),
+                            );
+                          } catch (_) {
+                            if (!dialogContext.mounted) return;
+
+                            setState(() => isSaving = false);
+                            Get.snackbar(
+                              'error'.tr,
+                              'unable_save_language'.tr,
+                              snackPosition: SnackPosition.BOTTOM,
+                              margin: const EdgeInsets.all(16),
+                            );
+                          }
+                        },
+                  child: isSaving
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Text('save'.tr),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  String _languageLabel(String code) {
+    switch (code) {
+      case 'te':
+        return 'telugu'.tr;
+      case 'hi':
+        return 'hindi'.tr;
+      case 'en':
+      default:
+        return 'english'.tr;
+    }
   }
 
   // ============================================================
@@ -77,7 +188,7 @@ class ProfileDrawer extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'profile'.tr,
+                        'manage_account'.tr,
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
@@ -86,7 +197,7 @@ class ProfileDrawer extends StatelessWidget {
                       ),
                       SizedBox(height: 3),
                       Text(
-                        'manage_account'.tr,
+                        'manage_account_description'.tr,
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w500,
@@ -118,12 +229,12 @@ class ProfileDrawer extends StatelessWidget {
 
             _buildDrawerItem(
               icon: Icons.help_outline_rounded,
-              title: 'Help & Support',
+              title: 'help_support'.tr,
               onTap: () {
                 Navigator.pop(context);
 
                 Get.snackbar(
-                  'Help & Support',
+                  'help_support'.tr,
                   'support_coming_soon'.tr,
                   snackPosition: SnackPosition.BOTTOM,
                   margin: const EdgeInsets.all(16),
@@ -132,8 +243,14 @@ class ProfileDrawer extends StatelessWidget {
             ),
 
             _buildDrawerItem(
+              icon: Icons.language_rounded,
+              title: 'language'.tr,
+              onTap: () => _showLanguagePicker(context),
+            ),
+
+            _buildDrawerItem(
               icon: Icons.logout_rounded,
-              title: 'Logout',
+              title: 'logout'.tr,
               onTap: () async {
                 Navigator.pop(context);
 
