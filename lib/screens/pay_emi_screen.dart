@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../providers/language_selection_provider.dart';
 import '../providers/pay_emi_provider.dart';
 import '../models/pay_emi_model.dart';
 import '../services/pay_emi_qr_service.dart';
@@ -45,6 +46,25 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
             onPressed: Get.back,
             icon: const Icon(Icons.arrow_back_rounded),
             color: AppColors.lightBlue,
+          ),
+
+          const SizedBox(width: 4),
+
+          Expanded(
+            child: Obx(() {
+              // Keep the screen heading synchronized with the dashboard
+              // button when the language changes from the profile drawer.
+              Get.find<LanguageSelectionProvider>().locale;
+
+              return Text(
+                'pay_emi'.tr,
+                style: AppTheme.style.copyWith(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.lightBlue,
+                ),
+              );
+            }),
           ),
         ],
       ),
