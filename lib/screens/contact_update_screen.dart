@@ -1021,9 +1021,9 @@ class _ContactUpdateScreenState
 
           const SizedBox(width: 4),
 
-          const Expanded(
+          Expanded(
             child: Text(
-              'Contact Update',
+              'contact_update'.tr,
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
@@ -1202,9 +1202,7 @@ class _ContactUpdateScreenState
               if (isPhonePending) ...[
                 const SizedBox(height: 16),
                 _buildPendingNotice(
-                  message:
-                      'Your mobile number update request is currently under review. '
-                      'You can submit another update once it is approved or rejected.',
+                    message: 'mobile_update_under_review'.tr,
                 ),
               ] else ...[
                 const SizedBox(height: 16),
@@ -1237,7 +1235,7 @@ class _ContactUpdateScreenState
             controller: _phoneController,
             keyboardType: TextInputType.phone,
             textInputAction: TextInputAction.done,
-            labelText: 'Phone Number',
+            labelText: 'phone_number'.tr,
             hintText: 'ten_digit_mobile'.tr,
             prefixIcon: const Icon(
               Icons.phone_outlined,
@@ -1289,7 +1287,7 @@ class _ContactUpdateScreenState
           const SizedBox(height: 24),
 
           AppSubmitButton(
-            label: 'Verify OTP',
+            label: 'verify_otp'.tr,
             isLoading: isSaving,
             onTap: _submitOtp,
           ),
@@ -1335,7 +1333,7 @@ class _ContactUpdateScreenState
           const SizedBox(height: 24),
 
           AppSubmitButton(
-            label: 'Verify OTP',
+            label: 'verify_otp'.tr,
             isLoading: isSaving,
             onTap: _submitOtp,
           ),
@@ -1357,7 +1355,7 @@ class _ContactUpdateScreenState
       controller: _otpController,
       keyboardType: TextInputType.number,
       textInputAction: TextInputAction.done,
-      labelText: 'OTP',
+      labelText: 'otp'.tr,
       hintText: 'otp_six_digit'.tr,
       prefixIcon: const Icon(
         Icons.verified_outlined,
@@ -1439,9 +1437,7 @@ class _ContactUpdateScreenState
                   if (isAddressPending) ...[
                     const SizedBox(height: 16),
                     _buildPendingNotice(
-                      message:
-                          'Your address update request is currently under review. '
-                          'You can submit another update once it is approved or rejected.',
+                        message: 'address_update_under_review'.tr,
                     ),
                   ] else ...[
                     const SizedBox(height: 16),
@@ -1473,63 +1469,63 @@ class _ContactUpdateScreenState
 
     final rows = <Widget>[
       _buildInfoRow(
-        label: 'House Number',
+        label: 'house_number'.tr,
         value: address?.houseNumber ?? '',
       ),
       _buildInfoRow(
-        label: 'Floor Number',
+        label: 'floor_number'.tr,
         value: address?.floorNumber ?? '',
       ),
       _buildInfoRow(
-        label: 'Building Name',
+        label: 'building_name'.tr,
         value: address?.buildingName ?? '',
       ),
       _buildInfoRow(
-        label: 'Apartment Name',
+        label: 'apartment_name'.tr,
         value: address?.apartmentName ?? '',
       ),
       _buildInfoRow(
-        label: 'Street Name',
+        label: 'street_name'.tr,
         value: address?.streetName ?? '',
       ),
       _buildInfoRow(
-        label: 'Address Line 1',
+        label: 'address_line_1'.tr,
         value: address?.addressLine1 ?? '',
       ),
       _buildInfoRow(
-        label: 'Address Line 2',
+        label: 'address_line_2'.tr,
         value: address?.addressLine2 ?? '',
       ),
       _buildInfoRow(
-        label: 'Landmark',
+        label: 'landmark'.tr,
         value: address?.landmark ?? '',
       ),
       _buildInfoRow(
-        label: 'Village',
+        label: 'village'.tr,
         value: address?.village ?? '',
       ),
       _buildInfoRow(
-        label: 'District',
+        label: 'district'.tr,
         value: address?.district ?? '',
       ),
       _buildInfoRow(
-        label: 'City',
+        label: 'city'.tr,
         value: address?.city ?? '',
       ),
       _buildInfoRow(
-        label: 'State',
+        label: 'state'.tr,
         value: address?.state ?? '',
       ),
       _buildInfoRow(
-        label: 'Country',
+        label: 'country'.tr,
         value: address?.country ?? '',
       ),
       _buildInfoRow(
-        label: 'Pincode',
+        label: 'pincode'.tr,
         value: address?.pincode ?? '',
       ),
       _buildInfoRow(
-        label: 'Address Type',
+        label: 'address_type'.tr,
         value: address?.addressType ?? '',
       ),
     ];
@@ -1586,9 +1582,9 @@ class _ContactUpdateScreenState
 
                 const SizedBox(width: 10),
 
-                const Expanded(
+                Expanded(
                   child: Text(
-                    'Current Saved Address',
+                    'current_saved_address'.tr,
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
@@ -1659,98 +1655,98 @@ class _ContactUpdateScreenState
         children: [
           _buildSectionTitle(
             icon: Icons.edit_location_alt_outlined,
-            title: 'Edit Address',
+            title: 'edit_address'.tr,
           ),
 
           const SizedBox(height: 20),
 
           AppTextField(
             controller: _houseNumberController,
-            labelText: 'House Number',
+            labelText: 'house_number'.tr,
           ),
 
           const SizedBox(height: 14),
 
           AppTextField(
             controller: _floorNumberController,
-            labelText: 'Floor Number',
+            labelText: 'floor_number'.tr,
           ),
 
           const SizedBox(height: 14),
 
           AppTextField(
             controller: _buildingNameController,
-            labelText: 'Building Name',
+            labelText: 'building_name'.tr,
           ),
 
           const SizedBox(height: 14),
 
           AppTextField(
             controller: _apartmentNameController,
-            labelText: 'Apartment Name',
+            labelText: 'apartment_name'.tr,
           ),
 
           const SizedBox(height: 14),
 
           AppTextField(
             controller: _streetNameController,
-            labelText: 'Street Name',
+            labelText: 'street_name'.tr,
           ),
 
           const SizedBox(height: 14),
 
           AppTextField(
             controller: _addressLine1Controller,
-            labelText: 'Address Line 1',
+            labelText: 'address_line_1'.tr,
           ),
 
           const SizedBox(height: 14),
 
           AppTextField(
             controller: _addressLine2Controller,
-            labelText: 'Address Line 2',
+            labelText: 'address_line_2'.tr,
           ),
 
           const SizedBox(height: 14),
 
           AppTextField(
             controller: _landmarkController,
-            labelText: 'Landmark',
+            labelText: 'landmark'.tr,
           ),
 
           const SizedBox(height: 14),
 
           AppTextField(
             controller: _villageController,
-            labelText: 'Village',
+            labelText: 'village'.tr,
           ),
 
           const SizedBox(height: 14),
 
           AppTextField(
             controller: _districtController,
-            labelText: 'District',
+            labelText: 'district'.tr,
           ),
 
           const SizedBox(height: 14),
 
           AppTextField(
             controller: _cityController,
-            labelText: 'City',
+            labelText: 'city'.tr,
           ),
 
           const SizedBox(height: 14),
 
           AppTextField(
             controller: _stateController,
-            labelText: 'State',
+            labelText: 'state'.tr,
           ),
 
           const SizedBox(height: 14),
 
           AppTextField(
             controller: _countryController,
-            labelText: 'Country',
+            labelText: 'country'.tr,
           ),
 
           const SizedBox(height: 14),
@@ -1758,20 +1754,20 @@ class _ContactUpdateScreenState
           AppTextField(
             controller: _pincodeController,
             keyboardType: TextInputType.number,
-            labelText: 'Pincode',
+            labelText: 'pincode'.tr,
           ),
 
           const SizedBox(height: 14),
 
           AppTextField(
             controller: _addressTypeController,
-            labelText: 'Address Type',
+            labelText: 'address_type'.tr,
           ),
 
           const SizedBox(height: 24),
 
           AppSubmitButton(
-            label: 'Update Address',
+            label: 'update_address'.tr,
             isLoading: isSaving,
             onTap: _submitAddress,
           ),
@@ -1829,8 +1825,8 @@ class _ContactUpdateScreenState
 
           const SizedBox(height: 14),
 
-          const Text(
-            'No Saved Address',
+          Text(
+            'no_saved_address'.tr,
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w700,
@@ -1841,7 +1837,7 @@ class _ContactUpdateScreenState
           const SizedBox(height: 6),
 
           Text(
-            'We could not find an address on this loan. Please contact support to update your address.',
+            'no_address_message'.tr,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 13,
@@ -1882,15 +1878,14 @@ class _ContactUpdateScreenState
     final detailRows = <Widget>[
       if (status != null)
         _buildRequestRow(
-          label: 'Requested Number',
+          label: 'requested_number'.tr,
           value: status.newPhone,
         )
       else
         Padding(
           padding: const EdgeInsets.only(bottom: 2),
           child: Text(
-            'Complete the OTP verification below '
-            'to submit your update request.',
+            'complete_otp_submit'.tr,
             style: TextStyle(
               fontSize: 12.5,
               height: 1.5,
@@ -1904,8 +1899,8 @@ class _ContactUpdateScreenState
 
     return _buildWorkflowStatusCard(
       icon: Icons.sms_rounded,
-      title: 'Mobile Number Update',
-      subtitle: 'Update Request',
+      title: 'mobile_number_update'.tr,
+      subtitle: 'update_request'.tr,
       progress: _PhoneUpdateProgressBar(
         step: step,
         status: status,
@@ -1944,8 +1939,8 @@ class _ContactUpdateScreenState
     final detailRows = <Widget>[
       if (changes.isEmpty)
         _buildRequestRow(
-          label: 'Changed Fields',
-          value: 'No changes detected',
+          label: 'changed_fields'.tr,
+          value: 'no_changes_detected'.tr,
           valueColor: Colors.black38,
         )
       else
@@ -1954,8 +1949,8 @@ class _ContactUpdateScreenState
 
     return _buildWorkflowStatusCard(
       icon: Icons.sms_rounded,
-      title: 'Address Update',
-      subtitle: 'Update Request',
+      title: 'address_update'.tr,
+      subtitle: 'update_request'.tr,
       progress: _ContactUpdateProgressBar(
         status: status.status,
       ),
@@ -2075,7 +2070,7 @@ class _ContactUpdateScreenState
             Row(
               children: [
                 Text(
-                  'Status',
+                  'status'.tr,
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
@@ -2096,7 +2091,7 @@ class _ContactUpdateScreenState
             const SizedBox(height: 14),
 
             Text(
-              'Comments',
+              'comments'.tr,
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
@@ -2171,8 +2166,7 @@ class _ContactUpdateScreenState
   // ============================================================
 
   Widget _buildStatusBadge(int status) {
-    final label =
-        ContactUpdateStatusMapping.label(status);
+    final label = _localizedStatusLabel(status);
 
     final isPending =
         status == ContactUpdateStatusMapping.pending;
@@ -2290,10 +2284,10 @@ class _ContactUpdateScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
+          Padding(
             padding: EdgeInsets.only(bottom: 8),
             child: Text(
-              'Changed Fields',
+              'changed_fields'.tr,
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
@@ -2340,7 +2334,8 @@ class _ContactUpdateScreenState
                         ),
                         children: [
                           TextSpan(
-                            text: '${change.label}: ',
+                            text:
+                                '${_localizedAddressFieldLabel(change.label)}: ',
                             style: const TextStyle(
                               fontWeight: FontWeight.w600,
                               color: Colors.black87,
@@ -2360,6 +2355,44 @@ class _ContactUpdateScreenState
         ],
       ),
     );
+  }
+
+  String _localizedStatusLabel(int status) {
+    if (status == ContactUpdateStatusMapping.pending) {
+      return 'pending'.tr;
+    }
+
+    if (status == ContactUpdateStatusMapping.approved) {
+      return 'approved'.tr;
+    }
+
+    if (status == ContactUpdateStatusMapping.rejected) {
+      return 'rejected'.tr;
+    }
+
+    return ContactUpdateStatusMapping.label(status);
+  }
+
+  String _localizedAddressFieldLabel(String label) {
+    const keys = {
+      'House Number': 'house_number',
+      'Floor Number': 'floor_number',
+      'Building Name': 'building_name',
+      'Apartment Name': 'apartment_name',
+      'Street Name': 'street_name',
+      'Address Line 1': 'address_line_1',
+      'Address Line 2': 'address_line_2',
+      'Landmark': 'landmark',
+      'Village': 'village',
+      'District': 'district',
+      'City': 'city',
+      'State': 'state',
+      'Country': 'country',
+      'Pincode': 'pincode',
+      'Address Type': 'address_type',
+    };
+
+    return keys[label]?.tr ?? label;
   }
 
   // ============================================================
@@ -2785,7 +2818,7 @@ class _ContactUpdateProgressBarState
                           filled: true,
                           color: _green,
                           icon: Icons.check_rounded,
-                          label: 'Request Submitted',
+                          label: 'request_submitted'.tr,
                           labelColor: _green,
                         ),
                       ),
@@ -2804,7 +2837,7 @@ class _ContactUpdateProgressBarState
                           icon: _isPending
                               ? Icons.hourglass_top_rounded
                               : Icons.check_rounded,
-                          label: 'Under Review',
+                          label: 'under_review'.tr,
                           labelColor: _isPending
                               ? _amber
                               : _green,
@@ -2830,8 +2863,8 @@ class _ContactUpdateProgressBarState
                                   ? Icons.check_rounded
                                   : Icons.circle,
                           label: _isRejected
-                              ? 'Rejected'
-                              : 'Approved',
+                              ? 'rejected'.tr
+                              : 'approved'.tr,
                           labelColor: _isRejected
                               ? _red
                               : _isApproved
@@ -2975,18 +3008,18 @@ class _PhoneUpdateProgressBarState
 
   late final List<Animation<double>> _lineAnims;
 
-  static const List<String> _otpLabels = [
-    'OTP Sent to Current Number',
-    'Verify OTP',
-    'OTP Sent to New Number',
-    'Verify OTP',
-  ];
+  List<String> get _otpLabels => [
+        'otp_sent_current_number'.tr,
+        'verify_otp'.tr,
+        'otp_sent_new_number'.tr,
+        'verify_otp'.tr,
+      ];
 
-  static const List<String> _requestLabels = [
-    'Request Submitted',
-    'Under Review',
-    'Approved / Rejected',
-  ];
+  List<String> get _requestLabels => [
+        'request_submitted'.tr,
+        'under_review'.tr,
+        'approved_rejected'.tr,
+      ];
 
   @override
   void initState() {

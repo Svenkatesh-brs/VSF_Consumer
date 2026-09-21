@@ -268,7 +268,9 @@ const Map<String, String> languageSelectionHi = {
   'update_phone': 'फोन अपडेट करें',
   'update_address': 'पता अपडेट करें',
   'current_saved_address': 'वर्तमान सेव किया गया पता',
+    'edit_address': 'पता संपादित करें',
   'no_saved_address': 'कोई सेव किया हुआ पता नहीं',
+    'no_address_message': 'इस लोन पर कोई पता नहीं मिला। अपना पता अपडेट करने के लिए सहायता से संपर्क करें।',
   'quick_actions': 'त्वरित कार्रवाइयां',
   'everything_at_glance': 'आपकी ज़रूरत की हर चीज़ एक नज़र में',
   'repayment_progress': 'भुगतान प्रगति',
@@ -305,6 +307,8 @@ const Map<String, String> languageSelectionHi = {
       'अपने वर्तमान मोबाइल नंबर पर भेजा गया OTP दर्ज करें।',
   'otp_new_description': 'अपने नए मोबाइल नंबर पर भेजा गया OTP दर्ज करें।',
   'otp_six_digit': '6 अंकों का OTP दर्ज करें',
+    'otp_sent_current_number': 'वर्तमान नंबर पर OTP भेजा गया',
+    'otp_sent_new_number': 'नए नंबर पर OTP भेजा गया',
   'mobile_update_under_review': 'आपका मोबाइल नंबर अपडेट अनुरोध समीक्षा में है।',
   'address_update_under_review': 'आपका पता अपडेट अनुरोध समीक्षा में है।',
   'complete_otp_submit':
