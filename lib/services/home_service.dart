@@ -5,17 +5,13 @@ import 'api_service.dart';
 class HomeService {
   final ApiService _apiService;
 
-  HomeService({
-    required ApiService apiService,
-  }) : _apiService = apiService;
+  HomeService({required ApiService apiService}) : _apiService = apiService;
 
   // ============================================================
   // GET HOME DATA
   // ============================================================
 
-  Future<HomeResponse> getHomeData(
-    HomeRequest request,
-  ) async {
+  Future<HomeResponse> getHomeData(HomeRequest request) async {
     final response = await _apiService.post(
       AppConstants.home,
       data: request.toJson(),
@@ -33,9 +29,25 @@ class HomeService {
     }
 
     return HomeResponse.fromJson(
-      Map<String, dynamic>.from(
-        response.data as Map,
-      ),
+      Map<String, dynamic>.from(response.data as Map),
+    );
+  }
+
+  Future<HomeResponse> getGuarantorLoans(HomeRequest request) async {
+    final response = await _apiService.post(
+      AppConstants.guarantorLoans,
+      data: request.toJson(),
+    );
+
+    if (response.data is! Map) {
+      throw ApiException(
+        statusCode: response.statusCode,
+        message: 'Invalid response received from server.',
+      );
+    }
+
+    return HomeResponse.fromJson(
+      Map<String, dynamic>.from(response.data as Map),
     );
   }
 }

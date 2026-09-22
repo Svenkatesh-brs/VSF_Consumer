@@ -3,12 +3,15 @@ import 'package:get/get.dart';
 
 import '../providers/auth_provider.dart';
 import '../providers/home_provider.dart';
+import '../models/home_model.dart';
 import '../routes/app_routes.dart';
 import '../utils/app_colors.dart';
 import '../widgets/app_background.dart';
 import '../widgets/footer_version.dart';
 import '../widgets/home/loan_card.dart';
 import '../widgets/home/summary_card.dart';
+import '../widgets/home/guarantor_loan_card.dart';
+import '../widgets/home/guarantor_loan_details_dialog.dart';
 import '../widgets/common/screen_transition.dart';
 import '../widgets/common/screen_content_exit.dart';
 
@@ -68,7 +71,7 @@ class _HomeScreenState extends State<HomeScreen> {
     Get.dialog(
       AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
-        title:  Row(
+        title: Row(
           children: [
             Icon(Icons.logout_rounded, color: AppColors.lightBlue),
             SizedBox(width: 10),
@@ -90,10 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           TextButton(
             onPressed: Get.back,
-            child:  Text(
-              'cancel'.tr,
-              style: TextStyle(color: Colors.black54),
-            ),
+            child: Text('cancel'.tr, style: TextStyle(color: Colors.black54)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -163,6 +163,139 @@ class _HomeScreenState extends State<HomeScreen> {
       _isExiting = false;
       _selectedLoanIndex = null;
     });
+  }
+
+  void _showGuarantorLoanDetails(HomeLoan loan) {
+    FocusManager.instance.primaryFocus?.unfocus();
+    GuarantorLoanDetailsDialog.show(context, loan);
+  }
+
+  Widget _buildLoanTypeSelector() {
+    return Obx(
+      () => Container(
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.62),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: AppColors.lightBlue.withValues(alpha: 0.10),
+          ),
+        ),
+        child: Row(
+          children: [
+            _LoanTypeOption(
+              label: 'my_loans'.tr,
+              icon: Icons.account_balance_wallet_outlined,
+              selected: controller.selectedLoanType.value == 'my_loans',
+              onTap: () => controller.setLoanType('my_loans'),
+            ),
+            _LoanTypeOption(
+              label: 'guarantor_loans'.tr,
+              icon: Icons.handshake_outlined,
+              selected: controller.selectedLoanType.value == 'guarantor_loans',
+              onTap: () => controller.setLoanType('guarantor_loans'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGuarantorLoansContent() {
+    if (controller.isLoadingGuarantorLoans.value) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 40),
+          child: Column(
+            children: [
+              const CircularProgressIndicator(color: AppColors.primary),
+              const SizedBox(height: 12),
+              Text(
+                'loading_guarantor_loans'.tr,
+                style: const TextStyle(fontSize: 12, color: Colors.black54),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final errorMessage = controller.guarantorErrorMessage.value;
+    if (errorMessage != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 30),
+          child: Column(
+            children: [
+              const Icon(
+                Icons.error_outline_rounded,
+                size: 42,
+                color: AppColors.error,
+              ),
+              const SizedBox(height: 10),
+              Text(
+                errorMessage.tr,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 13, color: AppColors.error),
+              ),
+              const SizedBox(height: 14),
+              TextButton(
+                onPressed: controller.loadGuarantorLoans,
+                child: Text('retry'.tr),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (controller.guarantorLoans.isEmpty) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.55),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.55)),
+        ),
+        child: Column(
+          children: [
+            Icon(
+              Icons.handshake_outlined,
+              size: 42,
+              color: AppColors.buttonEnd.withValues(alpha: 0.70),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'no_guarantor_loans'.tr,
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: AppColors.lightBlue,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 5),
+            Text(
+              'no_guarantor_loans_message'.tr,
+              style: const TextStyle(fontSize: 12, color: Colors.black54),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      children: controller.guarantorLoans
+          .map(
+            (loan) => GuarantorLoanCard(
+              loan: loan,
+              onTap: () => _showGuarantorLoanDetails(loan),
+            ),
+          )
+          .toList(),
+    );
   }
 
   // ------------------------------------------------------------
@@ -256,7 +389,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                             const SizedBox(width: 12),
 
-                             Text(
+                            Text(
                               'home'.tr,
                               style: TextStyle(
                                 fontSize: 18,
@@ -471,6 +604,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   const SizedBox(height: 30),
 
+                  _buildLoanTypeSelector(),
+
+                  const SizedBox(height: 20),
+
                   // ==================================================
                   // MY LOANS HEADER
                   // ENTRY LEFT - 240ms
@@ -486,16 +623,21 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                           Expanded(
+                          Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  'my_loans'.tr,
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w700,
-                                    color: AppColors.lightBlue,
+                                Obx(
+                                  () => Text(
+                                    controller.selectedLoanType.value ==
+                                            'guarantor_loans'
+                                        ? 'guarantor_loans'.tr
+                                        : 'my_loans'.tr,
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppColors.lightBlue,
+                                    ),
                                   ),
                                 ),
                                 SizedBox(height: 3),
@@ -512,120 +654,126 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
 
                           Obx(
-                            () => PopupMenuButton<String>(
-                              initialValue: controller.selectedFilter.value,
-                              onSelected: controller.setLoanFilter,
-                              offset: const Offset(0, 42),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                              itemBuilder: (context) => [
-                                PopupMenuItem<String>(
-                                  value: 'Total',
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        Icons.all_inclusive_rounded,
-                                        size: 18,
-                                        color: AppColors.lightBlue,
-                                      ),
-                                      SizedBox(width: 10),
-                                      Text(
-                                        'total_loans'.tr,
-                                        style: const TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                PopupMenuItem<String>(
-                                  value: 'Active',
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        Icons.pending_actions_outlined,
-                                        size: 18,
-                                        color: AppColors.buttonEnd,
-                                      ),
-                                      SizedBox(width: 10),
-                                      Text(
-                                        'active'.tr,
-                                        style: const TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                PopupMenuItem<String>(
-                                  value: 'Inactive',
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        Icons.check_circle_outline,
-                                        size: 18,
-                                        color: AppColors.primary,
-                                      ),
-                                      SizedBox(width: 10),
-                                      Text(
-                                        'inactive'.tr,
-                                        style: const TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 11,
-                                  vertical: 7,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.lightBlue.withValues(
-                                    alpha: 0.08,
-                                  ),
-                                  borderRadius: BorderRadius.circular(100),
-                                  border: Border.all(
-                                    color: AppColors.lightBlue.withValues(
-                                      alpha: 0.12,
-                                    ),
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(
-                                      Icons.filter_list_rounded,
-                                      size: 14,
-                                      color: AppColors.lightBlue,
-                                    ),
-                                    const SizedBox(width: 5),
-                                    Text(
-                                      _filterLabel(
+                            () =>
+                                controller.selectedLoanType.value == 'my_loans'
+                                ? PopupMenuButton<String>(
+                                    initialValue:
                                         controller.selectedFilter.value,
+                                    onSelected: controller.setLoanFilter,
+                                    offset: const Offset(0, 42),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                    itemBuilder: (context) => [
+                                      PopupMenuItem<String>(
+                                        value: 'Total',
+                                        child: Row(
+                                          children: [
+                                            Icon(
+                                              Icons.all_inclusive_rounded,
+                                              size: 18,
+                                              color: AppColors.lightBlue,
+                                            ),
+                                            SizedBox(width: 10),
+                                            Text(
+                                              'total_loans'.tr,
+                                              style: const TextStyle(
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                      style: const TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w600,
-                                        color: AppColors.lightBlue,
+                                      PopupMenuItem<String>(
+                                        value: 'Active',
+                                        child: Row(
+                                          children: [
+                                            Icon(
+                                              Icons.pending_actions_outlined,
+                                              size: 18,
+                                              color: AppColors.buttonEnd,
+                                            ),
+                                            SizedBox(width: 10),
+                                            Text(
+                                              'active'.tr,
+                                              style: const TextStyle(
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      PopupMenuItem<String>(
+                                        value: 'Inactive',
+                                        child: Row(
+                                          children: [
+                                            Icon(
+                                              Icons.check_circle_outline,
+                                              size: 18,
+                                              color: AppColors.primary,
+                                            ),
+                                            SizedBox(width: 10),
+                                            Text(
+                                              'inactive'.tr,
+                                              style: const TextStyle(
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 11,
+                                        vertical: 7,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.lightBlue.withValues(
+                                          alpha: 0.08,
+                                        ),
+                                        borderRadius: BorderRadius.circular(
+                                          100,
+                                        ),
+                                        border: Border.all(
+                                          color: AppColors.lightBlue.withValues(
+                                            alpha: 0.12,
+                                          ),
+                                        ),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Icon(
+                                            Icons.filter_list_rounded,
+                                            size: 14,
+                                            color: AppColors.lightBlue,
+                                          ),
+                                          const SizedBox(width: 5),
+                                          Text(
+                                            _filterLabel(
+                                              controller.selectedFilter.value,
+                                            ),
+                                            style: const TextStyle(
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w600,
+                                              color: AppColors.lightBlue,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 3),
+                                          const Icon(
+                                            Icons.keyboard_arrow_down_rounded,
+                                            size: 16,
+                                            color: AppColors.lightBlue,
+                                          ),
+                                        ],
                                       ),
                                     ),
-                                    const SizedBox(width: 3),
-                                    const Icon(
-                                      Icons.keyboard_arrow_down_rounded,
-                                      size: 16,
-                                      color: AppColors.lightBlue,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
+                                  )
+                                : const SizedBox.shrink(),
                           ),
                         ],
                       ),
@@ -638,6 +786,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   // LOANS
                   // ==================================================
                   Obx(() {
+                    if (controller.selectedLoanType.value ==
+                        'guarantor_loans') {
+                      return _buildGuarantorLoansContent();
+                    }
+
                     if (controller.isLoading.value) {
                       return ScreenContentExit(
                         isExiting: _isExiting,
@@ -885,6 +1038,63 @@ class _HeaderIconButton extends StatelessWidget {
             ],
           ),
           child: Icon(icon, size: iconSize, color: AppColors.lightBlue),
+        ),
+      ),
+    );
+  }
+}
+
+class _LoanTypeOption extends StatelessWidget {
+  const _LoanTypeOption({
+    required this.label,
+    required this.icon,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final IconData icon;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 220),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 11),
+          decoration: BoxDecoration(
+            color: selected
+                ? AppColors.lightBlue.withValues(alpha: 0.12)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 17,
+                color: selected ? AppColors.lightBlue : Colors.black45,
+              ),
+              const SizedBox(width: 7),
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: selected ? AppColors.lightBlue : Colors.black54,
+                    fontSize: 12,
+                    fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

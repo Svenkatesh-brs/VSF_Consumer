@@ -10,15 +10,23 @@ class HomeProvider extends GetxController {
 
   final HomeService _homeService;
 
-  HomeProvider({
-    required HomeService homeService,
-  }) : _homeService = homeService;
+  HomeProvider({required HomeService homeService}) : _homeService = homeService;
 
   // ============================================================
   // LOAN DATA
   // ============================================================
 
   final loans = <Map<String, dynamic>>[].obs;
+
+  final guarantorLoans = <HomeLoan>[].obs;
+
+  final selectedLoanType = 'my_loans'.obs;
+
+  final isLoadingGuarantorLoans = false.obs;
+
+  final guarantorErrorMessage = RxnString();
+
+  bool _hasLoadedGuarantorLoans = false;
 
   // ============================================================
   // DASHBOARD SUMMARY
@@ -59,6 +67,51 @@ class HomeProvider extends GetxController {
     selectedFilter.value = filter;
   }
 
+  Future<void> setLoanType(String loanType) async {
+    selectedLoanType.value = loanType;
+
+    if (loanType == 'guarantor_loans' && !_hasLoadedGuarantorLoans) {
+      await loadGuarantorLoans();
+    }
+  }
+
+  Future<void> loadGuarantorLoans({bool showLoading = true}) async {
+    if (isLoadingGuarantorLoans.value) {
+      return;
+    }
+
+    try {
+      if (showLoading) {
+        isLoadingGuarantorLoans.value = true;
+      }
+      guarantorErrorMessage.value = null;
+
+      const request = HomeRequest(
+        page: 1,
+        recordsPerPage: 10,
+        searchString: '',
+      );
+
+      final response = await _homeService.getGuarantorLoans(request);
+
+      if (!response.success || response.data == null) {
+        guarantorErrorMessage.value = response.message.isNotEmpty
+            ? response.message
+            : 'guarantor_loans_error'.tr;
+        return;
+      }
+
+      guarantorLoans.assignAll(response.data!.loans);
+      _hasLoadedGuarantorLoans = true;
+    } catch (error) {
+      guarantorErrorMessage.value = _getErrorMessage(error);
+    } finally {
+      if (showLoading) {
+        isLoadingGuarantorLoans.value = false;
+      }
+    }
+  }
+
   // ============================================================
   // FILTERED LOANS
   // ============================================================
@@ -66,18 +119,10 @@ class HomeProvider extends GetxController {
   List<Map<String, dynamic>> get filteredLoans {
     switch (selectedFilter.value) {
       case 'Active':
-        return loans
-            .where(
-              (loan) => loan['status'] == 'Active',
-            )
-            .toList();
+        return loans.where((loan) => loan['status'] == 'Active').toList();
 
       case 'Inactive':
-        return loans
-            .where(
-              (loan) => loan['status'] == 'Inactive',
-            )
-            .toList();
+        return loans.where((loan) => loan['status'] == 'Inactive').toList();
 
       case 'Total':
       default:
@@ -103,11 +148,14 @@ class HomeProvider extends GetxController {
 
   Future<void> refreshDashboard() async {
     await _loadDashboard(showLoading: false);
+
+    if (_hasLoadedGuarantorLoans ||
+        selectedLoanType.value == 'guarantor_loans') {
+      await loadGuarantorLoans(showLoading: false);
+    }
   }
 
-  Future<void> _loadDashboard({
-    required bool showLoading,
-  }) async {
+  Future<void> _loadDashboard({required bool showLoading}) async {
     if (isLoading.value) {
       return;
     }
@@ -132,9 +180,7 @@ class HomeProvider extends GetxController {
       // API CALL
       // --------------------------------------------------------
 
-      final response = await _homeService.getHomeData(
-        request,
-      );
+      final response = await _homeService.getHomeData(request);
 
       // --------------------------------------------------------
       // API FAILURE
@@ -145,7 +191,7 @@ class HomeProvider extends GetxController {
 
       if (!response.success) {
         if (showLoading) {
-            errorMessage.value = response.message.isNotEmpty
+          errorMessage.value = response.message.isNotEmpty
               ? response.message
               : 'error_unable_load'.tr;
 
@@ -167,7 +213,7 @@ class HomeProvider extends GetxController {
           loans.clear();
           _clearSummary();
 
-            errorMessage.value = 'error_no_customer'.tr;
+          errorMessage.value = 'error_no_customer'.tr;
         }
 
         return;
@@ -183,25 +229,23 @@ class HomeProvider extends GetxController {
       // MAP API LOANS TO EXISTING HOME UI STRUCTURE
       // --------------------------------------------------------
 
-      final mappedLoans = homeData.loans.map(
-        (loan) {
-          // ------------------------------------------------------
-          // Borrower names come from each borrower's nested
-          // consumer record. If the API returns no usable names,
-          // fall back to the consumer's own full name so the
-          // card never renders an empty value.
-          // ------------------------------------------------------
+      final mappedLoans = homeData.loans.map((loan) {
+        // ------------------------------------------------------
+        // Borrower names come from each borrower's nested
+        // consumer record. If the API returns no usable names,
+        // fall back to the consumer's own full name so the
+        // card never renders an empty value.
+        // ------------------------------------------------------
 
-          final borrowerNames = loan.borrowerNames;
+        final borrowerNames = loan.borrowerNames;
 
-          return _mapLoanToHomeCard(
-            loan: loan,
-            borrowerNames: borrowerNames.isEmpty
-                ? <String>[homeData.fullName]
-                : borrowerNames,
-          );
-        },
-      ).toList();
+        return _mapLoanToHomeCard(
+          loan: loan,
+          borrowerNames: borrowerNames.isEmpty
+              ? <String>[homeData.fullName]
+              : borrowerNames,
+        );
+      }).toList();
 
       loans.assignAll(mappedLoans);
 
@@ -215,8 +259,7 @@ class HomeProvider extends GetxController {
         loans.clear();
         _clearSummary();
 
-        errorMessage.value =
-            _getErrorMessage(e);
+        errorMessage.value = _getErrorMessage(e);
       }
     } finally {
       if (showLoading) {
@@ -243,26 +286,22 @@ class HomeProvider extends GetxController {
       // --------------------------------------------------------
       // Borrowers (complete borrower names)
       // --------------------------------------------------------
-
       'borrowers': borrowerNames,
 
       // --------------------------------------------------------
       // Loan Amount
       // --------------------------------------------------------
-
       'amount': loan.loanAmount,
 
       // --------------------------------------------------------
       // Status
       // --------------------------------------------------------
-
       'status': loan.displayStatus,
 
       // --------------------------------------------------------
       // Keep original API model available
       // for future Home details navigation.
       // --------------------------------------------------------
-
       'loan': loan,
     };
   }
@@ -275,15 +314,11 @@ class HomeProvider extends GetxController {
     totalLoans.value = loans.length;
 
     activeLoans.value = loans
-        .where(
-          (loan) => loan['status'] == 'Active',
-        )
+        .where((loan) => loan['status'] == 'Active')
         .length;
 
     inactiveLoans.value = loans
-        .where(
-          (loan) => loan['status'] == 'Inactive',
-        )
+        .where((loan) => loan['status'] == 'Inactive')
         .length;
   }
 
@@ -318,8 +353,7 @@ class HomeProvider extends GetxController {
       return 'error_connection'.tr;
     }
 
-    if (lowerMessage.contains('unauthorized') ||
-        lowerMessage.contains('401')) {
+    if (lowerMessage.contains('unauthorized') || lowerMessage.contains('401')) {
       return 'error_session_expired'.tr;
     }
 

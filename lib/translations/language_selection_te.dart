@@ -9,7 +9,7 @@ const Map<String, String> languageSelectionTe = {
 
   'home': 'హోమ్',
   'loan_details': 'లోన్ వివరాలు',
-    'loan_details_subtitle': 'పూర్తి లోన్ సమాచారం',
+  'loan_details_subtitle': 'పూర్తి లోన్ సమాచారం',
   'emi_schedule': 'EMI షెడ్యూల్',
   'pay_emi': 'EMI చెల్లించండి',
   'transactions': 'చెల్లింపులు',
@@ -49,6 +49,27 @@ const Map<String, String> languageSelectionTe = {
   'inactive': 'ఇనాక్టివ్',
 
   'my_loans': 'నా లోన్లు',
+  'guarantor_loans': 'హామీదారు లోన్లు',
+  'guarantor_loan_details': 'హామీదారు లోన్ వివరాలు',
+  'loan_information': 'లోన్ సమాచారం',
+  'loan_context': 'లోన్ సందర్భం',
+  'payment_summary': 'చెల్లింపు సారాంశం',
+  'loan_status': 'లోన్ స్థితి',
+  'loan_stage': 'లోన్ దశ',
+  'installments': 'వాయిదాలు',
+  'tenure': 'కాలవ్యవధి',
+  'interest_type': 'వడ్డీ రకం',
+  'loan_creation_date': 'లోన్ సృష్టించిన తేదీ',
+  'installment_date': 'వాయిదా తేదీ',
+  'total_emi_paid': 'చెల్లించిన మొత్తం EMI',
+  'total_lpc_received': 'అందుకున్న మొత్తం LPC',
+  'file_number': 'ఫైల్ నంబర్',
+  'loading_guarantor_loans': 'హామీదారు లోన్లు లోడ్ అవుతున్నాయి',
+  'no_guarantor_loans': 'హామీదారు లోన్లు ఏవీ లేవు',
+  'no_guarantor_loans_message':
+      'మీరు హామీదారుగా ఉన్న లోన్లు ఇక్కడ కనిపిస్తాయి.',
+  'guarantor_loans_error': 'హామీదారు లోన్లను లోడ్ చేయలేకపోయాం.',
+  'close': 'మూసివేయండి',
   'track_vehicle_loans': 'మీ వాహన లోన్ల వివరాలు తెలుసుకోండి',
   'total_loans': 'మొత్తం లోన్లు',
   'no_loans_available': 'లోన్లు ఏవీ లేవు',
@@ -374,5 +395,6 @@ const Map<String, String> languageSelectionTe = {
   'tell_us_issue':
       'మీ సమస్య గురించి మాకు తెలియజేయండి. మేము మీ ఫిర్యాదును పరిశీలిస్తాము.',
   'no_internet_title': 'ఇంటర్నెట్ కనెక్షన్ లేదు',
-  'no_internet_message': 'దయచేసి మీ ఇంటర్నెట్ కనెక్షన్‌ను తనిఖీ చేసి మళ్లీ ప్రయత్నించండి.',
+  'no_internet_message':
+      'దయచేసి మీ ఇంటర్నెట్ కనెక్షన్‌ను తనిఖీ చేసి మళ్లీ ప్రయత్నించండి.',
 };
