@@ -94,12 +94,9 @@ class _HelpScreenState extends State<HelpScreen> {
 
   Future<void> _callSupport() {
     return _launchUrl(
-      Uri(
-        scheme: 'tel',
-        path: AppConstants.supportPhone,
-      ),
-        failureTitle: 'call_support'.tr,
-        failureMessage: 'calling_unavailable'.tr,
+      Uri(scheme: 'tel', path: AppConstants.supportPhone),
+      failureTitle: 'call_support'.tr,
+      failureMessage: 'calling_unavailable'.tr,
     );
   }
 
@@ -109,12 +106,10 @@ class _HelpScreenState extends State<HelpScreen> {
 
   Future<void> _openWhatsAppSupport() {
     return _launchUrl(
-      Uri.parse(
-        'https://wa.me/${AppConstants.supportPhoneIntl}',
-      ),
+      Uri.parse('https://wa.me/${AppConstants.supportPhoneIntl}'),
       mode: LaunchMode.externalApplication,
-        failureTitle: 'whatsapp_support'.tr,
-        failureMessage: 'whatsapp_unavailable'.tr,
+      failureTitle: 'whatsapp_support'.tr,
+      failureMessage: 'whatsapp_unavailable'.tr,
     );
   }
 
@@ -139,9 +134,9 @@ class _HelpScreenState extends State<HelpScreen> {
   Widget _buildHeroCard() {
     final coverageChips = <String>[
       'loans_emi'.tr,
-      'Payments',
-      'Account',
-      'Complaints',
+      'payments'.tr,
+      'account'.tr,
+      'complaints'.tr,
     ];
 
     return Container(
@@ -316,10 +311,7 @@ class _HelpScreenState extends State<HelpScreen> {
           onTap: onTap,
           child: Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(
-              horizontal: 14,
-              vertical: 14,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
@@ -361,11 +353,7 @@ class _HelpScreenState extends State<HelpScreen> {
                       color: accentColor.withValues(alpha: 0.18),
                     ),
                   ),
-                  child: Icon(
-                    icon,
-                    size: 23,
-                    color: accentColor,
-                  ),
+                  child: Icon(icon, size: 23, color: accentColor),
                 ),
 
                 const SizedBox(width: 13),
@@ -439,7 +427,7 @@ class _HelpScreenState extends State<HelpScreen> {
       _buildContactOption(
         icon: Icons.phone_outlined,
         accentColor: const Color(0xFF268B68),
-        title: 'Call Support',
+        title: 'call_support'.tr,
         number: AppConstants.supportPhone,
         subtitle: 'speak_support_team'.tr,
         onTap: _callSupport,
@@ -448,7 +436,7 @@ class _HelpScreenState extends State<HelpScreen> {
       _buildContactOption(
         icon: Icons.chat_bubble_outline_rounded,
         accentColor: const Color(0xFF258F92),
-        title: 'WhatsApp Support',
+        title: 'whatsapp_support'.tr,
         number: AppConstants.supportPhone,
         subtitle: 'chat_support_team'.tr,
         onTap: _openWhatsAppSupport,
@@ -479,10 +467,7 @@ class _HelpScreenState extends State<HelpScreen> {
             _onHelpTopicTap(title);
           },
           child: Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 13,
-              vertical: 12,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 12),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
@@ -517,11 +502,7 @@ class _HelpScreenState extends State<HelpScreen> {
                       color: accentColor.withValues(alpha: 0.16),
                     ),
                   ),
-                  child: Icon(
-                    icon,
-                    size: 20,
-                    color: accentColor,
-                  ),
+                  child: Icon(icon, size: 20, color: accentColor),
                 ),
 
                 const SizedBox(width: 13),
@@ -581,7 +562,7 @@ class _HelpScreenState extends State<HelpScreen> {
       _buildHelpTopicCard(
         icon: Icons.event_note_outlined,
         accentColor: const Color(0xFF258F92),
-        title: 'Loan & EMI',
+        title: 'loans_emi'.tr,
         description: 'loan_emi_help'.tr,
       ),
 
@@ -602,7 +583,7 @@ class _HelpScreenState extends State<HelpScreen> {
       _buildHelpTopicCard(
         icon: Icons.report_problem_outlined,
         accentColor: const Color(0xFFD8893F),
-        title: 'Complaints',
+        title: 'complaints'.tr,
         description: 'raise_follow_issue'.tr,
       ),
     ];
@@ -644,12 +625,10 @@ class _HelpScreenState extends State<HelpScreen> {
                           width: 42,
                           height: 42,
                           decoration: BoxDecoration(
-                            color:
-                                Colors.white.withValues(alpha: 0.75),
+                            color: Colors.white.withValues(alpha: 0.75),
                             shape: BoxShape.circle,
                             border: Border.all(
-                              color: Colors.white
-                                  .withValues(alpha: 0.65),
+                              color: Colors.white.withValues(alpha: 0.65),
                             ),
                           ),
                           child: IconButton(
@@ -667,8 +646,7 @@ class _HelpScreenState extends State<HelpScreen> {
 
                         Expanded(
                           child: Column(
-                            crossAxisAlignment:
-                                CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 'help_support'.tr,
@@ -704,7 +682,6 @@ class _HelpScreenState extends State<HelpScreen> {
                 // ENTRY LEFT - 80ms
                 // EXIT RIGHT - 80ms
                 // ================================================
-
                 ScreenContentExit(
                   isExiting: _isExiting,
                   direction: ContentExitDirection.toRight,
@@ -723,7 +700,6 @@ class _HelpScreenState extends State<HelpScreen> {
                 // ENTRY LEFT - 160ms
                 // EXIT RIGHT - 160ms
                 // ================================================
-
                 ScreenContentExit(
                   isExiting: _isExiting,
                   direction: ContentExitDirection.toRight,
@@ -749,7 +725,6 @@ class _HelpScreenState extends State<HelpScreen> {
                 // ENTRY LEFT - 240ms
                 // EXIT RIGHT - 240ms
                 // ================================================
-
                 ScreenContentExit(
                   isExiting: _isExiting,
                   direction: ContentExitDirection.toRight,

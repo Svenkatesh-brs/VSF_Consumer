@@ -399,7 +399,7 @@ class _ComplaintScreenState extends State<ComplaintScreen>
         const SizedBox(height: 6),
 
         Text(
-          'Tell us about your issue and we will review your complaint.',
+          'tell_us_issue'.tr,
           style: TextStyle(
             fontSize: 13,
             height: 1.45,

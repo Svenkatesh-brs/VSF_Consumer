@@ -737,13 +737,13 @@ class _LoanDetailsScreenState
 
                 const SizedBox(width: 14),
 
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment:
                         CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Loan Details',
+                        'loan_details'.tr,
                         style: TextStyle(
                           fontSize: 23,
                           fontWeight: FontWeight.w700,
@@ -752,7 +752,7 @@ class _LoanDetailsScreenState
                       ),
                       SizedBox(height: 2),
                       Text(
-                        'Complete loan information',
+                        'loan_details_subtitle'.tr,
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w500,
