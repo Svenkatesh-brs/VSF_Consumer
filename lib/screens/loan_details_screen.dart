@@ -12,15 +12,19 @@ class LoanDetailsScreen extends StatefulWidget {
   const LoanDetailsScreen({super.key});
 
   @override
-  State<LoanDetailsScreen> createState() =>
-      _LoanDetailsScreenState();
+  State<LoanDetailsScreen> createState() => _LoanDetailsScreenState();
 }
 
-class _LoanDetailsScreenState
-    extends State<LoanDetailsScreen> {
+class _LoanDetailsScreenState extends State<LoanDetailsScreen> {
   late final LoanDashboardProvider controller;
 
   bool _isExiting = false;
+  final Set<String> _collapsedSections = <String>{
+    'financial_details',
+    'borrower',
+    'guarantors',
+    'vehicle_details',
+  };
 
   @override
   void initState() {
@@ -50,9 +54,7 @@ class _LoanDetailsScreenState
       _isExiting = true;
     });
 
-    await Future.delayed(
-      const Duration(milliseconds: 400),
-    );
+    await Future.delayed(const Duration(milliseconds: 400));
 
     if (!mounted) {
       return;
@@ -78,30 +80,44 @@ class _LoanDetailsScreenState
   // ============================================================
 
   Widget _buildSectionCard({
+    required String sectionKey,
     required IconData icon,
     required String title,
     required List<Widget> children,
   }) {
-    return Container(
+    final isExpanded = !_collapsedSections.contains(sectionKey);
+    final accentColor = isExpanded
+        ? AppColors.lightBlue
+        : AppColors.buttonStart;
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 260),
+      curve: Curves.easeOutCubic,
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Colors.white.withValues(alpha: 0.80),
-            Colors.white.withValues(alpha: 0.48),
+            isExpanded
+                ? Colors.white.withValues(alpha: 0.90)
+                : Colors.white.withValues(alpha: 0.58),
+            isExpanded
+                ? AppColors.primary.withValues(alpha: 0.10)
+                : AppColors.lightBlue.withValues(alpha: 0.05),
           ],
         ),
         borderRadius: BorderRadius.circular(22),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.60),
+          color: isExpanded
+              ? AppColors.primary.withValues(alpha: 0.24)
+              : Colors.white.withValues(alpha: 0.60),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.07),
+            color: accentColor.withValues(alpha: isExpanded ? 0.12 : 0.05),
             blurRadius: 20,
             offset: const Offset(0, 9),
           ),
@@ -110,41 +126,76 @@ class _LoanDetailsScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(
-                width: 34,
-                height: 34,
-                decoration: BoxDecoration(
-                  color: AppColors.lightBlue
-                      .withValues(alpha: 0.08),
-                  borderRadius:
-                      BorderRadius.circular(11),
-                ),
-                child: Icon(
-                  icon,
-                  size: 18,
-                  color: AppColors.lightBlue,
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(15),
+              onTap: () {
+                setState(() {
+                  if (isExpanded) {
+                    _collapsedSections.add(sectionKey);
+                  } else {
+                    _collapsedSections.remove(sectionKey);
+                  }
+                });
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                child: Row(
+                  children: [
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 260),
+                      width: 38,
+                      height: 38,
+                      decoration: BoxDecoration(
+                        color: accentColor.withValues(
+                          alpha: isExpanded ? 0.14 : 0.08,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(icon, size: 20, color: accentColor),
+                    ),
+                    const SizedBox(width: 11),
+                    Expanded(
+                      child: Text(
+                        title.toUpperCase(),
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 1.05,
+                          color: isExpanded
+                              ? AppColors.lightBlue
+                              : Colors.black54,
+                        ),
+                      ),
+                    ),
+                    AnimatedRotation(
+                      duration: const Duration(milliseconds: 260),
+                      turns: isExpanded ? 0.5 : 0,
+                      child: Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        size: 25,
+                        color: accentColor,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  title.toUpperCase(),
-                  style: const TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.1,
-                    color: Colors.black45,
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
-
-          const SizedBox(height: 14),
-
-          ...children,
+          AnimatedSize(
+            duration: const Duration(milliseconds: 260),
+            curve: Curves.easeOutCubic,
+            child: isExpanded
+                ? Padding(
+                    padding: const EdgeInsets.only(top: 14),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: children,
+                    ),
+                  )
+                : const SizedBox.shrink(),
+          ),
         ],
       ),
     );
@@ -157,12 +208,8 @@ class _LoanDetailsScreenState
   // null data from the API.
   // ============================================================
 
-  Widget _buildInfoRow({
-    required String label,
-    required String value,
-  }) {
-    final displayValue =
-        value.trim().isEmpty ? '-' : value.trim();
+  Widget _buildInfoRow({required String label, required String value}) {
+    final displayValue = value.trim().isEmpty ? '-' : value.trim();
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -203,8 +250,7 @@ class _LoanDetailsScreenState
       padding: const EdgeInsets.only(bottom: 12),
       child: Container(
         height: 1,
-        color: AppColors.lightBlue
-            .withValues(alpha: 0.07),
+        color: AppColors.lightBlue.withValues(alpha: 0.07),
       ),
     );
   }
@@ -214,24 +260,16 @@ class _LoanDetailsScreenState
   // ============================================================
 
   Widget _buildStatusBadge(String status) {
-    final isActive =
-        status.toLowerCase() == 'active';
+    final isActive = status.toLowerCase() == 'active';
 
-    final statusColor = isActive
-        ? AppColors.buttonStart
-        : AppColors.error;
+    final statusColor = isActive ? AppColors.buttonStart : AppColors.error;
 
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 11,
-        vertical: 6,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
       decoration: BoxDecoration(
         color: statusColor.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(100),
-        border: Border.all(
-          color: statusColor.withValues(alpha: 0.16),
-        ),
+        border: Border.all(color: statusColor.withValues(alpha: 0.16)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -263,10 +301,7 @@ class _LoanDetailsScreenState
   // ANIMATED SECTION WRAPPER
   // ============================================================
 
-  Widget _wrapAnimated({
-    required int delayMs,
-    required Widget child,
-  }) {
+  Widget _wrapAnimated({required int delayMs, required Widget child}) {
     return ScreenContentExit(
       isExiting: _isExiting,
       direction: ContentExitDirection.toRight,
@@ -283,10 +318,9 @@ class _LoanDetailsScreenState
   // BUILD LOAN SUMMARY SECTION
   // ============================================================
 
-  Widget _buildLoanSummarySection(
-    LoanDetailsModel details,
-  ) {
+  Widget _buildLoanSummarySection(LoanDetailsModel details) {
     return _buildSectionCard(
+      sectionKey: 'loan_summary',
       icon: Icons.account_balance_wallet_outlined,
       title: 'loan_summary'.tr,
       children: [
@@ -294,8 +328,7 @@ class _LoanDetailsScreenState
           children: [
             Expanded(
               child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'loan_number_label'.tr,
@@ -307,9 +340,7 @@ class _LoanDetailsScreenState
                   ),
                   const SizedBox(height: 3),
                   Text(
-                    details.loanNo.isEmpty
-                        ? '-'
-                        : details.loanNo,
+                    details.loanNo.isEmpty ? '-' : details.loanNo,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
@@ -329,22 +360,10 @@ class _LoanDetailsScreenState
 
         const SizedBox(height: 14),
 
-        _buildInfoRow(
-          label: 'branch'.tr,
-          value: details.branchName,
-        ),
-        _buildInfoRow(
-          label: 'product'.tr,
-          value: details.productName,
-        ),
-        _buildInfoRow(
-          label: 'loan_type'.tr,
-          value: details.loanTypeName,
-        ),
-        _buildInfoRow(
-          label: 'loan_scheme'.tr,
-          value: details.schemeName,
-        ),
+        _buildInfoRow(label: 'branch'.tr, value: details.branchName),
+        _buildInfoRow(label: 'product'.tr, value: details.productName),
+        _buildInfoRow(label: 'loan_type'.tr, value: details.loanTypeName),
+        _buildInfoRow(label: 'loan_scheme'.tr, value: details.schemeName),
       ],
     );
   }
@@ -353,27 +372,21 @@ class _LoanDetailsScreenState
   // BUILD FINANCIAL SECTION
   // ============================================================
 
-  Widget _buildFinancialSection(
-    LoanDetailsModel details,
-  ) {
+  Widget _buildFinancialSection(LoanDetailsModel details) {
     return _buildSectionCard(
+      sectionKey: 'financial_details',
       icon: Icons.currency_rupee_rounded,
       title: 'financial_details'.tr,
       children: [
         _buildInfoRow(
           label: 'principal_amount'.tr,
-          value:
-              _formatAmount(details.principalAmount),
+          value: _formatAmount(details.principalAmount),
         ),
         _buildInfoRow(
           label: 'interest_rate'.tr,
-          value:
-              _formatPercent(details.interestRate),
+          value: _formatPercent(details.interestRate),
         ),
-        _buildInfoRow(
-          label: 'IRR',
-          value: _formatPercent(details.irr),
-        ),
+        _buildInfoRow(label: 'IRR', value: _formatPercent(details.irr)),
         _buildInfoRow(
           label: 'emi_amount'.tr,
           value: _formatAmount(details.emiAmount),
@@ -382,33 +395,16 @@ class _LoanDetailsScreenState
           label: 'number_installments'.tr,
           value: details.numberOfInstallments <= 0
               ? '-'
-              : details.numberOfInstallments
-                  .toString(),
+              : details.numberOfInstallments.toString(),
         ),
-      ],
-    );
-  }
-
-  // ============================================================
-  // BUILD DATES SECTION
-  // ============================================================
-
-  Widget _buildDatesSection(
-    LoanDetailsModel details,
-  ) {
-    return _buildSectionCard(
-      icon: Icons.calendar_today_outlined,
-      title: 'important_dates'.tr,
-      children: [
+        _buildDivider(),
         _buildInfoRow(
           label: 'agreement_date'.tr,
-          value: controller
-              .formatDateMs(details.agreementDateMs),
+          value: controller.formatDateMs(details.agreementDateMs),
         ),
         _buildInfoRow(
           label: 'emi_start_date'.tr,
-          value: controller
-              .formatDateMs(details.emiStartDateMs),
+          value: controller.formatDateMs(details.emiStartDateMs),
         ),
       ],
     );
@@ -418,70 +414,38 @@ class _LoanDetailsScreenState
   // BUILD BORROWER SECTION
   // ============================================================
 
-  Widget _buildBorrowerSection(
-    LoanDetailsModel details,
-  ) {
+  Widget _buildBorrowerSection(LoanDetailsModel details) {
     final borrower = details.borrower;
 
     final address = borrower?.address;
 
     final addressParts = <String>[
-      if (address != null &&
-          address.addressLine1.isNotEmpty)
+      if (address != null && address.addressLine1.isNotEmpty)
         address.addressLine1,
-      if (address != null && address.city.isNotEmpty)
-        address.city,
-      if (address != null && address.state.isNotEmpty)
-        address.state,
-      if (address != null && address.pincode.isNotEmpty)
-        address.pincode,
+      if (address != null && address.city.isNotEmpty) address.city,
+      if (address != null && address.state.isNotEmpty) address.state,
+      if (address != null && address.pincode.isNotEmpty) address.pincode,
     ];
 
     return _buildSectionCard(
+      sectionKey: 'borrower',
       icon: Icons.person_outline_rounded,
       title: 'borrower'.tr,
       children: [
-        _buildInfoRow(
-          label: 'name'.tr,
-          value: borrower?.name ?? '',
-        ),
-        _buildInfoRow(
-          label: 'CIF ID',
-          value: borrower?.cifId ?? '',
-        ),
-        _buildInfoRow(
-          label: 'phone'.tr,
-          value: borrower?.phone ?? '',
-        ),
-        _buildInfoRow(
-          label: 'date_of_birth'.tr,
-          value: borrower?.dob ?? '',
-        ),
-        _buildInfoRow(
-          label: 'gender'.tr,
-          value: borrower?.gender ?? '',
-        ),
-        _buildInfoRow(
-          label: 'relation'.tr,
-          value: borrower?.relation ?? '',
-        ),
-        _buildInfoRow(
-          label: 'address'.tr,
-          value: addressParts.join(', '),
-        ),
+        _buildInfoRow(label: 'name'.tr, value: borrower?.name ?? ''),
+        _buildInfoRow(label: 'CIF ID', value: borrower?.cifId ?? ''),
+        _buildInfoRow(label: 'phone'.tr, value: borrower?.phone ?? ''),
+        _buildInfoRow(label: 'date_of_birth'.tr, value: borrower?.dob ?? ''),
+        _buildInfoRow(label: 'gender'.tr, value: borrower?.gender ?? ''),
+        _buildInfoRow(label: 'relation'.tr, value: borrower?.relation ?? ''),
+        _buildInfoRow(label: 'address'.tr, value: addressParts.join(', ')),
         _buildDivider(),
-        _buildInfoRow(
-          label: 'bank_name'.tr,
-          value: borrower?.bankName ?? '',
-        ),
+        _buildInfoRow(label: 'bank_name'.tr, value: borrower?.bankName ?? ''),
         _buildInfoRow(
           label: 'account_number'.tr,
           value: borrower?.accountNumber ?? '',
         ),
-        _buildInfoRow(
-          label: 'ifsc_code'.tr,
-          value: borrower?.ifscCode ?? '',
-        ),
+        _buildInfoRow(label: 'ifsc_code'.tr, value: borrower?.ifscCode ?? ''),
       ],
     );
   }
@@ -490,9 +454,7 @@ class _LoanDetailsScreenState
   // BUILD GUARANTORS SECTION
   // ============================================================
 
-  Widget _buildGuarantorsSection(
-    LoanDetailsModel details,
-  ) {
+  Widget _buildGuarantorsSection(LoanDetailsModel details) {
     final guarantors = details.guarantors;
 
     final children = <Widget>[];
@@ -509,9 +471,7 @@ class _LoanDetailsScreenState
         ),
       );
     } else {
-      for (var index = 0;
-          index < guarantors.length;
-          index++) {
+      for (var index = 0; index < guarantors.length; index++) {
         final guarantor = guarantors[index];
 
         if (index > 0) {
@@ -519,23 +479,15 @@ class _LoanDetailsScreenState
         }
 
         children.addAll([
-          _buildInfoRow(
-            label: 'name'.tr,
-            value: guarantor.name,
-          ),
-          _buildInfoRow(
-            label: 'relation'.tr,
-            value: guarantor.relation,
-          ),
-          _buildInfoRow(
-            label: 'phone'.tr,
-            value: guarantor.phone,
-          ),
+          _buildInfoRow(label: 'name'.tr, value: guarantor.name),
+          _buildInfoRow(label: 'relation'.tr, value: guarantor.relation),
+          _buildInfoRow(label: 'phone'.tr, value: guarantor.phone),
         ]);
       }
     }
 
     return _buildSectionCard(
+      sectionKey: 'guarantors',
       icon: Icons.people_outline_rounded,
       title: 'guarantors'.tr,
       children: children,
@@ -546,12 +498,11 @@ class _LoanDetailsScreenState
   // BUILD VEHICLE SECTION
   // ============================================================
 
-  Widget _buildVehicleSection(
-    LoanDetailsModel details,
-  ) {
+  Widget _buildVehicleSection(LoanDetailsModel details) {
     final asset = details.asset;
 
     return _buildSectionCard(
+      sectionKey: 'vehicle_details',
       icon: Icons.two_wheeler_outlined,
       title: 'vehicle_details'.tr,
       children: [
@@ -559,22 +510,13 @@ class _LoanDetailsScreenState
           label: 'registration_number'.tr,
           value: asset?.registrationNumber ?? '',
         ),
-        _buildInfoRow(
-          label: 'make'.tr,
-          value: asset?.makeName ?? '',
-        ),
-        _buildInfoRow(
-          label: 'model'.tr,
-          value: asset?.modelName ?? '',
-        ),
+        _buildInfoRow(label: 'make'.tr, value: asset?.makeName ?? ''),
+        _buildInfoRow(label: 'model'.tr, value: asset?.modelName ?? ''),
         _buildInfoRow(
           label: 'vehicle_type'.tr,
           value: asset?.vehicleType ?? '',
         ),
-        _buildInfoRow(
-          label: 'fuel_type'.tr,
-          value: asset?.fuelType ?? '',
-        ),
+        _buildInfoRow(label: 'fuel_type'.tr, value: asset?.fuelType ?? ''),
         _buildInfoRow(
           label: 'manufacture_year'.tr,
           value: asset?.manufactureYear ?? '',
@@ -587,26 +529,18 @@ class _LoanDetailsScreenState
           label: 'chassis_number'.tr,
           value: asset?.chassisNumber ?? '',
         ),
-        _buildInfoRow(
-          label: 'owner_name'.tr,
-          value: asset?.ownerName ?? '',
-        ),
+        _buildInfoRow(label: 'owner_name'.tr, value: asset?.ownerName ?? ''),
         _buildInfoRow(
           label: 'invoice_amount'.tr,
-          value: asset == null
-              ? ''
-              : _formatAmount(asset.invoiceAmount),
+          value: asset == null ? '' : _formatAmount(asset.invoiceAmount),
         ),
         _buildInfoRow(
           label: 'on_road_price'.tr,
-          value: asset == null
-              ? ''
-              : _formatAmount(asset.onRoadPrice),
+          value: asset == null ? '' : _formatAmount(asset.onRoadPrice),
         ),
       ],
     );
   }
-
 
   // ============================================================
   // ERROR / RETRY VIEW
@@ -616,8 +550,7 @@ class _LoanDetailsScreenState
   // ============================================================
 
   Widget _buildErrorView() {
-    final errorMessage =
-        controller.errorMessage.value ?? '';
+    final errorMessage = controller.errorMessage.value ?? '';
 
     return Center(
       child: Padding(
@@ -650,12 +583,10 @@ class _LoanDetailsScreenState
             Material(
               color: Colors.transparent,
               child: InkWell(
-                borderRadius:
-                    BorderRadius.circular(100),
+                borderRadius: BorderRadius.circular(100),
                 onTap: controller.retry,
                 child: Container(
-                  padding: const EdgeInsets
-                      .symmetric(
+                  padding: const EdgeInsets.symmetric(
                     horizontal: 26,
                     vertical: 11,
                   ),
@@ -663,13 +594,9 @@ class _LoanDetailsScreenState
                     gradient: const LinearGradient(
                       begin: Alignment.centerLeft,
                       end: Alignment.centerRight,
-                      colors: [
-                        AppColors.buttonStart,
-                        AppColors.buttonEnd,
-                      ],
+                      colors: [AppColors.buttonStart, AppColors.buttonEnd],
                     ),
-                    borderRadius:
-                        BorderRadius.circular(100),
+                    borderRadius: BorderRadius.circular(100),
                   ),
                   child: Text(
                     'retry'.tr,
@@ -702,119 +629,99 @@ class _LoanDetailsScreenState
         ),
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
         child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ==================================================
-          // HEADER
-          // ==================================================
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ==================================================
+            // HEADER
+            // ==================================================
 
-          _wrapAnimated(
-            delayMs: 0,
-            child: Row(
-              children: [
-                Container(
-                  width: 42,
-                  height: 42,
-                  decoration: BoxDecoration(
-                    color: Colors.white
-                        .withValues(alpha: 0.75),
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: Colors.white
-                          .withValues(alpha: 0.65),
+            _wrapAnimated(
+              delayMs: 0,
+              child: Row(
+                children: [
+                  Container(
+                    width: 42,
+                    height: 42,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.75),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.65),
+                      ),
+                    ),
+                    child: IconButton(
+                      padding: EdgeInsets.zero,
+                      onPressed: _goBack,
+                      icon: const Icon(
+                        Icons.arrow_back_rounded,
+                        size: 21,
+                        color: AppColors.lightBlue,
+                      ),
                     ),
                   ),
-                  child: IconButton(
-                    padding: EdgeInsets.zero,
-                    onPressed: _goBack,
-                    icon: const Icon(
-                      Icons.arrow_back_rounded,
-                      size: 21,
-                      color: AppColors.lightBlue,
+
+                  const SizedBox(width: 14),
+
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'loan_details'.tr,
+                          style: TextStyle(
+                            fontSize: 23,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.lightBlue,
+                          ),
+                        ),
+                        SizedBox(height: 2),
+                        Text(
+                          'loan_details_subtitle'.tr,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black45,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-
-                const SizedBox(width: 14),
-
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment:
-                        CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'loan_details'.tr,
-                        style: TextStyle(
-                          fontSize: 23,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.lightBlue,
-                        ),
-                      ),
-                      SizedBox(height: 2),
-                      Text(
-                        'loan_details_subtitle'.tr,
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.black45,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
 
-          const SizedBox(height: 24),
+            const SizedBox(height: 24),
 
-          // ==================================================
-          // SECTIONS
-          // ==================================================
+            // ==================================================
+            // SECTIONS
+            // ==================================================
+            _wrapAnimated(
+              delayMs: 80,
+              child: _buildLoanSummarySection(details),
+            ),
 
-          _wrapAnimated(
-            delayMs: 80,
-            child: _buildLoanSummarySection(details),
-          ),
+            const SizedBox(height: 16),
 
-          const SizedBox(height: 16),
+            _wrapAnimated(delayMs: 160, child: _buildFinancialSection(details)),
 
-          _wrapAnimated(
-            delayMs: 160,
-            child: _buildFinancialSection(details),
-          ),
+            const SizedBox(height: 16),
 
-          const SizedBox(height: 16),
+            _wrapAnimated(delayMs: 240, child: _buildBorrowerSection(details)),
 
-          _wrapAnimated(
-            delayMs: 240,
-            child: _buildDatesSection(details),
-          ),
+            const SizedBox(height: 16),
 
-          const SizedBox(height: 16),
+            _wrapAnimated(
+              delayMs: 320,
+              child: _buildGuarantorsSection(details),
+            ),
 
-          _wrapAnimated(
-            delayMs: 320,
-            child: _buildBorrowerSection(details),
-          ),
+            const SizedBox(height: 16),
 
-          const SizedBox(height: 16),
-
-          _wrapAnimated(
-            delayMs: 400,
-            child: _buildGuarantorsSection(details),
-          ),
-
-          const SizedBox(height: 16),
-
-          _wrapAnimated(
-            delayMs: 480,
-            child: _buildVehicleSection(details),
-          ),
-        ],
+            _wrapAnimated(delayMs: 400, child: _buildVehicleSection(details)),
+          ],
+        ),
       ),
-    ),
-  );
+    );
   }
 
   // ============================================================
@@ -829,23 +736,17 @@ class _LoanDetailsScreenState
         showBottomImage: false,
         child: SafeArea(
           child: Obx(() {
-            final details =
-                controller.loanDetails.value;
+            final details = controller.loanDetails.value;
 
             if (details == null) {
-              final isLoading =
-                  controller.isLoading.value;
+              final isLoading = controller.isLoading.value;
 
-              if (!isLoading &&
-                  controller.errorMessage.value !=
-                      null) {
+              if (!isLoading && controller.errorMessage.value != null) {
                 return _buildErrorView();
               }
 
               return const Center(
-                child: CircularProgressIndicator(
-                  color: AppColors.primary,
-                ),
+                child: CircularProgressIndicator(color: AppColors.primary),
               );
             }
 
