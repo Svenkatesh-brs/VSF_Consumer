@@ -8,8 +8,36 @@ import '../../utils/app_colors.dart';
 
 class ProfileDrawer extends StatelessWidget {
   final String avatarAsset;
+  final VoidCallback? onLanguageChanged;
 
-  const ProfileDrawer({super.key, this.avatarAsset = 'assets/vsf.png'});
+  const ProfileDrawer({
+    super.key,
+    this.avatarAsset = 'assets/vsf.png',
+    this.onLanguageChanged,
+  });
+
+  static void _showStyledSnackbar({
+    required String title,
+    required String message,
+    required Color backgroundColor,
+    required IconData icon,
+  }) {
+    Get.closeCurrentSnackbar();
+    Get.snackbar(
+      title,
+      message,
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: backgroundColor,
+      colorText: Colors.white,
+      borderRadius: 16,
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+      duration: const Duration(seconds: 2),
+      icon: Icon(icon, color: Colors.white),
+      shouldIconPulse: false,
+      animationDuration: const Duration(milliseconds: 250),
+    );
+  }
 
   // ============================================================
   // SHOW
@@ -18,20 +46,33 @@ class ProfileDrawer extends StatelessWidget {
   static Future<void> show(
     BuildContext context, {
     String avatarAsset = 'assets/vsf.png',
-  }) {
-    return showModalBottomSheet(
+  }) async {
+    await showModalBottomSheet<void>(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (context) {
-        return ProfileDrawer(avatarAsset: avatarAsset);
+        return ProfileDrawer(
+          avatarAsset: avatarAsset,
+          onLanguageChanged: () {
+            _showStyledSnackbar(
+              title: 'language'.tr,
+              message: 'language_updated'.tr,
+              backgroundColor: Colors.green.shade700,
+              icon: Icons.check_circle_rounded,
+            );
+          },
+        );
       },
     );
+
+    Get.closeCurrentSnackbar();
   }
 
   Future<void> _showLanguagePicker(BuildContext context) async {
     final languageProvider = Get.find<LanguageSelectionProvider>();
-    var selectedCode = Get.locale?.languageCode ?? languageProvider.languageCode;
+    var selectedCode =
+        Get.locale?.languageCode ?? languageProvider.languageCode;
     var isSaving = false;
 
     await showDialog<void>(
@@ -46,32 +87,30 @@ class ProfileDrawer extends StatelessWidget {
               title: Text('select_language'.tr),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
-                children: LanguageSelectionModel.supportedLanguages.map(
-                  (language) {
-                    final isSelected = language.languageCode == selectedCode;
+                children: LanguageSelectionModel.supportedLanguages.map((
+                  language,
+                ) {
+                  final isSelected = language.languageCode == selectedCode;
 
-                    return ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: Icon(
-                        isSelected
-                            ? Icons.radio_button_checked_rounded
-                            : Icons.radio_button_unchecked_rounded,
-                        color: isSelected
-                            ? AppColors.buttonEnd
-                            : Colors.black26,
-                      ),
-                      title: Text(_languageLabel(language.languageCode)),
-                      subtitle: Text(language.nativeName),
-                      onTap: isSaving
-                          ? null
-                          : () {
-                              setState(
-                                () => selectedCode = language.languageCode,
-                              );
-                            },
-                    );
-                  },
-                ).toList(),
+                  return ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: Icon(
+                      isSelected
+                          ? Icons.radio_button_checked_rounded
+                          : Icons.radio_button_unchecked_rounded,
+                      color: isSelected ? AppColors.buttonEnd : Colors.black26,
+                    ),
+                    title: Text(_languageLabel(language.languageCode)),
+                    subtitle: Text(language.nativeName),
+                    onTap: isSaving
+                        ? null
+                        : () {
+                            setState(
+                              () => selectedCode = language.languageCode,
+                            );
+                          },
+                  );
+                }).toList(),
               ),
               actions: [
                 TextButton(
@@ -92,21 +131,16 @@ class ProfileDrawer extends StatelessWidget {
                             if (!dialogContext.mounted) return;
 
                             Navigator.pop(dialogContext);
-                            Get.snackbar(
-                              'language'.tr,
-                              'language_updated'.tr,
-                              snackPosition: SnackPosition.BOTTOM,
-                              margin: const EdgeInsets.all(16),
-                            );
+                            onLanguageChanged?.call();
                           } catch (_) {
                             if (!dialogContext.mounted) return;
 
                             setState(() => isSaving = false);
-                            Get.snackbar(
-                              'error'.tr,
-                              'unable_save_language'.tr,
-                              snackPosition: SnackPosition.BOTTOM,
-                              margin: const EdgeInsets.all(16),
+                            _showStyledSnackbar(
+                              title: 'error'.tr,
+                              message: 'unable_save_language'.tr,
+                              backgroundColor: Colors.red.shade700,
+                              icon: Icons.error_rounded,
                             );
                           }
                         },
@@ -218,11 +252,11 @@ class ProfileDrawer extends StatelessWidget {
               onTap: () {
                 Navigator.pop(context);
 
-                Get.snackbar(
-                  'my_profile'.tr,
-                  'profile_coming_soon'.tr,
-                  snackPosition: SnackPosition.BOTTOM,
-                  margin: const EdgeInsets.all(16),
+                _showStyledSnackbar(
+                  title: 'my_profile'.tr,
+                  message: 'profile_coming_soon'.tr,
+                  backgroundColor: AppColors.lightBlue,
+                  icon: Icons.info_rounded,
                 );
               },
             ),
@@ -233,11 +267,11 @@ class ProfileDrawer extends StatelessWidget {
               onTap: () {
                 Navigator.pop(context);
 
-                Get.snackbar(
-                  'help_support'.tr,
-                  'support_coming_soon'.tr,
-                  snackPosition: SnackPosition.BOTTOM,
-                  margin: const EdgeInsets.all(16),
+                _showStyledSnackbar(
+                  title: 'help_support'.tr,
+                  message: 'support_coming_soon'.tr,
+                  backgroundColor: AppColors.lightBlue,
+                  icon: Icons.support_agent_rounded,
                 );
               },
             ),
