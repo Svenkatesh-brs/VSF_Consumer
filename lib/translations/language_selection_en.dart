@@ -365,4 +365,6 @@ const Map<String, String> languageSelectionEn = {
   'system_generated_receipt': 'This is a System Generated Receipt',
   'tell_us_issue':
       'Tell us about your issue and we will review your complaint.',
+  'no_internet_title': 'No Internet Connection',
+  'no_internet_message': 'Please check your internet connection and try again.',
 };

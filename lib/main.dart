@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
+import 'providers/network_provider.dart';
+import 'widgets/no_internet_widget.dart';
 import 'services/notification_service.dart';
 import 'bindings/app_binding.dart';
 import 'firebase_options.dart';
@@ -65,6 +67,36 @@ class VSFConsumerApp extends StatelessWidget {
       initialBinding: AppBinding(),
       initialRoute: AppRoutes.splash,
       getPages: AppPages.pages,
+      builder: (context, child) {
+        final networkProvider = Get.find<NetworkProvider>();
+
+        return AnimatedBuilder(
+          animation: networkProvider,
+          builder: (context, _) {
+            return Stack(
+              children: [
+                // Keep the existing app and navigation mounted.
+                AbsorbPointer(
+                  absorbing: !networkProvider.hasInternet,
+                  child: child ?? const SizedBox.shrink(),
+                ),
+
+                // Display the offline screen over the app.
+                if (!networkProvider.hasInternet)
+                  Positioned.fill(
+                    child: Material(
+                      color: Theme.of(context).scaffoldBackgroundColor,
+                      child: NoInternetWidget(
+                        isChecking: networkProvider.isChecking,
+                        onRetry: networkProvider.checkConnection,
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }

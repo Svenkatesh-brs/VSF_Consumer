@@ -138,7 +138,7 @@ const Map<String, String> languageSelectionTe = {
   'important_dates': 'ముఖ్యమైన తేదీలు',
   'agreement_date': 'ఒప్పంద తేదీ',
   'emi_start_date': 'EMI ప్రారంభ తేదీ',
-  'borrower': 'రుణగ్రహీత',
+  'లోన్ తీసుకున్నవారు': 'రుణగ్రహీత',
   'name': 'పేరు',
   'cif_id': 'CIF ID',
   'phone': 'ఫోన్',
@@ -373,4 +373,6 @@ const Map<String, String> languageSelectionTe = {
   'system_generated_receipt': 'ఇది సిస్టమ్ రూపొందించిన రసీదు',
   'tell_us_issue':
       'మీ సమస్య గురించి మాకు తెలియజేయండి. మేము మీ ఫిర్యాదును పరిశీలిస్తాము.',
+  'no_internet_title': 'ఇంటర్నెట్ కనెక్షన్ లేదు',
+  'no_internet_message': 'దయచేసి మీ ఇంటర్నెట్ కనెక్షన్‌ను తనిఖీ చేసి మళ్లీ ప్రయత్నించండి.',
 };

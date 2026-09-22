@@ -368,4 +368,6 @@ const Map<String, String> languageSelectionHi = {
   'system_generated_receipt': 'यह सिस्टम द्वारा बनाई गई रसीद है',
   'tell_us_issue':
       'हमें अपनी समस्या के बारे में बताएं। हम आपकी शिकायत की समीक्षा करेंगे।',
+  'no_internet_title': 'कोई इंटरनेट कनेक्शन नहीं',
+  'no_internet_message': 'कृपया अपने इंटरनेट कनेक्शन की जाँच करें और फिर से प्रयास करें।',
 };

@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
 
+import '../providers/network_provider.dart';
+import '../services/network_service.dart';
 import '../providers/language_selection_provider.dart';
 import '../services/language_selection_service.dart';
 import '../providers/auth_provider.dart';
@@ -79,6 +81,21 @@ class AppBinding extends Bindings {
         storageService: Get.find<StorageService>(),
         notificationService: Get.find<NotificationService>(),
       ),
+      permanent: true,
+    );
+
+    // ============================================================
+    // NETWORK SERVICE
+    // ============================================================
+
+    Get.lazyPut<NetworkService>(() => NetworkService(), fenix: true);
+
+    // ============================================================
+    // NETWORK PROVIDER
+    // ============================================================
+
+    Get.put<NetworkProvider>(
+      NetworkProvider(networkService: Get.find<NetworkService>())..initialize(),
       permanent: true,
     );
   }
