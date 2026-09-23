@@ -38,6 +38,7 @@ class _OtpScreenState extends State<OtpScreen>
 
   late final Animation<double> _successScale;
   late final Animation<double> _successFade;
+  Worker? _autofillWorker;
 
   @override
   void initState() {
@@ -45,6 +46,16 @@ class _OtpScreenState extends State<OtpScreen>
 
     controller = Get.find<AuthProvider>();
     WidgetsBinding.instance.addObserver(this);
+    _autofillWorker = ever<int>(controller.otpAutofillRevision, (revision) {
+      if (revision > 0) {
+        _submitAutofilledOtpIfReady();
+      }
+    });
+    // An exceptionally fast SMS can arrive after the API request but before
+    // this route is built. The revision still marks it as Retriever input.
+    if (controller.otpAutofillRevision.value > 0) {
+      _submitAutofilledOtpIfReady();
+    }
 
     // ------------------------------------------------------------
     // OTP SHAKE ANIMATION
@@ -96,6 +107,20 @@ class _OtpScreenState extends State<OtpScreen>
     if (state == AppLifecycleState.resumed && !_isExiting) {
       unawaited(controller.prepareOtpAutofill());
     }
+  }
+
+  void _submitAutofilledOtpIfReady() {
+    if (!mounted || _isExiting || controller.isLoading.value) {
+      return;
+    }
+
+    // This is invoked exclusively by [otpAutofillRevision], which is updated
+    // only for a validated SMS Retriever code, never manual entry.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && !_isExiting && !controller.isLoading.value) {
+        _verifyOtp();
+      }
+    });
   }
 
   // ------------------------------------------------------------
@@ -266,6 +291,7 @@ class _OtpScreenState extends State<OtpScreen>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _autofillWorker?.dispose();
     unawaited(controller.stopOtpAutofill());
     _otpFocusNode.dispose();
     _shakeController.dispose();

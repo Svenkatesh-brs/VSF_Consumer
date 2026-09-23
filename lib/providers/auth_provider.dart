@@ -44,6 +44,10 @@ class AuthProvider extends GetxController {
 
   final RxString otpValue = ''.obs;
 
+  /// Increments only when SMS Retriever supplies a valid code. This lets the
+  /// screen distinguish an autofill event from manual TextField entry.
+  final RxInt otpAutofillRevision = 0.obs;
+
   // ============================================================
   // REACTIVE STATE
   // ============================================================
@@ -90,6 +94,7 @@ class AuthProvider extends GetxController {
       if (RegExp(r'^\d{6}$').hasMatch(code)) {
         setOtp(code);
         clearError();
+        otpAutofillRevision.value++;
       }
     });
     await _otpAutofillService.arm();
@@ -190,6 +195,7 @@ class AuthProvider extends GetxController {
     errorMessage.value = null;
 
     setOtp('');
+    otpAutofillRevision.value = 0;
     try {
       await prepareOtpAutofill();
     } catch (_) {
