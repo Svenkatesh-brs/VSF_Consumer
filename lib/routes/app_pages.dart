@@ -18,6 +18,7 @@ import '../screens/loan_details_screen.dart';
 import '../screens/login_screen.dart';
 import '../screens/language_selection_screen.dart';
 import '../screens/otp_screen.dart';
+import '../screens/profile_screen.dart';
 import '../screens/receipt_preview_screen.dart';
 import '../screens/splash_screen.dart';
 import '../screens/transactions_screen.dart';
@@ -66,6 +67,8 @@ abstract class AppPages {
       page: () => const LoanDashboardScreen(),
       binding: LoanDashboardBinding(),
     ),
+
+    GetPage(name: AppRoutes.profile, page: () => const ProfileScreen()),
 
     // ==========================================================
     // LOAN DETAILS

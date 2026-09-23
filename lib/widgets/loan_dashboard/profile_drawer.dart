@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/language_selection_provider.dart';
 import '../../models/language_selection_model.dart';
+import '../../routes/app_routes.dart';
 import '../../utils/app_colors.dart';
 
 class ProfileDrawer extends StatelessWidget {
@@ -172,6 +173,61 @@ class ProfileDrawer extends StatelessWidget {
     }
   }
 
+  void _showLogoutConfirmation(BuildContext context) {
+    // Close the profile sheet first, then present the same confirmation used
+    // by the Home-screen logout control.
+    Navigator.pop(context);
+
+    Get.dialog(
+      AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+        title: Row(
+          children: [
+            Icon(Icons.logout_rounded, color: AppColors.lightBlue),
+            const SizedBox(width: 10),
+            Text(
+              'logout_confirmation_title'.tr,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: AppColors.lightBlue,
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          'logout_confirmation_message'.tr,
+          style: const TextStyle(fontSize: 14, color: Colors.black54),
+        ),
+        actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        actions: [
+          TextButton(
+            onPressed: Get.back,
+            child: Text('cancel'.tr, style: const TextStyle(color: Colors.black54)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Get.back();
+              Get.find<AuthProvider>().logout();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.error,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(100),
+              ),
+            ),
+            child: Text(
+              'logout'.tr,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   // ============================================================
   // BUILD
   // ============================================================
@@ -251,13 +307,7 @@ class ProfileDrawer extends StatelessWidget {
               title: 'my_profile'.tr,
               onTap: () {
                 Navigator.pop(context);
-
-                _showStyledSnackbar(
-                  title: 'my_profile'.tr,
-                  message: 'profile_coming_soon'.tr,
-                  backgroundColor: AppColors.lightBlue,
-                  icon: Icons.info_rounded,
-                );
+                Get.toNamed(AppRoutes.profile);
               },
             ),
 
@@ -285,13 +335,7 @@ class ProfileDrawer extends StatelessWidget {
             _buildDrawerItem(
               icon: Icons.logout_rounded,
               title: 'logout'.tr,
-              onTap: () async {
-                Navigator.pop(context);
-
-                final authProvider = Get.find<AuthProvider>();
-
-                await authProvider.logout();
-              },
+              onTap: () => _showLogoutConfirmation(context),
             ),
           ],
         ),

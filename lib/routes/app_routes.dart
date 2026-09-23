@@ -11,6 +11,8 @@ abstract class AppRoutes {
 
   static const loanDashboard = '/loan-dashboard';
 
+  static const profile = '/profile';
+
   static const loanDetails = '/loan-details';
 
   static const transactions = '/transactions';
