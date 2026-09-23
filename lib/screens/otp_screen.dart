@@ -1,7 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:sms_autofill/sms_autofill.dart';
 
 import '../widgets/common/screen_transition.dart';
 import '../widgets/common/screen_content_exit.dart';
@@ -19,23 +20,7 @@ class OtpScreen extends StatefulWidget {
 }
 
 class _OtpScreenState extends State<OtpScreen>
-    with TickerProviderStateMixin, CodeAutoFill {
-  @override
-  void codeUpdated() {
-    if (!mounted || code == null) {
-      return;
-    }
-
-    final otp = code!.replaceAll(RegExp(r'[^0-9]'), '');
-
-    if (otp.length == 6) {
-      controller.otpController.text = otp;
-
-      setState(() {});
-
-      controller.clearError();
-    }
-  }
+    with TickerProviderStateMixin, WidgetsBindingObserver {
 
   late final AuthProvider controller;
 
@@ -59,11 +44,7 @@ class _OtpScreenState extends State<OtpScreen>
     super.initState();
 
     controller = Get.find<AuthProvider>();
-    listenForCode();
-
-    // SmsAutoFill().getAppSignature.then((signature) {
-    //   print('SMS APP SIGNATURE: $signature');
-    // });
+    WidgetsBinding.instance.addObserver(this);
 
     // ------------------------------------------------------------
     // OTP SHAKE ANIMATION
@@ -108,6 +89,13 @@ class _OtpScreenState extends State<OtpScreen>
     _successFade = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _successController, curve: Curves.easeIn),
     );
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && !_isExiting) {
+      unawaited(controller.prepareOtpAutofill());
+    }
   }
 
   // ------------------------------------------------------------
@@ -175,6 +163,8 @@ class _OtpScreenState extends State<OtpScreen>
 
       return;
     }
+
+    unawaited(controller.stopOtpAutofill());
 
     // ------------------------------------------------------------
     // API SUCCESS
@@ -247,6 +237,7 @@ class _OtpScreenState extends State<OtpScreen>
     setState(() {
       _isExiting = true;
     });
+    unawaited(controller.stopOtpAutofill());
 
     // Wait for the staggered OTP exit animation.
     await Future.delayed(const Duration(milliseconds: 450));
@@ -274,7 +265,8 @@ class _OtpScreenState extends State<OtpScreen>
 
   @override
   void dispose() {
-    cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    unawaited(controller.stopOtpAutofill());
     _otpFocusNode.dispose();
     _shakeController.dispose();
     _successController.dispose();
@@ -286,7 +278,7 @@ class _OtpScreenState extends State<OtpScreen>
   // ------------------------------------------------------------
 
   Widget _buildOtpBoxes({required bool hasError}) {
-    final otp = controller.otpController.text;
+    final otp = controller.otpValue.value;
 
     return AnimatedBuilder(
       animation: _shakeAnimation,
@@ -543,7 +535,9 @@ class _OtpScreenState extends State<OtpScreen>
                                             LengthLimitingTextInputFormatter(6),
                                           ],
                                           onChanged: (_) {
-                                            setState(() {});
+                                            controller.updateOtpFromInput(
+                                              controller.otpController.text,
+                                            );
                                             controller.clearError();
                                           },
                                           onSubmitted: (_) {

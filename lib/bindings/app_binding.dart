@@ -9,6 +9,7 @@ import '../services/api_service.dart';
 import '../services/auth_service.dart';
 import '../services/notification_service.dart';
 import '../services/storage_service.dart';
+import '../services/otp_autofill_service.dart';
 import '../utils/app_constants.dart';
 
 class AppBinding extends Bindings {
@@ -71,6 +72,11 @@ class AppBinding extends Bindings {
       permanent: true,
     );
 
+    Get.put<OtpAutofillService>(
+      SmsRetrieverOtpAutofillService(),
+      permanent: true,
+    );
+
     // ============================================================
     // AUTH PROVIDER
     // ============================================================
@@ -80,6 +86,7 @@ class AppBinding extends Bindings {
         authService: Get.find<AuthService>(),
         storageService: Get.find<StorageService>(),
         notificationService: Get.find<NotificationService>(),
+        otpAutofillService: Get.find<OtpAutofillService>(),
       ),
       permanent: true,
     );

@@ -9,19 +9,23 @@ import '../models/verify_otp_model.dart';
 import '../routes/app_routes.dart';
 import '../services/auth_service.dart';
 import '../services/storage_service.dart';
+import '../services/otp_autofill_service.dart';
 
 class AuthProvider extends GetxController {
   final AuthService _authService;
   final StorageService _storageService;
   final NotificationService _notificationService;
+  final OtpAutofillService _otpAutofillService;
 
   AuthProvider({
     required AuthService authService,
     required StorageService storageService,
     required NotificationService notificationService,
+    required OtpAutofillService otpAutofillService,
   }) : _authService = authService,
        _storageService = storageService,
-       _notificationService = notificationService;
+       _notificationService = notificationService,
+       _otpAutofillService = otpAutofillService;
 
   @override
   void onInit() {
@@ -37,6 +41,8 @@ class AuthProvider extends GetxController {
   final TextEditingController mobileController = TextEditingController();
 
   final TextEditingController otpController = TextEditingController();
+
+  final RxString otpValue = ''.obs;
 
   // ============================================================
   // REACTIVE STATE
@@ -63,6 +69,37 @@ class AuthProvider extends GetxController {
   // ============================================================
 
   Timer? _otpTimer;
+  StreamSubscription<String>? _otpAutofillSubscription;
+
+  void setOtp(String value) {
+    otpController.value = otpController.value.copyWith(
+      text: value,
+      selection: TextSelection.collapsed(offset: value.length),
+      composing: TextRange.empty,
+    );
+    otpValue.value = value;
+  }
+
+  void updateOtpFromInput(String value) {
+    otpValue.value = value;
+  }
+
+  Future<void> prepareOtpAutofill() async {
+    await _otpAutofillSubscription?.cancel();
+    _otpAutofillSubscription = _otpAutofillService.codes.listen((code) {
+      if (RegExp(r'^\d{6}$').hasMatch(code)) {
+        setOtp(code);
+        clearError();
+      }
+    });
+    await _otpAutofillService.arm();
+  }
+
+  Future<void> stopOtpAutofill() async {
+    await _otpAutofillSubscription?.cancel();
+    _otpAutofillSubscription = null;
+    await _otpAutofillService.disarm();
+  }
 
   void startOtpTimer() {
     _otpTimer?.cancel();
@@ -152,6 +189,13 @@ class AuthProvider extends GetxController {
     isLoading.value = true;
     errorMessage.value = null;
 
+    setOtp('');
+    try {
+      await prepareOtpAutofill();
+    } catch (_) {
+      // SMS Retriever is an optional convenience; do not block manual OTP.
+    }
+
     try {
       final request = RequestOtpRequest(countryCode: countryCode, phone: phone);
 
@@ -175,6 +219,8 @@ class AuthProvider extends GetxController {
 
       errorMessage.value = _getRequestOtpErrorMessage(response.message);
 
+      await stopOtpAutofill();
+
       isLoading.value = false;
 
       return false;
@@ -185,6 +231,8 @@ class AuthProvider extends GetxController {
       );
 
       isLoading.value = false;
+
+      await stopOtpAutofill();
 
       return false;
     }
@@ -208,13 +256,7 @@ class AuthProvider extends GetxController {
       return false;
     }
 
-    final success = await requestOtp(countryCode: '+91', phone: phone);
-
-    if (success) {
-      otpController.clear();
-    }
-
-    return success;
+    return requestOtp(countryCode: '+91', phone: phone);
   }
 
   // ============================================================
@@ -361,7 +403,9 @@ class AuthProvider extends GetxController {
 
       // Clear input fields.
       mobileController.clear();
-      otpController.clear();
+      setOtp('');
+
+      await stopOtpAutofill();
 
       // Stop OTP timer.
       _otpTimer?.cancel();
@@ -386,6 +430,8 @@ class AuthProvider extends GetxController {
   @override
   void onClose() {
     _otpTimer?.cancel();
+    _otpAutofillSubscription?.cancel();
+    unawaited(_otpAutofillService.dispose());
 
     mobileController.dispose();
     otpController.dispose();
