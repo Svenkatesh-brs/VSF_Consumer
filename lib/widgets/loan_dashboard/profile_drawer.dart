@@ -242,9 +242,14 @@ class ProfileDrawer extends StatelessWidget {
       ),
       child: SafeArea(
         top: false,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.sizeOf(context).height * 0.85,
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
             Container(
               width: 42,
               height: 4,
@@ -311,20 +316,10 @@ class ProfileDrawer extends StatelessWidget {
               },
             ),
 
-            _buildDrawerItem(
-              icon: Icons.help_outline_rounded,
-              title: 'help_support'.tr,
-              onTap: () {
-                Navigator.pop(context);
-
-                _showStyledSnackbar(
-                  title: 'help_support'.tr,
-                  message: 'support_coming_soon'.tr,
-                  backgroundColor: AppColors.lightBlue,
-                  icon: Icons.support_agent_rounded,
-                );
-              },
-            ),
+            _QuickActionsDropdown(onNavigate: (route) {
+              Navigator.pop(context);
+              Get.toNamed(route);
+            }),
 
             _buildDrawerItem(
               icon: Icons.language_rounded,
@@ -337,7 +332,9 @@ class ProfileDrawer extends StatelessWidget {
               title: 'logout'.tr,
               onTap: () => _showLogoutConfirmation(context),
             ),
-          ],
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -390,6 +387,104 @@ class ProfileDrawer extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _QuickActionsDropdown extends StatelessWidget {
+  final ValueChanged<String> onNavigate;
+
+  const _QuickActionsDropdown({required this.onNavigate});
+
+  @override
+  Widget build(BuildContext context) {
+    return Theme(
+      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+      child: ExpansionTile(
+        tilePadding: const EdgeInsets.symmetric(horizontal: 4),
+        childrenPadding: const EdgeInsets.only(left: 18, bottom: 4),
+        leading: Container(
+          width: 42,
+          height: 42,
+          decoration: BoxDecoration(
+            color: AppColors.lightBlue.withValues(alpha: 0.07),
+            borderRadius: BorderRadius.circular(13),
+          ),
+          child: const Icon(
+            Icons.bolt_outlined,
+            size: 21,
+            color: AppColors.lightBlue,
+          ),
+        ),
+        title: Text(
+          'quick_actions'.tr,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: AppColors.lightBlue,
+          ),
+        ),
+        iconColor: AppColors.lightBlue,
+        collapsedIconColor: Colors.black26,
+        children: [
+          _QuickActionItem(
+            icon: Icons.event_note_outlined,
+            title: 'emi_schedule'.tr,
+            onTap: () => onNavigate(AppRoutes.emiSchedule),
+          ),
+          _QuickActionItem(
+            icon: Icons.swap_vert_rounded,
+            title: 'transactions'.tr,
+            onTap: () => onNavigate(AppRoutes.transactions),
+          ),
+          _QuickActionItem(
+            icon: Icons.contact_phone_outlined,
+            title: 'contact_update'.tr,
+            onTap: () => onNavigate(AppRoutes.contactUpdate),
+          ),
+          _QuickActionItem(
+            icon: Icons.report_problem_outlined,
+            title: 'complaints'.tr,
+            onTap: () => onNavigate(AppRoutes.complaint),
+          ),
+          _QuickActionItem(
+            icon: Icons.help_outline_rounded,
+            title: 'help'.tr,
+            onTap: () => onNavigate(AppRoutes.help),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _QuickActionItem extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final VoidCallback onTap;
+
+  const _QuickActionItem({
+    required this.icon,
+    required this.title,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      dense: true,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+      leading: Icon(icon, size: 20, color: AppColors.lightBlue),
+      title: Text(
+        title,
+        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+      ),
+      trailing: const Icon(
+        Icons.chevron_right_rounded,
+        size: 20,
+        color: Colors.black26,
+      ),
+      onTap: onTap,
     );
   }
 }
