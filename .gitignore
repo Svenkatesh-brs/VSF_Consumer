@@ -49,3 +49,7 @@ app.*.map.json
 
 # Kotlin generated files
 android/.kotlin/
+
+android/key.properties
+android/app/*.keystore
+android/app/*.jks
