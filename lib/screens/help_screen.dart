@@ -8,6 +8,109 @@ import '../widgets/app_background.dart';
 import '../widgets/common/screen_content_exit.dart';
 import '../widgets/common/screen_transition.dart';
 
+// ============================================================
+// FAQ TOPIC MODEL
+//
+// Each topic becomes one collapsible card holding a list of
+// question/answer pairs (also collapsible). Content is stored
+// as translation keys so all three app languages stay in sync.
+// ============================================================
+
+class _FaqItem {
+  final String questionKey;
+  final String answerKey;
+
+  const _FaqItem({
+    required this.questionKey,
+    required this.answerKey,
+  });
+}
+
+class _FaqTopic {
+  final IconData icon;
+  final Color accentColor;
+  final String titleKey;
+  final List<_FaqItem> items;
+
+  const _FaqTopic({
+    required this.icon,
+    required this.accentColor,
+    required this.titleKey,
+    required this.items,
+  });
+}
+
+const List<_FaqTopic> _faqTopics = [
+  _FaqTopic(
+    icon: Icons.event_note_outlined,
+    accentColor: Color(0xFF258F92),
+    titleKey: 'loans_emi',
+    items: [
+      _FaqItem(
+        questionKey: 'faq_emi_schedule_q',
+        answerKey: 'faq_emi_schedule_a',
+      ),
+      _FaqItem(
+        questionKey: 'faq_check_outstanding_q',
+        answerKey: 'faq_check_outstanding_a',
+      ),
+      _FaqItem(
+        questionKey: 'faq_emi_paid_status_q',
+        answerKey: 'faq_emi_paid_status_a',
+      ),
+    ],
+  ),
+  _FaqTopic(
+    icon: Icons.receipt_long_outlined,
+    accentColor: Color(0xFF5968BE),
+    titleKey: 'payments_receipts',
+    items: [
+      _FaqItem(
+        questionKey: 'faq_pay_emi_q',
+        answerKey: 'faq_pay_emi_a',
+      ),
+      _FaqItem(
+        questionKey: 'faq_download_receipt_q',
+        answerKey: 'faq_download_receipt_a',
+      ),
+      _FaqItem(
+        questionKey: 'faq_payment_help_q',
+        answerKey: 'faq_payment_help_a',
+      ),
+    ],
+  ),
+  _FaqTopic(
+    icon: Icons.contact_phone_outlined,
+    accentColor: Color(0xFF6956C8),
+    titleKey: 'account_contact_details',
+    items: [
+      _FaqItem(
+        questionKey: 'faq_update_phone_q',
+        answerKey: 'faq_update_phone_a',
+      ),
+      _FaqItem(
+        questionKey: 'faq_update_address_q',
+        answerKey: 'faq_update_address_a',
+      ),
+    ],
+  ),
+  _FaqTopic(
+    icon: Icons.report_problem_outlined,
+    accentColor: Color(0xFFD8893F),
+    titleKey: 'complaints',
+    items: [
+      _FaqItem(
+        questionKey: 'faq_raise_complaint_q',
+        answerKey: 'faq_raise_complaint_a',
+      ),
+      _FaqItem(
+        questionKey: 'faq_track_complaint_q',
+        answerKey: 'faq_track_complaint_a',
+      ),
+    ],
+  ),
+];
+
 class HelpScreen extends StatefulWidget {
   const HelpScreen({super.key});
 
@@ -114,17 +217,35 @@ class _HelpScreenState extends State<HelpScreen> {
   }
 
   // ============================================================
-  // HELP TOPICS
+  // FAQ STATE
   //
-  // Informational only - they point the customer back to the
-  // live contact channels above. No API calls are made.
+  // _expandedCards holds the indices of the currently open topic
+  // cards. Each open card tracks at most one open question at a
+  // time (single-open accordion) via _openQuestionByCard.
   // ============================================================
 
-  void _onHelpTopicTap(String topic) {
-    _showSupportMessage(
-      topic,
-      'support_topic_message'.trParams({'topic': topic}),
-    );
+  final Set<int> _expandedCards = {};
+  final Map<int, int> _openQuestionByCard = {};
+
+  void _toggleFaqCard(int index) {
+    setState(() {
+      if (_expandedCards.contains(index)) {
+        _expandedCards.remove(index);
+        _openQuestionByCard.remove(index);
+      } else {
+        _expandedCards.add(index);
+      }
+    });
+  }
+
+  void _toggleFaqQuestion(int cardIndex, int questionIndex) {
+    setState(() {
+      if (_openQuestionByCard[cardIndex] == questionIndex) {
+        _openQuestionByCard.remove(cardIndex);
+      } else {
+        _openQuestionByCard[cardIndex] = questionIndex;
+      }
+    });
   }
 
   // ============================================================
@@ -445,108 +566,239 @@ class _HelpScreenState extends State<HelpScreen> {
   }
 
   // ============================================================
-  // HELP TOPIC CARD
+  // FAQ QUESTION ROW
   //
-  // Static informational card reusing the dashboard's feature
-  // icons and accent colors.
+  // One collapsible Q&A pair inside a FAQ topic card. Tapping
+  // the question reveals the answer below it.
   // ============================================================
 
-  Widget _buildHelpTopicCard({
-    required IconData icon,
+  Widget _buildFaqQuestion({
+    required int cardIndex,
+    required int questionIndex,
+    required _FaqItem item,
     required Color accentColor,
-    required String title,
-    required String description,
+    required bool isOpen,
   }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(18),
-          onTap: () {
-            _onHelpTopicTap(title);
-          },
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 12),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Colors.white.withValues(alpha: 0.72),
-                  Colors.white.withValues(alpha: 0.44),
-                ],
-              ),
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.55),
-                width: 1,
-              ),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 42,
-                  height: 42,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(13),
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        accentColor.withValues(alpha: 0.14),
-                        accentColor.withValues(alpha: 0.07),
-                      ],
-                    ),
-                    border: Border.all(
-                      color: accentColor.withValues(alpha: 0.16),
-                    ),
-                  ),
-                  child: Icon(icon, size: 20, color: accentColor),
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: accentColor.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: accentColor.withValues(alpha: 0.12)),
+      ),
+      child: Column(
+        children: [
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () => _toggleFaqQuestion(cardIndex, questionIndex),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 11,
                 ),
-
-                const SizedBox(width: 13),
-
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                child: Row(
+                  children: [
+                    Container(
+                      width: 22,
+                      height: 22,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: accentColor.withValues(alpha: 0.12),
+                      ),
+                      child: const Icon(
+                        Icons.help_outline_rounded,
+                        size: 13,
+                        color: AppColors.lightBlue,
+                      ),
+                    ),
+                    const SizedBox(width: 9),
+                    Expanded(
+                      child: Text(
+                        item.questionKey.tr,
                         style: const TextStyle(
-                          fontSize: 13,
+                          fontSize: 11.5,
                           fontWeight: FontWeight.w700,
                           color: AppColors.lightBlue,
                         ),
                       ),
-
-                      const SizedBox(height: 3),
-
-                      Text(
-                        description,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.black45,
-                        ),
+                    ),
+                    AnimatedRotation(
+                      turns: isOpen ? 0.5 : 0,
+                      duration: const Duration(milliseconds: 240),
+                      curve: Curves.easeInOut,
+                      child: const Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        size: 20,
+                        color: Colors.black26,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
+              ),
+            ),
+          ),
+          AnimatedSize(
+            duration: const Duration(milliseconds: 240),
+            curve: Curves.easeInOut,
+            alignment: Alignment.topCenter,
+            child: isOpen
+                ? Padding(
+                    padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: 3,
+                          height: 14,
+                          decoration: BoxDecoration(
+                            color: accentColor,
+                            borderRadius: BorderRadius.circular(3),
+                          ),
+                        ),
+                        const SizedBox(width: 9),
+                        Expanded(
+                          child: Text(
+                            item.answerKey.tr,
+                            style: const TextStyle(
+                              fontSize: 10.5,
+                              height: 1.5,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black54,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : const SizedBox(width: double.infinity, height: 0),
+          ),
+        ],
+      ),
+    );
+  }
 
-                const SizedBox(width: 8),
+  // ============================================================
+  // FAQ TOPIC CARD
+  //
+  // Collapsible card; tapping the header expands or collapses
+  // the FAQ questions below it.
+  // ============================================================
 
-                const Icon(
-                  Icons.chevron_right_rounded,
-                  size: 20,
-                  color: Colors.black26,
-                ),
+  Widget _buildFaqCard({
+    required int index,
+    required _FaqTopic topic,
+    required bool isExpanded,
+    required int? openQuestionIndex,
+  }) {
+    final accentColor = topic.accentColor;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      child: Material(
+        color: Colors.transparent,
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(13, 12, 13, 0),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.white.withValues(alpha: 0.72),
+                Colors.white.withValues(alpha: 0.44),
               ],
             ),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.55),
+              width: 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 12,
+                offset: const Offset(0, 5),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(18),
+                  onTap: () => _toggleFaqCard(index),
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 42,
+                          height: 42,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(13),
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                accentColor.withValues(alpha: 0.14),
+                                accentColor.withValues(alpha: 0.07),
+                              ],
+                            ),
+                            border: Border.all(
+                              color: accentColor.withValues(alpha: 0.16),
+                            ),
+                          ),
+                          child: Icon(topic.icon, size: 20, color: accentColor),
+                        ),
+                        const SizedBox(width: 13),
+                        Expanded(
+                          child: Text(
+                            topic.titleKey.tr,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.lightBlue,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        AnimatedRotation(
+                          turns: isExpanded ? 0.5 : 0,
+                          duration: const Duration(milliseconds: 240),
+                          curve: Curves.easeInOut,
+                          child: const Icon(
+                            Icons.keyboard_arrow_down_rounded,
+                            size: 22,
+                            color: Colors.black26,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              AnimatedSize(
+                duration: const Duration(milliseconds: 240),
+                curve: Curves.easeInOut,
+                alignment: Alignment.topCenter,
+                child: isExpanded
+                    ? Column(
+                        children: [
+                          for (var q = 0; q < topic.items.length; q++)
+                            _buildFaqQuestion(
+                              cardIndex: index,
+                              questionIndex: q,
+                              item: topic.items[q],
+                              accentColor: accentColor,
+                              isOpen: openQuestionIndex == q,
+                            ),
+                        ],
+                      )
+                    : const SizedBox(width: double.infinity, height: 0),
+              ),
+            ],
           ),
         ),
       ),
@@ -554,38 +806,18 @@ class _HelpScreenState extends State<HelpScreen> {
   }
 
   // ============================================================
-  // HELP TOPICS
+  // FAQ TOPICS
   // ============================================================
 
-  List<Widget> _buildHelpTopics() {
+  List<Widget> _buildFaqTopics() {
     return [
-      _buildHelpTopicCard(
-        icon: Icons.event_note_outlined,
-        accentColor: const Color(0xFF258F92),
-        title: 'loans_emi'.tr,
-        description: 'loan_emi_help'.tr,
-      ),
-
-      _buildHelpTopicCard(
-        icon: Icons.receipt_long_outlined,
-        accentColor: const Color(0xFF5968BE),
-        title: 'payments_receipts'.tr,
-        description: 'payment_status_history_receipts'.tr,
-      ),
-
-      _buildHelpTopicCard(
-        icon: Icons.contact_phone_outlined,
-        accentColor: const Color(0xFF6956C8),
-        title: 'account_contact_details'.tr,
-        description: 'profile_contact_updates'.tr,
-      ),
-
-      _buildHelpTopicCard(
-        icon: Icons.report_problem_outlined,
-        accentColor: const Color(0xFFD8893F),
-        title: 'complaints'.tr,
-        description: 'raise_follow_issue'.tr,
-      ),
+      for (var i = 0; i < _faqTopics.length; i++)
+        _buildFaqCard(
+          index: i,
+          topic: _faqTopics[i],
+          isExpanded: _expandedCards.contains(i),
+          openQuestionIndex: _openQuestionByCard[i],
+        ),
     ];
   }
 
@@ -735,9 +967,9 @@ class _HelpScreenState extends State<HelpScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildSectionLabel('how_can_we_help'.tr),
+                        _buildSectionLabel('faq'.tr),
 
-                        ..._buildHelpTopics(),
+                        ..._buildFaqTopics(),
                       ],
                     ),
                   ),

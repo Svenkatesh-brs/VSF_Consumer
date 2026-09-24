@@ -510,7 +510,7 @@ class _EmiScheduleScreenState extends State<EmiScheduleScreen> {
               ],
             ),
 
-            if (emi.daysOverdue > 0) ...[
+            if (emi.daysOverdue > 0 && !emi.isPaid) ...[
               const SizedBox(height: 4),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
