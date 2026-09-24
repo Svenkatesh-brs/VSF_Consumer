@@ -237,7 +237,7 @@ class _GuarantorLoanDetailsDialogState extends State<GuarantorLoanDetailsDialog>
                             ? ''
                             : '${lead.tenure}',
                       ),
-                      _row('interest_type'.tr, _text(widget.loan.interestType)),
+                      // _row('interest_type'.tr, _text(widget.loan.interestType)),
                       _row(
                         'interest_rate'.tr,
                         widget.loan.interest <= 0
