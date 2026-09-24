@@ -10,65 +10,80 @@ class GuarantorLoanCard extends StatelessWidget {
   final HomeLoan loan;
   final VoidCallback onTap;
 
-  String _currency(double value) {
-    return value <= 0 ? '-' : '₹${value.toStringAsFixed(0)}';
+  // ============================================================
+  // STATUS (same rules as the My Loans card)
+  // ============================================================
+
+  bool get _isInactive {
+    return loan.displayStatus.toLowerCase() == 'inactive';
   }
 
-  String _value(String value) {
-    return value.trim().isEmpty ? '-' : value;
+  Color get _statusColor {
+    return _isInactive ? AppColors.primary : AppColors.buttonEnd;
+  }
+
+  IconData get _statusIcon {
+    return _isInactive
+        ? Icons.check_circle_outline
+        : Icons.pending_actions_outlined;
   }
 
   @override
   Widget build(BuildContext context) {
-    final scheme = loan.loanSchemes.isEmpty ? null : loan.loanSchemes.first;
-    final branch = loan.lead?.branch?.name ?? '';
+    final borrowerNames = loan.borrowerNames;
 
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Container(
         margin: const EdgeInsets.only(bottom: 14),
-        padding: const EdgeInsets.all(17),
+        padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Colors.white.withValues(alpha: 0.84),
-              AppColors.buttonEnd.withValues(alpha: 0.08),
+              Colors.white.withValues(alpha: 0.82),
+              Colors.white.withValues(alpha: 0.48),
             ],
           ),
           borderRadius: BorderRadius.circular(22),
           border: Border.all(
-            color: AppColors.buttonEnd.withValues(alpha: 0.18),
+            color: Colors.white.withValues(alpha: 0.60),
+            width: 1,
           ),
           boxShadow: [
             BoxShadow(
-              color: AppColors.buttonEnd.withValues(alpha: 0.10),
-              blurRadius: 18,
-              offset: const Offset(0, 8),
+              color: Colors.black.withValues(alpha: 0.07),
+              blurRadius: 20,
+              offset: const Offset(0, 9),
             ),
           ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // --------------------------------------------------
+            // TOP ROW: ICON + LOAN NUMBER + STATUS
+            // --------------------------------------------------
             Row(
               children: [
                 Container(
-                  width: 44,
-                  height: 44,
+                  width: 46,
+                  height: 46,
                   decoration: BoxDecoration(
-                    color: AppColors.buttonEnd.withValues(alpha: 0.12),
+                    color: AppColors.lightBlue.withValues(alpha: 0.10),
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: const Icon(
                     Icons.handshake_outlined,
-                    color: AppColors.buttonEnd,
-                    size: 23,
+                    color: AppColors.lightBlue,
+                    size: 24,
                   ),
                 ),
+
                 const SizedBox(width: 12),
+
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -77,60 +92,116 @@ class GuarantorLoanCard extends StatelessWidget {
                         'loan_number'.tr,
                         style: const TextStyle(
                           fontSize: 10,
-                          color: Colors.black45,
                           fontWeight: FontWeight.w500,
+                          color: Colors.black45,
                         ),
                       ),
                       const SizedBox(height: 3),
                       Text(
-                        _value(loan.loanNo),
-                        maxLines: 1,
+                        loan.loanNo,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           fontSize: 15,
+                          fontWeight: FontWeight.w700,
                           color: AppColors.lightBlue,
-                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.2,
                         ),
                       ),
                     ],
                   ),
                 ),
-                const Icon(Icons.chevron_right_rounded, color: Colors.black38),
+
+                const SizedBox(width: 8),
+
+                // ------------------------------------------------
+                // STATUS
+                // ------------------------------------------------
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: _statusColor.withValues(alpha: 0.13),
+                    borderRadius: BorderRadius.circular(100),
+                    border: Border.all(
+                      color: _statusColor.withValues(alpha: 0.20),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(_statusIcon, size: 14, color: _statusColor),
+                      const SizedBox(width: 4),
+                      Text(
+                        loan.displayStatus,
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: _statusColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
-            const SizedBox(height: 15),
-            Container(
-              height: 1,
-              color: AppColors.buttonEnd.withValues(alpha: 0.10),
-            ),
-            const SizedBox(height: 14),
+
+            const SizedBox(height: 18),
+
+            // --------------------------------------------------
+            // DIVIDER
+            // --------------------------------------------------
+            Container(height: 1, color: Colors.black.withValues(alpha: 0.06)),
+
+            const SizedBox(height: 16),
+
+            // --------------------------------------------------
+            // BORROWER + AMOUNT
+            // --------------------------------------------------
             Row(
               children: [
                 Expanded(
                   child: _InfoItem(
-                    label: 'loan_status'.tr,
-                    value: loan.displayStatus,
+                    icon: Icons.person_outline,
+                    label: 'borrowers'.tr,
+                    value: borrowerNames.join(', '),
                   ),
                 ),
+                const SizedBox(width: 16),
                 Expanded(
                   child: _InfoItem(
+                    icon: Icons.account_balance_wallet_outlined,
                     label: 'loan_amount'.tr,
-                    value: _currency(loan.loanAmount),
+                    value: '₹${loan.loanAmount.toStringAsFixed(0)}',
+                    valueColor: AppColors.lightBlue,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+
+            const SizedBox(height: 16),
+
+            // --------------------------------------------------
+            // VIEW DETAILS
+            // --------------------------------------------------
             Row(
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Expanded(
-                  child: _InfoItem(
-                    label: 'emi_amount'.tr,
-                    value: scheme == null ? '-' : _currency(scheme.emi),
+                Text(
+                  'view_details'.tr,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.buttonEnd,
                   ),
                 ),
-                Expanded(
-                  child: _InfoItem(label: 'branch'.tr, value: _value(branch)),
+                const SizedBox(width: 4),
+                Icon(
+                  Icons.arrow_forward_rounded,
+                  size: 17,
+                  color: AppColors.buttonEnd,
                 ),
               ],
             ),
@@ -141,36 +212,59 @@ class GuarantorLoanCard extends StatelessWidget {
   }
 }
 
-class _InfoItem extends StatelessWidget {
-  const _InfoItem({required this.label, required this.value});
+// ================================================================
+// INFORMATION ITEM
+//
+// Identical to the My Loans card's info item so both cards render
+// with the same look.
+// ================================================================
 
+class _InfoItem extends StatelessWidget {
+  const _InfoItem({
+    required this.icon,
+    required this.label,
+    required this.value,
+    this.valueColor,
+  });
+
+  final IconData icon;
   final String label;
   final String value;
+  final Color? valueColor;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            fontSize: 10,
-            color: Colors.black45,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 3),
-        Text(
-          value,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            fontSize: 12.5,
-            color: AppColors.lightBlue,
-            fontWeight: FontWeight.w700,
+        Icon(icon, size: 18, color: AppColors.secondary),
+
+        const SizedBox(width: 8),
+
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black45,
+                ),
+              ),
+              const SizedBox(height: 3),
+              Text(
+                value,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: valueColor ?? Colors.black87,
+                ),
+              ),
+            ],
           ),
         ),
       ],

@@ -46,9 +46,7 @@ class HomeResponse {
   factory HomeResponse.fromJson(Map<String, dynamic> json) {
     return HomeResponse(
       data: json['data'] is Map
-          ? HomeData.fromJson(
-              Map<String, dynamic>.from(json['data'] as Map),
-            )
+          ? HomeData.fromJson(Map<String, dynamic>.from(json['data'] as Map))
           : null,
       message: json['message']?.toString() ?? '',
       page: _toInt(json['page']),
@@ -169,10 +167,8 @@ class HomeData {
       ckycId: _nullableString(json['ckycId']),
       email: _nullableString(json['email']),
       education: _nullableString(json['education']),
-      alternativePhoneNumber:
-          _nullableString(json['alternativePhoneNumber']),
-      contactReference:
-          _nullableString(json['contactReference']),
+      alternativePhoneNumber: _nullableString(json['alternativePhoneNumber']),
+      contactReference: _nullableString(json['contactReference']),
       familyBg: _nullableString(json['familyBg']),
       relation: _nullableString(json['relation']),
       address: json['address'] is Map
@@ -181,20 +177,12 @@ class HomeData {
             )
           : null,
       bank: json['bank'] is Map
-          ? HomeBank.fromJson(
-              Map<String, dynamic>.from(json['bank'] as Map),
-            )
+          ? HomeBank.fromJson(Map<String, dynamic>.from(json['bank'] as Map))
           : null,
-      documents: _mapList(
-        json['documents'],
-        HomeDocument.fromJson,
-      ),
+      documents: _mapList(json['documents'], HomeDocument.fromJson),
       createdAt: _toString(json['createdAt']),
       updatedAt: _toString(json['updatedAt']),
-      loans: _mapList(
-        json['loans'],
-        HomeLoan.fromJson,
-      ),
+      loans: _mapList(json['loans'], HomeLoan.fromJson),
     );
   }
 
@@ -399,6 +387,11 @@ class HomeLoan {
   final double totalEMIPaid;
   final double totalLpcReceived;
 
+  final int totalEMICount;
+  final int paidEMICount;
+  final int upcomingEMICount;
+  final int overDueEMICount;
+
   const HomeLoan({
     required this.id,
     required this.loanNo,
@@ -429,6 +422,10 @@ class HomeLoan {
     required this.loanAmount,
     required this.totalEMIPaid,
     required this.totalLpcReceived,
+    required this.totalEMICount,
+    required this.paidEMICount,
+    required this.upcomingEMICount,
+    required this.overDueEMICount,
   });
 
   factory HomeLoan.fromJson(Map<String, dynamic> json) {
@@ -438,58 +435,40 @@ class HomeLoan {
       loanStage: _toInt(json['loanStage']),
       freezeDate: _toInt(json['freezeDate']),
       closerDate: _toInt(json['closerDate']),
-      closerReminderDate:
-          _toInt(json['closerReminderDate']),
+      closerReminderDate: _toInt(json['closerReminderDate']),
       step: _toInt(json['step']),
       status: _toInt(json['status']),
       leadId: _toString(json['leadId']),
       ledger: _toString(json['ledger']),
-      loanSchemes: _mapList(
-        json['loanSchemes'],
-        HomeLoanScheme.fromJson,
-      ),
+      loanSchemes: _mapList(json['loanSchemes'], HomeLoanScheme.fromJson),
       payment: json['payment'] is Map
           ? HomePayment.fromJson(
               Map<String, dynamic>.from(json['payment'] as Map),
             )
           : null,
-      principalAmount:
-          _toDouble(json['principalAmount']),
-      agreementDate:
-          _toInt(json['agreementDate']),
-      installmentDate:
-          _toInt(json['installmentDate']),
-      interestType:
-          _toString(json['interestType']),
-      interest:
-          _toDouble(json['interest']),
-      irr:
-          _toDouble(json['irr']),
-      workflowId:
-          _toString(json['workflowId']),
-      executiveId:
-          _nullableString(json['executiveId']),
-      adminId:
-          _nullableString(json['adminId']),
-      loanDiscount:
-          _nullableString(json['loanDiscount']),
-      createdBy:
-          _toString(json['createdBy']),
-      createdAt:
-          _toString(json['createdAt']),
-      updatedAt:
-          _toString(json['updatedAt']),
+      principalAmount: _toDouble(json['principalAmount']),
+      agreementDate: _toInt(json['agreementDate']),
+      installmentDate: _toInt(json['installmentDate']),
+      interestType: _toString(json['interestType']),
+      interest: _toDouble(json['interest']),
+      irr: _toDouble(json['irr']),
+      workflowId: _toString(json['workflowId']),
+      executiveId: _nullableString(json['executiveId']),
+      adminId: _nullableString(json['adminId']),
+      loanDiscount: _nullableString(json['loanDiscount']),
+      createdBy: _toString(json['createdBy']),
+      createdAt: _toString(json['createdAt']),
+      updatedAt: _toString(json['updatedAt']),
       lead: json['lead'] is Map
-          ? HomeLead.fromJson(
-              Map<String, dynamic>.from(json['lead'] as Map),
-            )
+          ? HomeLead.fromJson(Map<String, dynamic>.from(json['lead'] as Map))
           : null,
-      loanAmount:
-          _toDouble(json['loanAmount']),
-      totalEMIPaid:
-          _toDouble(json['totalEMIPaid']),
-      totalLpcReceived:
-          _toDouble(json['totalLpcReceived']),
+      loanAmount: _toDouble(json['loanAmount']),
+      totalEMIPaid: _toDouble(json['totalEMIPaid']),
+      totalLpcReceived: _toDouble(json['totalLpcReceived']),
+      totalEMICount: _toInt(json['totalEMICount']),
+      paidEMICount: _toInt(json['paidEMICount']),
+      upcomingEMICount: _toInt(json['upcomingEMICount']),
+      overDueEMICount: _toInt(json['overDueEMICount']),
     );
   }
 
@@ -518,6 +497,22 @@ class HomeLoan {
         .toList();
   }
 
+  /// Complete guarantor names, resolved from each guarantor's
+  /// nested consumer record (firstName/lastName). Guarantors
+  /// without a usable name are skipped.
+  List<String> get guarantorNames {
+    final guarantors = lead?.guarantors;
+
+    if (guarantors == null || guarantors.isEmpty) {
+      return const <String>[];
+    }
+
+    return guarantors
+        .map((guarantor) => guarantor.name)
+        .where((name) => name.isNotEmpty)
+        .toList();
+  }
+
   double get amount {
     return loanAmount;
   }
@@ -540,18 +535,12 @@ class HomeLoanScheme {
   final double emi;
   final int noOfInstallments;
 
-  const HomeLoanScheme({
-    required this.emi,
-    required this.noOfInstallments,
-  });
+  const HomeLoanScheme({required this.emi, required this.noOfInstallments});
 
-  factory HomeLoanScheme.fromJson(
-    Map<String, dynamic> json,
-  ) {
+  factory HomeLoanScheme.fromJson(Map<String, dynamic> json) {
     return HomeLoanScheme(
       emi: _toDouble(json['emi']),
-      noOfInstallments:
-          _toInt(json['noOfInstallments']),
+      noOfInstallments: _toInt(json['noOfInstallments']),
     );
   }
 }
@@ -573,21 +562,14 @@ class HomePayment {
     required this.methods,
   });
 
-  factory HomePayment.fromJson(
-    Map<String, dynamic> json,
-  ) {
+  factory HomePayment.fromJson(Map<String, dynamic> json) {
     return HomePayment(
-      loanCreationDate:
-          _toInt(json['loanCreationDate']),
-      emiStartDate:
-          _toInt(json['emiStartDate']),
-      fileNumber:
-          _toString(json['fileNumber']),
+      loanCreationDate: _toInt(json['loanCreationDate']),
+      emiStartDate: _toInt(json['emiStartDate']),
+      fileNumber: _toString(json['fileNumber']),
       methods: json['methods'] is Map
           ? HomePaymentMethods.fromJson(
-              Map<String, dynamic>.from(
-                json['methods'] as Map,
-              ),
+              Map<String, dynamic>.from(json['methods'] as Map),
             )
           : null,
     );
@@ -613,9 +595,7 @@ class HomePaymentMethods {
     required this.dta,
   });
 
-  factory HomePaymentMethods.fromJson(
-    Map<String, dynamic> json,
-  ) {
+  factory HomePaymentMethods.fromJson(Map<String, dynamic> json) {
     return HomePaymentMethods(
       customer: json['customer'],
       dealer: json['dealer'],
@@ -684,9 +664,7 @@ class HomeLead {
     required this.guarantors,
   });
 
-  factory HomeLead.fromJson(
-    Map<String, dynamic> json,
-  ) {
+  factory HomeLead.fromJson(Map<String, dynamic> json) {
     return HomeLead(
       id: _toString(json['id']),
       leadId: _toString(json['leadId']),
@@ -696,31 +674,23 @@ class HomeLead {
       updatedAt: _toString(json['updatedAt']),
       branch: json['branch'] is Map
           ? HomeBranch.fromJson(
-              Map<String, dynamic>.from(
-                json['branch'] as Map,
-              ),
+              Map<String, dynamic>.from(json['branch'] as Map),
             )
           : null,
       center: json['center'] is Map
           ? HomeCenter.fromJson(
-              Map<String, dynamic>.from(
-                json['center'] as Map,
-              ),
+              Map<String, dynamic>.from(json['center'] as Map),
             )
           : null,
       collectionArea: json['collectionArea'] is Map
           ? HomeCollectionArea.fromJson(
-              Map<String, dynamic>.from(
-                json['collectionArea'] as Map,
-              ),
+              Map<String, dynamic>.from(json['collectionArea'] as Map),
             )
           : null,
       productType: _toString(json['productType']),
       loanType: json['loanType'] is Map
           ? HomeLoanType.fromJson(
-              Map<String, dynamic>.from(
-                json['loanType'] as Map,
-              ),
+              Map<String, dynamic>.from(json['loanType'] as Map),
             )
           : null,
       loanScheme: _toString(json['loanScheme']),
@@ -728,19 +698,11 @@ class HomeLead {
       sourceType: _toString(json['sourceType']),
       source: _toString(json['source']),
       loanPurpose: _toString(json['loanPurpose']),
-      comfortableEmi:
-          _toDouble(json['comfortableEmi']),
+      comfortableEmi: _toDouble(json['comfortableEmi']),
       tenure: _toInt(json['tenure']),
-      proposedAmount:
-          _toDouble(json['proposedAmount']),
-      borrowers: _mapList(
-        json['borrowers'],
-        HomeBorrowerReference.fromJson,
-      ),
-      guarantors: _mapList(
-        json['guarantors'],
-        HomeGuarantorReference.fromJson,
-      ),
+      proposedAmount: _toDouble(json['proposedAmount']),
+      borrowers: _mapList(json['borrowers'], HomeBorrowerReference.fromJson),
+      guarantors: _mapList(json['guarantors'], HomeGuarantorReference.fromJson),
     );
   }
 }
@@ -762,9 +724,7 @@ class HomeBranch {
     required this.lpcType,
   });
 
-  factory HomeBranch.fromJson(
-    Map<String, dynamic> json,
-  ) {
+  factory HomeBranch.fromJson(Map<String, dynamic> json) {
     return HomeBranch(
       id: _toString(json['id']),
       name: _toString(json['name']),
@@ -799,22 +759,16 @@ class HomeCenter {
     required this.updatedAt,
   });
 
-  factory HomeCenter.fromJson(
-    Map<String, dynamic> json,
-  ) {
+  factory HomeCenter.fromJson(Map<String, dynamic> json) {
     return HomeCenter(
       id: _toString(json['id']),
       name: _toString(json['name']),
       address: _toString(json['address']),
-      addressLane1:
-          _toString(json['addressLane1']),
-      famousLandMark:
-          _toString(json['famousLandMark']),
+      addressLane1: _toString(json['addressLane1']),
+      famousLandMark: _toString(json['famousLandMark']),
       pincode: _toString(json['pincode']),
-      createdAt:
-          _toString(json['createdAt']),
-      updatedAt:
-          _toString(json['updatedAt']),
+      createdAt: _toString(json['createdAt']),
+      updatedAt: _toString(json['updatedAt']),
     );
   }
 }
@@ -838,17 +792,13 @@ class HomeCollectionArea {
     required this.updatedAt,
   });
 
-  factory HomeCollectionArea.fromJson(
-    Map<String, dynamic> json,
-  ) {
+  factory HomeCollectionArea.fromJson(Map<String, dynamic> json) {
     return HomeCollectionArea(
       id: _toString(json['id']),
       name: _toString(json['name']),
       address: _toString(json['address']),
-      createdAt:
-          _toString(json['createdAt']),
-      updatedAt:
-          _toString(json['updatedAt']),
+      createdAt: _toString(json['createdAt']),
+      updatedAt: _toString(json['updatedAt']),
     );
   }
 }
@@ -874,19 +824,14 @@ class HomeLoanType {
     required this.updatedAt,
   });
 
-  factory HomeLoanType.fromJson(
-    Map<String, dynamic> json,
-  ) {
+  factory HomeLoanType.fromJson(Map<String, dynamic> json) {
     return HomeLoanType(
       id: _toString(json['id']),
       name: _toString(json['name']),
       prefix: _toString(json['prefix']),
-      ltvReduction:
-          _toDouble(json['ltvReduction']),
-      createdAt:
-          _toString(json['createdAt']),
-      updatedAt:
-          _toString(json['updatedAt']),
+      ltvReduction: _toDouble(json['ltvReduction']),
+      createdAt: _toString(json['createdAt']),
+      updatedAt: _toString(json['updatedAt']),
     );
   }
 }
@@ -898,49 +843,48 @@ class HomeLoanType {
 class HomeBorrowerReference {
   final String id;
   final String relation;
+  final String fullName;
   final String firstName;
   final String lastName;
 
   const HomeBorrowerReference({
     required this.id,
     required this.relation,
+    required this.fullName,
     required this.firstName,
     required this.lastName,
   });
 
-  factory HomeBorrowerReference.fromJson(
-    Map<String, dynamic> json,
-  ) {
+  factory HomeBorrowerReference.fromJson(Map<String, dynamic> json) {
     // --------------------------------------------------------
-    // NESTED CONSUMER OBJECT
+    // FULL NAME
     //
-    // Each borrower entry carries the borrower's own consumer
-    // record with firstName/lastName (same consumer shape as
-    // the top-level customer payload).
-    //
-    // Parsed defensively: the nested object itself and every
-    // name field may be absent or null in the API response.
+    // The API now serves the borrower's display name directly
+    // in `fullName` (e.g. "GEMMELA KESHAVARAO").
     // --------------------------------------------------------
 
-    final consumer = _firstMapOf(
-      json,
-      const ['consumer', 'customer'],
-    );
+    final consumer = _firstMapOf(json, const ['consumer', 'customer']);
 
     return HomeBorrowerReference(
       id: _toString(json['id']),
       relation: _toString(json['relation']),
-      firstName: consumer == null
-          ? ''
-          : _toString(consumer['firstName']),
-      lastName: consumer == null
-          ? ''
-          : _toString(consumer['lastName']),
+      fullName: _toString(json['fullName']),
+      firstName: consumer == null ? '' : _toString(consumer['firstName']),
+      lastName: consumer == null ? '' : _toString(consumer['lastName']),
     );
   }
 
   /// Complete borrower name. Empty when the API provides none.
-  String get name => '$firstName $lastName'.trim();
+  ///
+  /// Prefers the direct `fullName` field; falls back to the nested
+  /// consumer's first + last name when `fullName` is missing.
+  String get name {
+    if (fullName.isNotEmpty) {
+      return fullName;
+    }
+
+    return '$firstName $lastName'.trim();
+  }
 }
 
 // ============================================================
@@ -950,19 +894,49 @@ class HomeBorrowerReference {
 class HomeGuarantorReference {
   final String id;
   final String relation;
+  final String fullName;
+  final String firstName;
+  final String lastName;
 
   const HomeGuarantorReference({
     required this.id,
     required this.relation,
+    required this.fullName,
+    required this.firstName,
+    required this.lastName,
   });
 
-  factory HomeGuarantorReference.fromJson(
-    Map<String, dynamic> json,
-  ) {
+  factory HomeGuarantorReference.fromJson(Map<String, dynamic> json) {
+    // --------------------------------------------------------
+    // FULL NAME
+    //
+    // The API now serves the guarantor's display name directly
+    // in `fullName` (e.g. "GOLLAPALLI NAGESWARI DEVI").
+    // Nested consumer lookup remains as a fallback for older
+    // responses; missing/null entries safely default to empty.
+    // --------------------------------------------------------
+
+    final consumer = _firstMapOf(json, const ['consumer', 'customer']);
+
     return HomeGuarantorReference(
       id: _toString(json['id']),
       relation: _toString(json['relation']),
+      fullName: _toString(json['fullName']),
+      firstName: consumer == null ? '' : _toString(consumer['firstName']),
+      lastName: consumer == null ? '' : _toString(consumer['lastName']),
     );
+  }
+
+  /// Complete guarantor name. Empty when the API provides none.
+  ///
+  /// Prefers the direct `fullName` field; falls back to the nested
+  /// consumer's first + last name when `fullName` is missing.
+  String get name {
+    if (fullName.isNotEmpty) {
+      return fullName;
+    }
+
+    return '$firstName $lastName'.trim();
   }
 }
 
@@ -1035,20 +1009,13 @@ double _toDouble(dynamic value) {
   return 0.0;
 }
 
-List<T> _mapList<T>(
-  dynamic value,
-  T Function(Map<String, dynamic>) fromJson,
-) {
+List<T> _mapList<T>(dynamic value, T Function(Map<String, dynamic>) fromJson) {
   if (value is! List) {
     return <T>[];
   }
 
   return value
       .whereType<Map>()
-      .map(
-        (item) => fromJson(
-          Map<String, dynamic>.from(item),
-        ),
-      )
+      .map((item) => fromJson(Map<String, dynamic>.from(item)))
       .toList();
 }
