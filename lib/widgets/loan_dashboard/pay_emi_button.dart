@@ -135,7 +135,7 @@ class _PayEmiButtonState extends State<PayEmiButton>
                 onTap: _isDisabled ? null : widget.onTap,
                 child: Center(
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 420),
+                    constraints: const BoxConstraints(maxWidth: 300),
                     child: SizedBox(
                       width: double.infinity,
                       child: Stack(
