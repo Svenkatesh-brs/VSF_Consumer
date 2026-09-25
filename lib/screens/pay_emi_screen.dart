@@ -279,37 +279,71 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
   Widget _buildQrImageFrame({required Uint8List? image, VoidCallback? onTap}) {
     return Material(
       color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(22),
-        child: Container(
-          width: 230,
-          height: 230,
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: AppColors.white,
-            borderRadius: BorderRadius.circular(22),
-            border: Border.all(color: AppColors.tintColor, width: 1.5),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.lightBlack.withValues(alpha: 0.07),
-                blurRadius: 18,
-                offset: const Offset(0, 7),
+      child: Container(
+        width: 250,
+        height: 250,
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: AppColors.tintColor, width: 1.5),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.lightBlack.withValues(alpha: 0.07),
+              blurRadius: 18,
+              offset: const Offset(0, 7),
+            ),
+          ],
+        ),
+        child: Stack(
+          children: [
+            Positioned(
+              left: 16,
+              top: 32,
+              width: 190,
+              height: 190,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: image == null || image.isEmpty
+                    ? _buildQrUnavailable()
+                    : Image.memory(
+                        image,
+                        width: double.infinity,
+                        height: double.infinity,
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, _, _) => _buildQrUnavailable(),
+                      ),
               ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: image == null || image.isEmpty
-                ? _buildQrUnavailable()
-                : Image.memory(
-                    image,
-                    width: double.infinity,
-                    height: double.infinity,
-                    fit: BoxFit.contain,
-                    errorBuilder: (_, _, _) => _buildQrUnavailable(),
+            ),
+            if (image != null && image.isNotEmpty)
+              Positioned(
+                top: 0,
+                right: 0,
+                child: Material(
+                  color: AppColors.tintColor.withValues(alpha: 0.9),
+                  borderRadius: BorderRadius.circular(9),
+                  child: InkWell(
+                    onTap: onTap,
+                    borderRadius: BorderRadius.circular(9),
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(9),
+                        border: Border.all(
+                          color: AppColors.primary.withValues(alpha: 0.25),
+                          width: 1,
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.fullscreen_rounded,
+                        color: AppColors.lightBlue,
+                        size: 16,
+                      ),
+                    ),
                   ),
-          ),
+                ),
+              ),
+          ],
         ),
       ),
     );
