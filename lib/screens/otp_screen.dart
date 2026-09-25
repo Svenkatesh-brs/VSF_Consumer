@@ -8,6 +8,7 @@ import '../widgets/common/screen_transition.dart';
 import '../widgets/common/screen_content_exit.dart';
 import '../providers/auth_provider.dart';
 import '../routes/app_routes.dart';
+import '../utils/app_responsive.dart';
 import '../widgets/app_background.dart';
 import '../widgets/app_form_card.dart';
 import '../widgets/app_submit_button.dart';
@@ -21,7 +22,6 @@ class OtpScreen extends StatefulWidget {
 
 class _OtpScreenState extends State<OtpScreen>
     with TickerProviderStateMixin, WidgetsBindingObserver {
-
   late final AuthProvider controller;
 
   late final AnimationController _shakeController;
@@ -390,278 +390,289 @@ class _OtpScreenState extends State<OtpScreen>
                     horizontal: 20,
                     vertical: 20,
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const SizedBox(height: 20),
+                  child: AppResponsive.constrainedContent(
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const SizedBox(height: 20),
 
-                      // ==================================================
-                      // BACK BUTTON
-                      // EXIT RIGHT - FIRST
-                      // ==================================================
-                      ScreenContentExit(
-                        isExiting: _isExiting,
-                        direction: ContentExitDirection.toRight,
-                        delay: Duration.zero,
-                        child: Align(
-                          alignment: Alignment.centerLeft,
+                        // ==================================================
+                        // BACK BUTTON
+                        // EXIT RIGHT - FIRST
+                        // ==================================================
+                        ScreenContentExit(
+                          isExiting: _isExiting,
+                          direction: ContentExitDirection.toRight,
+                          delay: Duration.zero,
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: ScreenContentTransition(
+                              direction: ContentTransitionDirection.fromLeft,
+                              delay: Duration.zero,
+                              child: IconButton(
+                                onPressed: _goBack,
+                                icon: const Icon(Icons.arrow_back),
+                                tooltip: 'back'.tr,
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 4),
+
+                        // ==================================================
+                        // LOGO
+                        // EXIT RIGHT - 70ms
+                        // ==================================================
+                        ScreenContentExit(
+                          isExiting: _isExiting,
+                          direction: ContentExitDirection.toRight,
+                          delay: const Duration(milliseconds: 70),
                           child: ScreenContentTransition(
                             direction: ContentTransitionDirection.fromLeft,
-                            delay: Duration.zero,
-                            child: IconButton(
-                              onPressed: _goBack,
-                              icon: const Icon(Icons.arrow_back),
-                              tooltip: 'back'.tr,
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 4),
-
-                      // ==================================================
-                      // LOGO
-                      // EXIT RIGHT - 70ms
-                      // ==================================================
-                      ScreenContentExit(
-                        isExiting: _isExiting,
-                        direction: ContentExitDirection.toRight,
-                        delay: const Duration(milliseconds: 70),
-                        child: ScreenContentTransition(
-                          direction: ContentTransitionDirection.fromLeft,
-                          delay: const Duration(milliseconds: 70),
-                          child: Center(
-                            child: Container(
-                              width: 120,
-                              height: 120,
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.white,
-                              ),
-                              padding: const EdgeInsets.all(8),
-                              child: ClipOval(
-                                child: Image.asset(
-                                  'assets/vsf.png',
-                                  width: 120,
-                                  height: 120,
-                                  fit: BoxFit.cover,
+                            delay: const Duration(milliseconds: 70),
+                            child: Center(
+                              child: Container(
+                                width: 120,
+                                height: 120,
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.white,
                                 ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 45),
-
-                      // ==================================================
-                      // TITLE
-                      // EXIT RIGHT - 140ms
-                      // ==================================================
-                      ScreenContentExit(
-                        isExiting: _isExiting,
-                        direction: ContentExitDirection.toRight,
-                        delay: const Duration(milliseconds: 140),
-                        child: ScreenContentTransition(
-                          direction: ContentTransitionDirection.fromLeft,
-                          delay: const Duration(milliseconds: 140),
-                          child: Text(
-                            'verify_otp'.tr,
-                            style: TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.w700,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 8),
-
-                      // ==================================================
-                      // DESCRIPTION
-                      // EXIT RIGHT - 200ms
-                      // ==================================================
-                      ScreenContentExit(
-                        isExiting: _isExiting,
-                        direction: ContentExitDirection.toRight,
-                        delay: const Duration(milliseconds: 200),
-                        child: ScreenContentTransition(
-                          direction: ContentTransitionDirection.fromLeft,
-                          delay: const Duration(milliseconds: 200),
-                          child: Text(
-                            maskedMobile.isEmpty
-                                  ? 'otp_description'.tr
-                                  : 'otp_sent_to'.trParams({'mobile': maskedMobile}),
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Colors.black54,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 24),
-
-                      // ==================================================
-                      // OTP CARD
-                      // EXIT RIGHT - 280ms
-                      // ==================================================
-                      ScreenContentExit(
-                        isExiting: _isExiting,
-                        direction: ContentExitDirection.toRight,
-                        delay: const Duration(milliseconds: 280),
-                        child: ScreenContentTransition(
-                          direction: ContentTransitionDirection.fromLeft,
-                          delay: const Duration(milliseconds: 280),
-                          child: AppFormCard(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'otp'.tr,
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
+                                padding: const EdgeInsets.all(8),
+                                child: ClipOval(
+                                  child: Image.asset(
+                                    'assets/vsf.png',
+                                    width: 120,
+                                    height: 120,
+                                    fit: BoxFit.cover,
                                   ),
                                 ),
+                              ),
+                            ),
+                          ),
+                        ),
 
-                                const SizedBox(height: 12),
+                        const SizedBox(height: 45),
 
-                                // ------------------------------------------
-                                // OTP INPUT
-                                // ------------------------------------------
-                                Stack(
-                                  children: [
-                                    Obx(
-                                      () => GestureDetector(
-                                        onTap: _focusOtpField,
-                                        behavior: HitTestBehavior.opaque,
-                                        child: _buildOtpBoxes(
-                                          hasError:
-                                              controller.errorMessage.value !=
-                                              null,
-                                        ),
-                                      ),
+                        // ==================================================
+                        // TITLE
+                        // EXIT RIGHT - 140ms
+                        // ==================================================
+                        ScreenContentExit(
+                          isExiting: _isExiting,
+                          direction: ContentExitDirection.toRight,
+                          delay: const Duration(milliseconds: 140),
+                          child: ScreenContentTransition(
+                            direction: ContentTransitionDirection.fromLeft,
+                            delay: const Duration(milliseconds: 140),
+                            child: Text(
+                              'verify_otp'.tr,
+                              style: TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.w700,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 8),
+
+                        // ==================================================
+                        // DESCRIPTION
+                        // EXIT RIGHT - 200ms
+                        // ==================================================
+                        ScreenContentExit(
+                          isExiting: _isExiting,
+                          direction: ContentExitDirection.toRight,
+                          delay: const Duration(milliseconds: 200),
+                          child: ScreenContentTransition(
+                            direction: ContentTransitionDirection.fromLeft,
+                            delay: const Duration(milliseconds: 200),
+                            child: Text(
+                              maskedMobile.isEmpty
+                                  ? 'otp_description'.tr
+                                  : 'otp_sent_to'.trParams({
+                                      'mobile': maskedMobile,
+                                    }),
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Colors.black54,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 24),
+
+                        // ==================================================
+                        // OTP CARD
+                        // EXIT RIGHT - 280ms
+                        // ==================================================
+                        ScreenContentExit(
+                          isExiting: _isExiting,
+                          direction: ContentExitDirection.toRight,
+                          delay: const Duration(milliseconds: 280),
+                          child: ScreenContentTransition(
+                            direction: ContentTransitionDirection.fromLeft,
+                            delay: const Duration(milliseconds: 280),
+                            child: AppFormCard(
+                              sf: AppResponsive.scale(context),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'otp'.tr,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
                                     ),
+                                  ),
 
-                                    Positioned.fill(
-                                      child: Opacity(
-                                        opacity: 0.01,
-                                        child: TextField(
-                                          controller: controller.otpController,
-                                          focusNode: _otpFocusNode,
-                                          keyboardType: TextInputType.number,
-                                          textInputAction: TextInputAction.done,
-                                          maxLength: 6,
-                                          inputFormatters: [
-                                            FilteringTextInputFormatter
-                                                .digitsOnly,
-                                            LengthLimitingTextInputFormatter(6),
-                                          ],
-                                          onChanged: (_) {
-                                            controller.updateOtpFromInput(
-                                              controller.otpController.text,
-                                            );
-                                            controller.clearError();
-                                          },
-                                          onSubmitted: (_) {
-                                            _verifyOtp();
-                                          },
-                                          decoration: const InputDecoration(
-                                            counterText: '',
-                                            border: InputBorder.none,
-                                            enabledBorder: InputBorder.none,
-                                            focusedBorder: InputBorder.none,
-                                            filled: false,
+                                  const SizedBox(height: 12),
+
+                                  // ------------------------------------------
+                                  // OTP INPUT
+                                  // ------------------------------------------
+                                  Stack(
+                                    children: [
+                                      Obx(
+                                        () => GestureDetector(
+                                          onTap: _focusOtpField,
+                                          behavior: HitTestBehavior.opaque,
+                                          child: _buildOtpBoxes(
+                                            hasError:
+                                                controller.errorMessage.value !=
+                                                null,
                                           ),
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                ),
 
-                                // ------------------------------------------
-                                // ERROR
-                                // ------------------------------------------
-                                Obx(() {
-                                  final error = controller.errorMessage.value;
-
-                                  if (error == null || error.isEmpty) {
-                                    return const SizedBox.shrink();
-                                  }
-
-                                  return Padding(
-                                    padding: const EdgeInsets.only(
-                                      top: 8,
-                                      left: 4,
-                                    ),
-                                    child: Text(
-                                      error,
-                                      style: const TextStyle(
-                                        color: Colors.red,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  );
-                                }),
-
-                                const SizedBox(height: 20),
-
-                                // ------------------------------------------
-                                // VERIFY
-                                // ------------------------------------------
-                                Obx(
-                                  () => AppSubmitButton(
-                                    label: 'verify'.tr,
-                                    isLoading:
-                                        controller.isLoading.value ||
-                                        _isExiting,
-                                    onTap: _verificationSuccessful || _isExiting
-                                        ? null
-                                        : _verifyOtp,
-                                  ),
-                                ),
-
-                                const SizedBox(height: 16),
-
-                                // ------------------------------------------
-                                // RESEND
-                                // ------------------------------------------
-                                Obx(() {
-                                  final countdown =
-                                      controller.otpCountdown.value;
-
-                                  final canResend =
-                                      controller.canResendOtp.value;
-
-                                  return Center(
-                                    child: canResend
-                                        ? TextButton(
-                                            onPressed: _resendOtp,
-                                            child: Text('resend_otp'.tr),
-                                          )
-                                        : Text(
-                                            'resend_otp_in'.trParams({
-                                              'count': countdown.toString(),
-                                            }),
-                                            style: const TextStyle(
-                                              fontSize: 14,
-                                              color: Colors.black54,
+                                      Positioned.fill(
+                                        child: Opacity(
+                                          opacity: 0.01,
+                                          child: TextField(
+                                            controller:
+                                                controller.otpController,
+                                            focusNode: _otpFocusNode,
+                                            keyboardType: TextInputType.number,
+                                            textInputAction:
+                                                TextInputAction.done,
+                                            maxLength: 6,
+                                            inputFormatters: [
+                                              FilteringTextInputFormatter
+                                                  .digitsOnly,
+                                              LengthLimitingTextInputFormatter(
+                                                6,
+                                              ),
+                                            ],
+                                            onChanged: (_) {
+                                              controller.updateOtpFromInput(
+                                                controller.otpController.text,
+                                              );
+                                              controller.clearError();
+                                            },
+                                            onSubmitted: (_) {
+                                              _verifyOtp();
+                                            },
+                                            decoration: const InputDecoration(
+                                              counterText: '',
+                                              border: InputBorder.none,
+                                              enabledBorder: InputBorder.none,
+                                              focusedBorder: InputBorder.none,
+                                              filled: false,
                                             ),
                                           ),
-                                  );
-                                }),
-                              ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+
+                                  // ------------------------------------------
+                                  // ERROR
+                                  // ------------------------------------------
+                                  Obx(() {
+                                    final error = controller.errorMessage.value;
+
+                                    if (error == null || error.isEmpty) {
+                                      return const SizedBox.shrink();
+                                    }
+
+                                    return Padding(
+                                      padding: const EdgeInsets.only(
+                                        top: 8,
+                                        left: 4,
+                                      ),
+                                      child: Text(
+                                        error,
+                                        style: const TextStyle(
+                                          color: Colors.red,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    );
+                                  }),
+
+                                  const SizedBox(height: 20),
+
+                                  // ------------------------------------------
+                                  // VERIFY
+                                  // ------------------------------------------
+                                  Obx(
+                                    () => AppSubmitButton(
+                                      label: 'verify'.tr,
+                                      sf: AppResponsive.scale(context),
+                                      isLoading:
+                                          controller.isLoading.value ||
+                                          _isExiting,
+                                      onTap:
+                                          _verificationSuccessful || _isExiting
+                                          ? null
+                                          : _verifyOtp,
+                                    ),
+                                  ),
+
+                                  const SizedBox(height: 16),
+
+                                  // ------------------------------------------
+                                  // RESEND
+                                  // ------------------------------------------
+                                  Obx(() {
+                                    final countdown =
+                                        controller.otpCountdown.value;
+
+                                    final canResend =
+                                        controller.canResendOtp.value;
+
+                                    return Center(
+                                      child: canResend
+                                          ? TextButton(
+                                              onPressed: _resendOtp,
+                                              child: Text('resend_otp'.tr),
+                                            )
+                                          : Text(
+                                              'resend_otp_in'.trParams({
+                                                'count': countdown.toString(),
+                                              }),
+                                              style: const TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.black54,
+                                              ),
+                                            ),
+                                    );
+                                  }),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
 
-                      const SizedBox(height: 40),
-                    ],
+                        const SizedBox(height: 40),
+                      ],
+                    ),
                   ),
                 ),
               ),

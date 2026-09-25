@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../utils/app_colors.dart';
 import '../utils/app_constants.dart';
+import '../utils/app_responsive.dart';
 import '../widgets/app_background.dart';
 import '../widgets/common/screen_content_exit.dart';
 import '../widgets/common/screen_transition.dart';
@@ -20,10 +21,7 @@ class _FaqItem {
   final String questionKey;
   final String answerKey;
 
-  const _FaqItem({
-    required this.questionKey,
-    required this.answerKey,
-  });
+  const _FaqItem({required this.questionKey, required this.answerKey});
 }
 
 class _FaqTopic {
@@ -65,10 +63,7 @@ const List<_FaqTopic> _faqTopics = [
     accentColor: Color(0xFF5968BE),
     titleKey: 'payments_receipts',
     items: [
-      _FaqItem(
-        questionKey: 'faq_pay_emi_q',
-        answerKey: 'faq_pay_emi_a',
-      ),
+      _FaqItem(questionKey: 'faq_pay_emi_q', answerKey: 'faq_pay_emi_a'),
       _FaqItem(
         questionKey: 'faq_download_receipt_q',
         answerKey: 'faq_download_receipt_a',
@@ -835,146 +830,148 @@ class _HelpScreenState extends State<HelpScreen> {
           child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // ================================================
-                // HEADER
-                // ENTRY LEFT - 0ms
-                // EXIT RIGHT - 0ms
-                // ================================================
+            child: AppResponsive.constrainedContent(
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // ================================================
+                  // HEADER
+                  // ENTRY LEFT - 0ms
+                  // EXIT RIGHT - 0ms
+                  // ================================================
 
-                ScreenContentExit(
-                  isExiting: _isExiting,
-                  direction: ContentExitDirection.toRight,
-                  delay: Duration.zero,
-                  child: ScreenContentTransition(
-                    direction: ContentTransitionDirection.fromLeft,
+                  ScreenContentExit(
+                    isExiting: _isExiting,
+                    direction: ContentExitDirection.toRight,
                     delay: Duration.zero,
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 42,
-                          height: 42,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.75),
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.65),
+                    child: ScreenContentTransition(
+                      direction: ContentTransitionDirection.fromLeft,
+                      delay: Duration.zero,
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 42,
+                            height: 42,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.75),
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.65),
+                              ),
+                            ),
+                            child: IconButton(
+                              padding: EdgeInsets.zero,
+                              onPressed: _goBack,
+                              icon: const Icon(
+                                Icons.arrow_back_rounded,
+                                size: 21,
+                                color: AppColors.lightBlue,
+                              ),
                             ),
                           ),
-                          child: IconButton(
-                            padding: EdgeInsets.zero,
-                            onPressed: _goBack,
-                            icon: const Icon(
-                              Icons.arrow_back_rounded,
-                              size: 21,
-                              color: AppColors.lightBlue,
+
+                          const SizedBox(width: 14),
+
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'help_support'.tr,
+                                  style: TextStyle(
+                                    fontSize: 23,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.lightBlue,
+                                  ),
+                                ),
+
+                                SizedBox(height: 2),
+
+                                Text(
+                                  'were_here_to_help'.tr,
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.black45,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ),
-
-                        const SizedBox(width: 14),
-
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'help_support'.tr,
-                                style: TextStyle(
-                                  fontSize: 23,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.lightBlue,
-                                ),
-                              ),
-
-                              SizedBox(height: 2),
-
-                              Text(
-                                'were_here_to_help'.tr,
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.black45,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
 
-                const SizedBox(height: 24),
+                  const SizedBox(height: 24),
 
-                // ================================================
-                // HERO SUPPORT CARD
-                // ENTRY LEFT - 80ms
-                // EXIT RIGHT - 80ms
-                // ================================================
-                ScreenContentExit(
-                  isExiting: _isExiting,
-                  direction: ContentExitDirection.toRight,
-                  delay: const Duration(milliseconds: 80),
-                  child: ScreenContentTransition(
-                    direction: ContentTransitionDirection.fromLeft,
+                  // ================================================
+                  // HERO SUPPORT CARD
+                  // ENTRY LEFT - 80ms
+                  // EXIT RIGHT - 80ms
+                  // ================================================
+                  ScreenContentExit(
+                    isExiting: _isExiting,
+                    direction: ContentExitDirection.toRight,
                     delay: const Duration(milliseconds: 80),
-                    child: _buildHeroCard(),
+                    child: ScreenContentTransition(
+                      direction: ContentTransitionDirection.fromLeft,
+                      delay: const Duration(milliseconds: 80),
+                      child: _buildHeroCard(),
+                    ),
                   ),
-                ),
 
-                const SizedBox(height: 24),
+                  const SizedBox(height: 24),
 
-                // ================================================
-                // CONTACT OPTIONS
-                // ENTRY LEFT - 160ms
-                // EXIT RIGHT - 160ms
-                // ================================================
-                ScreenContentExit(
-                  isExiting: _isExiting,
-                  direction: ContentExitDirection.toRight,
-                  delay: const Duration(milliseconds: 160),
-                  child: ScreenContentTransition(
-                    direction: ContentTransitionDirection.fromLeft,
+                  // ================================================
+                  // CONTACT OPTIONS
+                  // ENTRY LEFT - 160ms
+                  // EXIT RIGHT - 160ms
+                  // ================================================
+                  ScreenContentExit(
+                    isExiting: _isExiting,
+                    direction: ContentExitDirection.toRight,
                     delay: const Duration(milliseconds: 160),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildSectionLabel('contact_us'.tr),
+                    child: ScreenContentTransition(
+                      direction: ContentTransitionDirection.fromLeft,
+                      delay: const Duration(milliseconds: 160),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildSectionLabel('contact_us'.tr),
 
-                        ..._buildContactOptions(),
-                      ],
+                          ..._buildContactOptions(),
+                        ],
+                      ),
                     ),
                   ),
-                ),
 
-                const SizedBox(height: 14),
+                  const SizedBox(height: 14),
 
-                // ================================================
-                // HELP TOPICS
-                // ENTRY LEFT - 240ms
-                // EXIT RIGHT - 240ms
-                // ================================================
-                ScreenContentExit(
-                  isExiting: _isExiting,
-                  direction: ContentExitDirection.toRight,
-                  delay: const Duration(milliseconds: 240),
-                  child: ScreenContentTransition(
-                    direction: ContentTransitionDirection.fromLeft,
+                  // ================================================
+                  // HELP TOPICS
+                  // ENTRY LEFT - 240ms
+                  // EXIT RIGHT - 240ms
+                  // ================================================
+                  ScreenContentExit(
+                    isExiting: _isExiting,
+                    direction: ContentExitDirection.toRight,
                     delay: const Duration(milliseconds: 240),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildSectionLabel('faq'.tr),
+                    child: ScreenContentTransition(
+                      direction: ContentTransitionDirection.fromLeft,
+                      delay: const Duration(milliseconds: 240),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildSectionLabel('faq'.tr),
 
-                        ..._buildFaqTopics(),
-                      ],
+                          ..._buildFaqTopics(),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

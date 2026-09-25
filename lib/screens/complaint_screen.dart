@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../models/complaint_model.dart';
 import '../providers/complaint_provider.dart';
 import '../utils/app_colors.dart';
+import '../utils/app_responsive.dart';
 import '../widgets/app_background.dart';
 import 'complaint_list_screen.dart';
 
@@ -243,19 +244,21 @@ class _ComplaintScreenState extends State<ComplaintScreen>
                           child: SingleChildScrollView(
                             physics: const BouncingScrollPhysics(),
                             padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _buildIntro(),
+                            child: AppResponsive.constrainedContent(
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _buildIntro(),
 
-                                const SizedBox(height: 20),
+                                  const SizedBox(height: 20),
 
-                                _buildComplaintCard(),
+                                  _buildComplaintCard(),
 
-                                const SizedBox(height: 24),
+                                  const SizedBox(height: 24),
 
-                                _buildComplaintHistoryButton(),
-                              ],
+                                  _buildComplaintHistoryButton(),
+                                ],
+                              ),
                             ),
                           ),
                         ),
@@ -307,8 +310,14 @@ class _ComplaintScreenState extends State<ComplaintScreen>
           ),
           labelColor: AppColors.lightBlue,
           unselectedLabelColor: Colors.black45,
-          labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
-          unselectedLabelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+          labelStyle: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+          ),
+          unselectedLabelStyle: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+          ),
           tabs: [
             Tab(
               height: 42,

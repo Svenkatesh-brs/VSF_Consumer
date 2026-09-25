@@ -224,53 +224,56 @@ class _SplashScreenState extends State<SplashScreen>
         color: Colors.white,
         child: SafeArea(
           child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // ------------------------------------------------
-                // VSF LOGO
-                // ------------------------------------------------
-                SlideTransition(
-                  position: _logoSlide,
-                  child: FadeTransition(
-                    opacity: _logoOpacity,
-                    child: ScaleTransition(
-                      scale: _logoScale,
-                      child: Image.asset(
-                        'assets/vsf.png',
-                        width: 130,
-                        height: 130,
-                        fit: BoxFit.contain,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // ------------------------------------------------
+                  // VSF LOGO
+                  // ------------------------------------------------
+                  SlideTransition(
+                    position: _logoSlide,
+                    child: FadeTransition(
+                      opacity: _logoOpacity,
+                      child: ScaleTransition(
+                        scale: _logoScale,
+                        child: Image.asset(
+                          'assets/vsf.png',
+                          width: 130,
+                          height: 130,
+                          fit: BoxFit.contain,
+                        ),
                       ),
                     ),
                   ),
-                ),
 
-                const SizedBox(height: 20),
+                  const SizedBox(height: 20),
 
-                // ------------------------------------------------
-                // BIKE LOTTIE ANIMATION
-                // ------------------------------------------------
-                SizedBox(
-                  width: 260,
-                  height: 260,
-                  child: Lottie.asset(
-                    'assets/animations/splash_animation.json',
-                    controller: _lottieController,
-                    fit: BoxFit.contain,
-                    repeat: false,
-                    onLoaded: (composition) {
-                      _compositionDuration = composition.duration;
-                      _lottieController.duration = composition.duration;
+                  // ------------------------------------------------
+                  // BIKE LOTTIE ANIMATION
+                  // ------------------------------------------------
+                  SizedBox(
+                    width: 260,
+                    height: 260,
+                    child: Lottie.asset(
+                      'assets/animations/splash_animation.json',
+                      controller: _lottieController,
+                      fit: BoxFit.contain,
+                      repeat: false,
+                      onLoaded: (composition) {
+                        _compositionDuration = composition.duration;
+                        _lottieController.duration = composition.duration;
 
-                      // Start both animations only once the first frame has
-                      // actually been drawn, so the full logo/Lottie animation
-                      // is visible from the beginning (cold launch included).
-                      _tryStartAnimations();
-                    },
+                        // Start both animations only once the first frame has
+                        // actually been drawn, so the full logo/Lottie animation
+                        // is visible from the beginning (cold launch included).
+                        _tryStartAnimations();
+                      },
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

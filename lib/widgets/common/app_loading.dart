@@ -1,7 +1,10 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 
 import '../../utils/app_colors.dart';
+import '../../utils/app_responsive.dart';
 import '../../utils/app_theme.dart';
 
 class AppLoading extends StatelessWidget {
@@ -18,6 +21,11 @@ class AppLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double animationWidth = math.min(
+      size,
+      AppResponsive.width(context) * 0.75,
+    );
+
     return Center(
       child: SingleChildScrollView(
         physics: const NeverScrollableScrollPhysics(),
@@ -26,8 +34,8 @@ class AppLoading extends StatelessWidget {
           children: [
             Lottie.asset(
               'assets/animations/app_loading.json',
-              width: size,
-              height: size,
+              width: animationWidth,
+              height: animationWidth,
               fit: BoxFit.contain,
               repeat: true,
             ),

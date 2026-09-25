@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../models/loan_details_model.dart';
 import '../providers/loan_dashboard_provider.dart';
 import '../utils/app_colors.dart';
+import '../utils/app_responsive.dart';
 import '../widgets/app_background.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -50,37 +51,71 @@ class ProfileScreen extends StatelessWidget {
                   child: controller.isLoading.value && !hasProfile
                       ? const Center(child: CircularProgressIndicator())
                       : hasProfile
-                      ? ListView(
-                          padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
-                          children: [
-                            _ProfileCard(
-                              title: 'my_profile'.tr,
-                              children: [
-                                _ProfileField('name'.tr, borrower?.name ?? fallbackName),
-                                _ProfileField('phone'.tr, borrower?.phone ?? ''),
-                                _ProfileField('date_of_birth'.tr, borrower?.dob ?? ''),
-                                _ProfileField('gender'.tr, borrower?.gender ?? ''),
-                                _ProfileField('relation'.tr, borrower?.relation ?? ''),
-                                _ProfileField('customer_id'.tr, borrower?.cifId ?? ''),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            _ProfileCard(
-                              title: 'address'.tr,
-                              children: [
-                                _ProfileField('address'.tr, _formatAddress(borrower?.address)),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            _ProfileCard(
-                              title: 'bank_details'.tr,
-                              children: [
-                                _ProfileField('bank_name'.tr, borrower?.bankName ?? ''),
-                                _ProfileField('account_number'.tr, _maskAccountNumber(borrower?.accountNumber ?? '')),
-                                _ProfileField('ifsc_code'.tr, borrower?.ifscCode ?? ''),
-                              ],
-                            ),
-                          ],
+                      ? AppResponsive.constrainedContent(
+                          ListView(
+                            padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+                            children: [
+                              _ProfileCard(
+                                title: 'my_profile'.tr,
+                                children: [
+                                  _ProfileField(
+                                    'name'.tr,
+                                    borrower?.name ?? fallbackName,
+                                  ),
+                                  _ProfileField(
+                                    'phone'.tr,
+                                    borrower?.phone ?? '',
+                                  ),
+                                  _ProfileField(
+                                    'date_of_birth'.tr,
+                                    borrower?.dob ?? '',
+                                  ),
+                                  _ProfileField(
+                                    'gender'.tr,
+                                    borrower?.gender ?? '',
+                                  ),
+                                  _ProfileField(
+                                    'relation'.tr,
+                                    borrower?.relation ?? '',
+                                  ),
+                                  _ProfileField(
+                                    'customer_id'.tr,
+                                    borrower?.cifId ?? '',
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              _ProfileCard(
+                                title: 'address'.tr,
+                                children: [
+                                  _ProfileField(
+                                    'address'.tr,
+                                    _formatAddress(borrower?.address),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              _ProfileCard(
+                                title: 'bank_details'.tr,
+                                children: [
+                                  _ProfileField(
+                                    'bank_name'.tr,
+                                    borrower?.bankName ?? '',
+                                  ),
+                                  _ProfileField(
+                                    'account_number'.tr,
+                                    _maskAccountNumber(
+                                      borrower?.accountNumber ?? '',
+                                    ),
+                                  ),
+                                  _ProfileField(
+                                    'ifsc_code'.tr,
+                                    borrower?.ifscCode ?? '',
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         )
                       : Center(
                           child: Text(
@@ -147,7 +182,10 @@ class _ProfileField extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(fontSize: 12, color: Colors.black54)),
+          Text(
+            label,
+            style: const TextStyle(fontSize: 12, color: Colors.black54),
+          ),
           const SizedBox(height: 3),
           Text(
             displayValue,

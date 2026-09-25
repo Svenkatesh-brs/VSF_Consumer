@@ -4,19 +4,16 @@ import 'package:get/get.dart';
 import '../models/complaint_model.dart';
 import '../providers/complaint_provider.dart';
 import '../utils/app_colors.dart';
+import '../utils/app_responsive.dart';
 
 class ComplaintListScreen extends StatefulWidget {
-  const ComplaintListScreen({
-    super.key,
-  });
+  const ComplaintListScreen({super.key});
 
   @override
-  State<ComplaintListScreen> createState() =>
-      _ComplaintListScreenState();
+  State<ComplaintListScreen> createState() => _ComplaintListScreenState();
 }
 
-class _ComplaintListScreenState
-    extends State<ComplaintListScreen> {
+class _ComplaintListScreenState extends State<ComplaintListScreen> {
   late final ComplaintProvider controller;
   final _expandedComplaintKeys = <String>{};
 
@@ -75,14 +72,12 @@ class _ComplaintListScreenState
     final hour = localDate.hour == 0
         ? 12
         : localDate.hour > 12
-            ? localDate.hour - 12
-            : localDate.hour;
+        ? localDate.hour - 12
+        : localDate.hour;
 
-    final minute =
-        localDate.minute.toString().padLeft(2, '0');
+    final minute = localDate.minute.toString().padLeft(2, '0');
 
-    final period =
-        localDate.hour >= 12 ? 'PM' : 'AM';
+    final period = localDate.hour >= 12 ? 'PM' : 'AM';
 
     return '$day $month $year, '
         '$hour:$minute $period';
@@ -156,9 +151,7 @@ class _ComplaintListScreenState
   Widget build(BuildContext context) {
     // Embedded as tab 2 of the Complaint
     // screen: no own background/header.
-    return Obx(
-      () => _buildBody(),
-    );
+    return Obx(() => _buildBody());
   }
 
   // ============================================================
@@ -167,13 +160,11 @@ class _ComplaintListScreenState
 
   Widget _buildIntro() {
     return Row(
-      crossAxisAlignment:
-          CrossAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Expanded(
           child: Column(
-            crossAxisAlignment:
-                CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 'your_complaints'.tr,
@@ -191,9 +182,7 @@ class _ComplaintListScreenState
                 style: TextStyle(
                   fontSize: 13,
                   height: 1.4,
-                  color: Colors.black.withValues(
-                    alpha: 0.55,
-                  ),
+                  color: Colors.black.withValues(alpha: 0.55),
                 ),
               ),
             ],
@@ -206,24 +195,22 @@ class _ComplaintListScreenState
             child: controller.totalComplaints.value > 0
                 ? Container(
                     key: const ValueKey('complaint-count'),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.lightBlue
-                        .withValues(alpha: 0.10),
-                    borderRadius:
-                        BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    '${controller.totalComplaints.value}',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.lightBlue,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
                     ),
-                  ),
+                    decoration: BoxDecoration(
+                      color: AppColors.lightBlue.withValues(alpha: 0.10),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      '${controller.totalComplaints.value}',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.lightBlue,
+                      ),
+                    ),
                   )
                 : const SizedBox.shrink(key: ValueKey('no-complaint-count')),
           ),
@@ -240,33 +227,28 @@ class _ComplaintListScreenState
     return RefreshIndicator(
       onRefresh: _refresh,
       color: AppColors.lightBlue,
-      child: ListView(
-        physics:
-            const AlwaysScrollableScrollPhysics(
-          parent: BouncingScrollPhysics(),
+      child: AppResponsive.constrainedContent(
+        ListView(
+          physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics(),
+          ),
+          padding: const EdgeInsets.fromLTRB(20, 4, 20, 30),
+          children: [
+            _buildIntro(),
+
+            const SizedBox(height: 16),
+
+            // ------------------------------------------
+            // STATUS FILTER - ALWAYS VISIBLE IN EVERY
+            // STATE (LOADING / ERROR / EMPTY / LIST).
+            // ------------------------------------------
+            _buildStatusFilter(),
+
+            const SizedBox(height: 16),
+
+            _buildListContent(),
+          ],
         ),
-        padding: const EdgeInsets.fromLTRB(
-          20,
-          4,
-          20,
-          30,
-        ),
-        children: [
-          _buildIntro(),
-
-          const SizedBox(height: 16),
-
-          // ------------------------------------------
-          // STATUS FILTER - ALWAYS VISIBLE IN EVERY
-          // STATE (LOADING / ERROR / EMPTY / LIST).
-          // ------------------------------------------
-
-          _buildStatusFilter(),
-
-          const SizedBox(height: 16),
-
-          _buildListContent(),
-        ],
       ),
     );
   }
@@ -282,13 +264,10 @@ class _ComplaintListScreenState
     late final Widget content;
     late final String state;
 
-    if (controller.isLoading.value &&
-        controller.complaints.isEmpty) {
+    if (controller.isLoading.value && controller.complaints.isEmpty) {
       content = const Padding(
         padding: EdgeInsets.only(top: 60),
-        child: Center(
-          child: CircularProgressIndicator(),
-        ),
+        child: Center(child: CircularProgressIndicator()),
       );
       state = 'loading';
     } else if (controller.errorMessage.value != null &&
@@ -303,14 +282,14 @@ class _ComplaintListScreenState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ...controller.complaints.asMap().entries.map(
-                (entry) => _buildComplaintCard(
-                  entry.value,
-                  controller.totalComplaints.value -
-                    entry.key -
-                    ((controller.currentPage.value - 1) *
+            (entry) => _buildComplaintCard(
+              entry.value,
+              controller.totalComplaints.value -
+                  entry.key -
+                  ((controller.currentPage.value - 1) *
                       controller.recordsPerPage.value),
-                ),
-              ),
+            ),
+          ),
           const SizedBox(height: 8),
           _buildPagination(),
         ],
@@ -362,19 +341,42 @@ class _ComplaintListScreenState
         ),
         child: Row(
           children: [
-            const Icon(Icons.filter_list_rounded, size: 19, color: AppColors.lightBlue),
+            const Icon(
+              Icons.filter_list_rounded,
+              size: 19,
+              color: AppColors.lightBlue,
+            ),
             const SizedBox(width: 8),
-            Text('status'.tr, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.black87)),
+            Text(
+              'status'.tr,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: Colors.black87,
+              ),
+            ),
             const Spacer(),
             DropdownButtonHideUnderline(
               child: DropdownButton<int>(
                 value: controller.selectedStatus.value,
                 icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 20),
                 items: [
-                  DropdownMenuItem(value: ComplaintModel.all, child: Text('all'.tr)),
-                  DropdownMenuItem(value: ComplaintModel.pending, child: Text('pending'.tr)),
-                  DropdownMenuItem(value: ComplaintModel.approved, child: Text('resolved'.tr)),
-                  DropdownMenuItem(value: ComplaintModel.rejected, child: Text('rejected'.tr)),
+                  DropdownMenuItem(
+                    value: ComplaintModel.all,
+                    child: Text('all'.tr),
+                  ),
+                  DropdownMenuItem(
+                    value: ComplaintModel.pending,
+                    child: Text('pending'.tr),
+                  ),
+                  DropdownMenuItem(
+                    value: ComplaintModel.approved,
+                    child: Text('resolved'.tr),
+                  ),
+                  DropdownMenuItem(
+                    value: ComplaintModel.rejected,
+                    child: Text('rejected'.tr),
+                  ),
                 ],
                 onChanged: (value) {
                   if (value != null) controller.setStatus(value);
@@ -391,10 +393,7 @@ class _ComplaintListScreenState
   // COMPLAINT CARD
   // ============================================================
 
-  Widget _buildComplaintCard(
-    ComplaintModel complaint,
-    int serialNumber,
-  ) {
+  Widget _buildComplaintCard(ComplaintModel complaint, int serialNumber) {
     final statusColor = _statusColor(complaint.status);
     final expansionKey = complaint.id.isNotEmpty
         ? complaint.id
@@ -403,35 +402,22 @@ class _ComplaintListScreenState
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 220),
-      margin: const EdgeInsets.only(
-        bottom: 14,
-      ),
+      margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(17),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Colors.white.withValues(
-              alpha: 0.84,
-            ),
-            Colors.white.withValues(
-              alpha: 0.48,
-            ),
+            Colors.white.withValues(alpha: 0.84),
+            Colors.white.withValues(alpha: 0.48),
           ],
         ),
-        borderRadius:
-            BorderRadius.circular(21),
-        border: Border.all(
-          color: Colors.white.withValues(
-            alpha: 0.65,
-          ),
-        ),
+        borderRadius: BorderRadius.circular(21),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.65)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(
-              alpha: 0.06,
-            ),
+            color: Colors.black.withValues(alpha: 0.06),
             blurRadius: 18,
             offset: const Offset(0, 8),
           ),
@@ -473,7 +459,9 @@ class _ComplaintListScreenState
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'complaint_number'.trParams({'number': '$serialNumber'}),
+                        'complaint_number'.trParams({
+                          'number': '$serialNumber',
+                        }),
                         style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
@@ -669,16 +657,10 @@ class _ComplaintListScreenState
     final color = _statusColor(status);
 
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 9,
-        vertical: 5,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
       decoration: BoxDecoration(
-        color: color.withValues(
-          alpha: 0.10,
-        ),
-        borderRadius:
-            BorderRadius.circular(20),
+        color: color.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
         _statusLabel(status),
@@ -701,49 +683,33 @@ class _ComplaintListScreenState
     required String value,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 9,
-        vertical: 9,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 9),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(
-          alpha: 0.45,
-        ),
-        borderRadius:
-            BorderRadius.circular(12),
+        color: Colors.white.withValues(alpha: 0.45),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
-          Icon(
-            icon,
-            size: 15,
-            color: AppColors.lightBlue,
-          ),
+          Icon(icon, size: 15, color: AppColors.lightBlue),
 
           const SizedBox(width: 7),
 
           Expanded(
             child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   label,
-                  style: const TextStyle(
-                    fontSize: 9,
-                    color: Colors.black45,
-                  ),
+                  style: const TextStyle(fontSize: 9, color: Colors.black45),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   value,
                   maxLines: 2,
-                  overflow:
-                      TextOverflow.ellipsis,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontSize: 10,
-                    fontWeight:
-                        FontWeight.w600,
+                    fontWeight: FontWeight.w600,
                     color: Colors.black87,
                   ),
                 ),
@@ -760,54 +726,41 @@ class _ComplaintListScreenState
   // ============================================================
 
   Widget _buildPagination() {
-    return Obx(
-      () {
-        final hasPrevious =
-            controller.hasPreviousPage;
+    return Obx(() {
+      final hasPrevious = controller.hasPreviousPage;
 
-        final hasNext =
-            controller.hasNextPage;
+      final hasNext = controller.hasNextPage;
 
-        if (!hasPrevious && !hasNext) {
-          return const SizedBox.shrink();
-        }
+      if (!hasPrevious && !hasNext) {
+        return const SizedBox.shrink();
+      }
 
-        return Row(
-          mainAxisAlignment:
-              MainAxisAlignment.center,
-          children: [
-            IconButton(
-              onPressed: hasPrevious
-                  ? controller.previousPage
-                  : null,
-              icon: const Icon(
-                Icons.chevron_left_rounded,
-              ),
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          IconButton(
+            onPressed: hasPrevious ? controller.previousPage : null,
+            icon: const Icon(Icons.chevron_left_rounded),
+            color: AppColors.lightBlue,
+          ),
+
+          Text(
+            'page'.trParams({'number': '${controller.currentPage.value}'}),
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
               color: AppColors.lightBlue,
             ),
+          ),
 
-            Text(
-              'page'.trParams({'number': '${controller.currentPage.value}'}),
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: AppColors.lightBlue,
-              ),
-            ),
-
-            IconButton(
-              onPressed: hasNext
-                  ? controller.nextPage
-                  : null,
-              icon: const Icon(
-                Icons.chevron_right_rounded,
-              ),
-              color: AppColors.lightBlue,
-            ),
-          ],
-        );
-      },
-    );
+          IconButton(
+            onPressed: hasNext ? controller.nextPage : null,
+            icon: const Icon(Icons.chevron_right_rounded),
+            color: AppColors.lightBlue,
+          ),
+        ],
+      );
+    });
   }
 
   // ============================================================
@@ -825,8 +778,7 @@ class _ComplaintListScreenState
           width: 76,
           height: 76,
           decoration: BoxDecoration(
-            color: AppColors.lightBlue
-                .withValues(alpha: 0.10),
+            color: AppColors.lightBlue.withValues(alpha: 0.10),
             shape: BoxShape.circle,
           ),
           child: const Icon(
@@ -860,9 +812,7 @@ class _ComplaintListScreenState
           style: TextStyle(
             fontSize: 13,
             height: 1.4,
-            color: Colors.black.withValues(
-              alpha: 0.52,
-            ),
+            color: Colors.black.withValues(alpha: 0.52),
           ),
         ),
       ],
@@ -875,8 +825,7 @@ class _ComplaintListScreenState
 
   Widget _buildErrorState() {
     final message =
-        controller.errorMessage.value ??
-            'Unable to load your complaints.';
+        controller.errorMessage.value ?? 'Unable to load your complaints.';
 
     // Rendered below the always-visible
     // status filter; no own scroll view.
@@ -888,9 +837,7 @@ class _ComplaintListScreenState
           width: 76,
           height: 76,
           decoration: BoxDecoration(
-            color: Colors.redAccent.withValues(
-              alpha: 0.10,
-            ),
+            color: Colors.redAccent.withValues(alpha: 0.10),
             shape: BoxShape.circle,
           ),
           child: const Icon(
@@ -920,9 +867,7 @@ class _ComplaintListScreenState
           style: TextStyle(
             fontSize: 12,
             height: 1.45,
-            color: Colors.black.withValues(
-              alpha: 0.55,
-            ),
+            color: Colors.black.withValues(alpha: 0.55),
           ),
         ),
 
@@ -931,27 +876,15 @@ class _ComplaintListScreenState
         Center(
           child: ElevatedButton.icon(
             onPressed: controller.loadComplaints,
-            icon: const Icon(
-              Icons.refresh_rounded,
-              size: 18,
-            ),
-            label: Text(
-              'retry'.tr,
-            ),
+            icon: const Icon(Icons.refresh_rounded, size: 18),
+            label: Text('retry'.tr),
             style: ElevatedButton.styleFrom(
-              backgroundColor:
-                  AppColors.buttonEnd,
+              backgroundColor: AppColors.buttonEnd,
               foregroundColor: Colors.white,
               elevation: 0,
-              padding:
-                  const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 12,
-              ),
-              shape:
-                  RoundedRectangleBorder(
-                borderRadius:
-                    BorderRadius.circular(30),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
               ),
             ),
           ),

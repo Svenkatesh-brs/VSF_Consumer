@@ -9,6 +9,7 @@ import '../providers/pay_emi_provider.dart';
 import '../models/pay_emi_model.dart';
 import '../services/pay_emi_qr_service.dart';
 import '../utils/app_colors.dart';
+import '../utils/app_responsive.dart';
 import '../utils/app_theme.dart';
 import '../widgets/app_background.dart';
 import '../widgets/common/app_card.dart';
@@ -96,15 +97,17 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
           parent: BouncingScrollPhysics(),
         ),
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildQrCard(context),
-            const SizedBox(height: 22),
-            _buildContactNumbersSection(),
-            const SizedBox(height: 22),
-            _buildInstructionsCard(),
-          ],
+        child: AppResponsive.constrainedContent(
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildQrCard(context),
+              const SizedBox(height: 22),
+              _buildContactNumbersSection(),
+              const SizedBox(height: 22),
+              _buildInstructionsCard(),
+            ],
+          ),
         ),
       ),
     );
@@ -169,11 +172,7 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
     final files = controller.files;
 
     if (files.isEmpty) {
-      return SizedBox(
-        width: 230,
-        height: 230,
-        child: _buildQrUnavailable(),
-      );
+      return SizedBox(width: 230, height: 230, child: _buildQrUnavailable());
     }
 
     if (files.length == 1) {
@@ -235,11 +234,8 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
                 child: _buildQrImageFrame(
                   image: image,
                   onTap: image != null && image.isNotEmpty
-                      ? () => _showEnlargedQrDialog(
-                            context,
-                            files[index],
-                            image,
-                          )
+                      ? () =>
+                            _showEnlargedQrDialog(context, files[index], image)
                       : null,
                 ),
               );
@@ -247,14 +243,11 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
           ),
         ),
         const SizedBox(height: 10),
-        Obx(
-          () {
-            final index = controller.selectedQrIndex.value;
-            final currentFile =
-                index < files.length ? files[index] : files.first;
-            return _buildQrMetadata(currentFile);
-          },
-        ),
+        Obx(() {
+          final index = controller.selectedQrIndex.value;
+          final currentFile = index < files.length ? files[index] : files.first;
+          return _buildQrMetadata(currentFile);
+        }),
         const SizedBox(height: 10),
         Text(
           'swipe_qr_codes'.trParams({'count': '${files.length}'}),
@@ -270,9 +263,7 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
       decoration: BoxDecoration(
         color: AppColors.tintColor,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: AppColors.primary.withValues(alpha: 0.25),
-        ),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.25)),
       ),
       child: Text(
         name,
@@ -285,10 +276,7 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
     );
   }
 
-  Widget _buildQrImageFrame({
-    required Uint8List? image,
-    VoidCallback? onTap,
-  }) {
+  Widget _buildQrImageFrame({required Uint8List? image, VoidCallback? onTap}) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -301,10 +289,7 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
           decoration: BoxDecoration(
             color: AppColors.white,
             borderRadius: BorderRadius.circular(22),
-            border: Border.all(
-              color: AppColors.tintColor,
-              width: 1.5,
-            ),
+            border: Border.all(color: AppColors.tintColor, width: 1.5),
             boxShadow: [
               BoxShadow(
                 color: AppColors.lightBlack.withValues(alpha: 0.07),
@@ -375,9 +360,7 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
       decoration: BoxDecoration(
         color: AppColors.tintColor.withValues(alpha: 0.45),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: AppColors.primary.withValues(alpha: 0.25),
-        ),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.25)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -595,18 +578,12 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
                   decoration: BoxDecoration(
                     color: AppColors.white,
                     borderRadius: BorderRadius.circular(18),
-                    border: Border.all(
-                      color: AppColors.tintColor,
-                      width: 1.5,
-                    ),
+                    border: Border.all(color: AppColors.tintColor, width: 1.5),
                   ),
                   child: InteractiveViewer(
                     minScale: 0.8,
                     maxScale: 3.5,
-                    child: Image.memory(
-                      image,
-                      fit: BoxFit.contain,
-                    ),
+                    child: Image.memory(image, fit: BoxFit.contain),
                   ),
                 ),
                 const SizedBox(height: 14),
@@ -1012,8 +989,8 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
               children: [
                 Lottie.asset(
                   'assets/animations/pay_emi_loading.json',
-                  width: 320,
-                  height: 320,
+                  width: AppResponsive.animationSize(context, 320),
+                  height: AppResponsive.animationSize(context, 320),
                   fit: BoxFit.contain,
                   repeat: true,
                 ),
@@ -1055,67 +1032,69 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
     return Center(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(28),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 76,
-              height: 76,
-              decoration: BoxDecoration(
-                color: AppColors.error.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: const Icon(
-                Icons.cloud_off_rounded,
-                color: AppColors.error,
-                size: 36,
-              ),
-            ),
-            const SizedBox(height: 18),
-            Text(
-              'unable_load_payment_details'.tr,
-              textAlign: TextAlign.center,
-              style: AppTheme.style.copyWith(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: AppColors.lightBlue,
-              ),
-            ),
-            const SizedBox(height: 7),
-            Text(
-              controller.errorMessage.value,
-              textAlign: TextAlign.center,
-              style: AppTheme.style.copyWith(
-                fontSize: 12,
-                color: AppColors.hint,
-                height: 1.4,
-              ),
-            ),
-            const SizedBox(height: 20),
-            SizedBox(
-              height: 46,
-              child: ElevatedButton.icon(
-                onPressed: controller.retry,
-                icon: const Icon(Icons.refresh_rounded, size: 19),
-                label: Text(
-                  'retry'.tr,
-                  style: AppTheme.style.copyWith(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                  ),
+        child: AppResponsive.constrainedContent(
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 76,
+                height: 76,
+                decoration: BoxDecoration(
+                  color: AppColors.error.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(24),
                 ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.secondary,
-                  foregroundColor: AppColors.white,
-                  elevation: 0,
-                  padding: const EdgeInsets.symmetric(horizontal: 22),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
+                child: const Icon(
+                  Icons.cloud_off_rounded,
+                  color: AppColors.error,
+                  size: 36,
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: 18),
+              Text(
+                'unable_load_payment_details'.tr,
+                textAlign: TextAlign.center,
+                style: AppTheme.style.copyWith(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.lightBlue,
+                ),
+              ),
+              const SizedBox(height: 7),
+              Text(
+                controller.errorMessage.value,
+                textAlign: TextAlign.center,
+                style: AppTheme.style.copyWith(
+                  fontSize: 12,
+                  color: AppColors.hint,
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                height: 46,
+                child: ElevatedButton.icon(
+                  onPressed: controller.retry,
+                  icon: const Icon(Icons.refresh_rounded, size: 19),
+                  label: Text(
+                    'retry'.tr,
+                    style: AppTheme.style.copyWith(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.secondary,
+                    foregroundColor: AppColors.white,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(horizontal: 22),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

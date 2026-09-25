@@ -18,6 +18,7 @@ import '../models/transactions_model.dart';
 import '../providers/loan_dashboard_provider.dart';
 import '../services/receipt_pdf_service.dart';
 import '../utils/app_colors.dart';
+import '../utils/app_responsive.dart';
 import '../widgets/app_background.dart';
 import '../widgets/app_submit_button.dart';
 
@@ -25,14 +26,11 @@ class ReceiptPreviewScreen extends StatefulWidget {
   const ReceiptPreviewScreen({super.key});
 
   @override
-  State<ReceiptPreviewScreen> createState() =>
-      _ReceiptPreviewScreenState();
+  State<ReceiptPreviewScreen> createState() => _ReceiptPreviewScreenState();
 }
 
-class _ReceiptPreviewScreenState
-    extends State<ReceiptPreviewScreen> {
-  final LoanDashboardProvider controller =
-      Get.find<LoanDashboardProvider>();
+class _ReceiptPreviewScreenState extends State<ReceiptPreviewScreen> {
+  final LoanDashboardProvider controller = Get.find<LoanDashboardProvider>();
 
   final ReceiptPdfService _pdfService = ReceiptPdfService();
 
@@ -55,8 +53,7 @@ class _ReceiptPreviewScreenState
   void initState() {
     super.initState();
 
-    final transaction =
-        _resolveTransaction() ?? _fallbackTransaction();
+    final transaction = _resolveTransaction() ?? _fallbackTransaction();
 
     receipt = _buildReceipt(transaction);
   }
@@ -83,32 +80,22 @@ class _ReceiptPreviewScreenState
     );
   }
 
-  ReceiptModel _buildReceipt(
-    LoanTransaction transaction,
-  ) {
+  ReceiptModel _buildReceipt(LoanTransaction transaction) {
     final details = controller.loanDetails.value;
     final dashboard = controller.dashboard.value;
     final borrower = details?.borrower;
 
     return ReceiptModel.fromTransaction(
       transaction,
-      dateText:
-          controller.formatDateMs(transaction.dateMs),
-      customerName: _firstNonEmpty([
-        borrower?.name,
-        dashboard?.borrowerName,
-      ]),
+      dateText: controller.formatDateMs(transaction.dateMs),
+      customerName: _firstNonEmpty([borrower?.name, dashboard?.borrowerName]),
       customerPhone: borrower?.phone ?? '',
       vehicleNumber: _firstNonEmpty([
         details?.asset?.registrationNumber,
         dashboard?.vehicleNumber,
       ]),
-      agreementNo: _firstNonEmpty([
-        details?.loanNo,
-        dashboard?.loanNo,
-      ]),
-      agreementDateText: controller
-          .formatDateMs(details?.agreementDateMs),
+      agreementNo: _firstNonEmpty([details?.loanNo, dashboard?.loanNo]),
+      agreementDateText: controller.formatDateMs(details?.agreementDateMs),
     );
   }
 
@@ -151,10 +138,7 @@ class _ReceiptPreviewScreenState
       final bytes = await _pdfService.buildPdf(receipt);
       final fileName = _pdfService.fileNameFor(receipt);
 
-      final savedLocation = await _pdfService.saveToDownloads(
-        bytes,
-        fileName,
-      );
+      final savedLocation = await _pdfService.saveToDownloads(bytes, fileName);
 
       if (!mounted) {
         return;
@@ -165,8 +149,7 @@ class _ReceiptPreviewScreenState
         'file_saved_to'.trParams({'file': fileName, 'location': savedLocation}),
         snackPosition: SnackPosition.BOTTOM,
         margin: const EdgeInsets.all(16),
-        backgroundColor:
-            Colors.white.withValues(alpha: 0.96),
+        backgroundColor: Colors.white.withValues(alpha: 0.96),
         colorText: AppColors.lightBlue,
         duration: const Duration(seconds: 3),
       );
@@ -233,10 +216,7 @@ class _ReceiptPreviewScreenState
     try {
       final bytes = await _pdfService.buildPdf(receipt);
 
-      await _pdfService.shareReceipt(
-        bytes,
-        _pdfService.fileNameFor(receipt),
-      );
+      await _pdfService.shareReceipt(bytes, _pdfService.fileNameFor(receipt));
     } catch (_) {
       Get.snackbar(
         'receipt'.tr,
@@ -290,9 +270,7 @@ class _ReceiptPreviewScreenState
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.75),
               shape: BoxShape.circle,
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.65),
-              ),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.65)),
             ),
             child: IconButton(
               padding: EdgeInsets.zero,
@@ -309,8 +287,7 @@ class _ReceiptPreviewScreenState
 
           Expanded(
             child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'receipt'.tr,
@@ -351,42 +328,43 @@ class _ReceiptPreviewScreenState
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.10),
-              blurRadius: 24,
-              offset: const Offset(0, 10),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment:
-              CrossAxisAlignment.stretch,
-          children: [
-            _receiptHeader(),
+      child: AppResponsive.constrainedContent(
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.10),
+                blurRadius: 24,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _receiptHeader(),
 
-            _receiptDivider(),
+              _receiptDivider(),
 
-            _receiptDetails(),
+              _receiptDetails(),
 
-            _receiptDivider(),
+              _receiptDivider(),
 
-            _receiptItemsTable(),
+              _receiptItemsTable(),
 
-            const SizedBox(height: 14),
+              const SizedBox(height: 14),
 
-            _receiptTotalBlock(),
+              _receiptTotalBlock(),
 
-            const SizedBox(height: 22),
+              const SizedBox(height: 22),
 
-            _receiptFooter(),
-          ],
+              _receiptFooter(),
+            ],
+          ),
         ),
       ),
     );
@@ -411,8 +389,7 @@ class _ReceiptPreviewScreenState
               width: 46,
               height: 46,
               decoration: BoxDecoration(
-                color: AppColors.lightBlue
-                    .withValues(alpha: 0.08),
+                color: AppColors.lightBlue.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Icon(
@@ -428,8 +405,7 @@ class _ReceiptPreviewScreenState
 
         Expanded(
           child: Column(
-            crossAxisAlignment:
-                CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 ReceiptModel.companyName,
@@ -460,15 +436,11 @@ class _ReceiptPreviewScreenState
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 9,
-                vertical: 4,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(100),
                 border: Border.all(
-                  color: AppColors.lightBlue
-                      .withValues(alpha: 0.35),
+                  color: AppColors.lightBlue.withValues(alpha: 0.35),
                 ),
               ),
               child: Text(
@@ -537,21 +509,22 @@ class _ReceiptPreviewScreenState
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: _detailCell(
-                'date'.tr,
-                receipt.dateText,
-              ),
-            ),
+            Expanded(child: _detailCell('date'.tr, receipt.dateText)),
 
             const SizedBox(width: 14),
 
-            Expanded(
-              child: _detailCell(
-                'voucher_no'.tr,
-                receipt.voucherNo,
-              ),
-            ),
+            Expanded(child: _detailCell('voucher_no'.tr, receipt.voucherNo)),
+          ],
+        ),
+
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(child: _detailCell('customer'.tr, receipt.customerName)),
+
+            const SizedBox(width: 14),
+
+            Expanded(child: _detailCell('vehicle'.tr, receipt.vehicleNumber)),
           ],
         ),
 
@@ -559,40 +532,13 @@ class _ReceiptPreviewScreenState
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: _detailCell(
-                'customer'.tr,
-                receipt.customerName,
-              ),
+              child: _detailCell('instrument_no'.tr, receipt.instrumentNo),
             ),
 
             const SizedBox(width: 14),
 
             Expanded(
-              child: _detailCell(
-                'vehicle'.tr,
-                receipt.vehicleNumber,
-              ),
-            ),
-          ],
-        ),
-
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: _detailCell(
-                'instrument_no'.tr,
-                receipt.instrumentNo,
-              ),
-            ),
-
-            const SizedBox(width: 14),
-
-            Expanded(
-              child: _detailCell(
-                'agreement_no'.tr,
-                receipt.agreementNo,
-              ),
+              child: _detailCell('agreement_no'.tr, receipt.agreementNo),
             ),
           ],
         ),
@@ -610,10 +556,7 @@ class _ReceiptPreviewScreenState
             const SizedBox(width: 14),
 
             Expanded(
-              child: _detailCell(
-                'customer_phone'.tr,
-                receipt.customerPhone,
-              ),
+              child: _detailCell('customer_phone'.tr, receipt.customerPhone),
             ),
           ],
         ),
@@ -621,8 +564,7 @@ class _ReceiptPreviewScreenState
     );
   }
 
-  Widget _tableHeaderText(String text,
-      {bool right = false}) {
+  Widget _tableHeaderText(String text, {bool right = false}) {
     return Text(
       text,
       textAlign: right ? TextAlign.right : TextAlign.left,
@@ -645,8 +587,7 @@ class _ReceiptPreviewScreenState
       textAlign: right ? TextAlign.right : TextAlign.left,
       style: TextStyle(
         fontSize: 11,
-        fontWeight:
-            bold ? FontWeight.w800 : FontWeight.w500,
+        fontWeight: bold ? FontWeight.w800 : FontWeight.w500,
         color: color ?? const Color(0xDD000000),
       ),
     );
@@ -657,14 +598,11 @@ class _ReceiptPreviewScreenState
 
     final rows = <TableRow>[
       TableRow(
-        decoration:
-            const BoxDecoration(color: headerColor),
+        decoration: const BoxDecoration(color: headerColor),
         children: [
           _tablePadding(_tableHeaderText('#')),
           _tablePadding(_tableHeaderText('collection_type'.tr)),
-          _tablePadding(
-            _tableHeaderText('amount'.tr, right: true),
-          ),
+          _tablePadding(_tableHeaderText('amount'.tr, right: true)),
         ],
       ),
 
@@ -677,12 +615,8 @@ class _ReceiptPreviewScreenState
                 : Colors.white,
           ),
           children: [
-            _tablePadding(
-              _tableCellText('${i + 1}'),
-            ),
-            _tablePadding(
-              _tableCellText(receipt.items[i].label),
-            ),
+            _tablePadding(_tableCellText('${i + 1}')),
+            _tablePadding(_tableCellText(receipt.items[i].label)),
             _tablePadding(
               _tableCellText(
                 '₹${ReceiptModel.formatAmount(receipt.items[i].amount)}',
@@ -694,14 +628,10 @@ class _ReceiptPreviewScreenState
 
       // TOTAL row inside the table frame.
       TableRow(
-        decoration: BoxDecoration(
-          color: Colors.black.withValues(alpha: 0.06),
-        ),
+        decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.06)),
         children: [
           _tablePadding(const Text('')),
-          _tablePadding(
-            _tableCellText('total'.tr, bold: true),
-          ),
+          _tablePadding(_tableCellText('total'.tr, bold: true)),
           _tablePadding(
             _tableCellText(
               '₹${ReceiptModel.formatAmount(receipt.totalAmount)}',
@@ -724,35 +654,27 @@ class _ReceiptPreviewScreenState
         color: Colors.black.withValues(alpha: 0.25),
         width: 0.6,
       ),
-      defaultVerticalAlignment:
-          TableCellVerticalAlignment.middle,
+      defaultVerticalAlignment: TableCellVerticalAlignment.middle,
       children: rows,
     );
   }
 
   Widget _tablePadding(Widget child) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 8,
-        vertical: 8,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       child: child,
     );
   }
 
   Widget _receiptTotalBlock() {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 14,
-        vertical: 12,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
         color: AppColors.lightBlue.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
-        mainAxisAlignment:
-            MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             'total_amount_received'.tr,
@@ -778,8 +700,7 @@ class _ReceiptPreviewScreenState
     );
   }
 
-  Widget _signatureArea(String label,
-      {bool alignRight = false}) {
+  Widget _signatureArea(String label, {bool alignRight = false}) {
     return SizedBox(
       width: 140,
       child: Column(
@@ -787,10 +708,7 @@ class _ReceiptPreviewScreenState
             ? CrossAxisAlignment.end
             : CrossAxisAlignment.start,
         children: [
-          Container(
-            height: 0.8,
-            color: Colors.black.withValues(alpha: 0.35),
-          ),
+          Container(height: 0.8, color: Colors.black.withValues(alpha: 0.35)),
 
           const SizedBox(height: 5),
 
@@ -814,15 +732,11 @@ class _ReceiptPreviewScreenState
         const SizedBox(height: 38),
 
         Row(
-          mainAxisAlignment:
-              MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             _signatureArea('customer_signature'.tr),
 
-            _signatureArea(
-              'For ${ReceiptModel.companyName}',
-              alignRight: true,
-            ),
+            _signatureArea('For ${ReceiptModel.companyName}', alignRight: true),
           ],
         ),
 
@@ -861,9 +775,7 @@ class _ReceiptPreviewScreenState
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.85),
               borderRadius: BorderRadius.circular(100),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.65),
-              ),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.65)),
             ),
             child: IconButton(
               padding: EdgeInsets.zero,
@@ -880,6 +792,7 @@ class _ReceiptPreviewScreenState
           Expanded(
             child: AppSubmitButton(
               label: 'download_pdf'.tr,
+              sf: AppResponsive.scale(context),
               isLoading: _isDownloading,
               onTap: _downloadPdf,
             ),

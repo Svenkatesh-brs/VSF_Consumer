@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../providers/language_selection_provider.dart';
 import '../routes/app_routes.dart';
 import '../utils/app_colors.dart';
+import '../utils/app_responsive.dart';
 import '../widgets/app_background.dart';
 
 class LanguageSelectionScreen extends StatefulWidget {
@@ -141,43 +142,49 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
         child: SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(22, 24, 22, 28),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _reveal(
-                  begin: 0.0,
-                  end: 0.38,
-                  offset: const Offset(0, -0.12),
-                  child: _buildBrandMark(),
-                ),
-                const SizedBox(height: 26),
-                _reveal(begin: 0.12, end: 0.5, child: _buildHeading()),
-                const SizedBox(height: 26),
-                ..._languages.asMap().entries.map(
-                  (entry) => Padding(
-                    padding: EdgeInsets.only(
-                      bottom: entry.key == _languages.length - 1 ? 0 : 12,
-                    ),
-                    child: _reveal(
-                      begin: 0.28 + (entry.key * 0.09),
-                      end: 0.65 + (entry.key * 0.09),
-                      child: _buildLanguageTile(entry.value),
+            child: AppResponsive.constrainedContent(
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _reveal(
+                    begin: 0.0,
+                    end: 0.38,
+                    offset: const Offset(0, -0.12),
+                    child: _buildBrandMark(),
+                  ),
+                  const SizedBox(height: 26),
+                  _reveal(begin: 0.12, end: 0.5, child: _buildHeading()),
+                  const SizedBox(height: 26),
+                  ..._languages.asMap().entries.map(
+                    (entry) => Padding(
+                      padding: EdgeInsets.only(
+                        bottom: entry.key == _languages.length - 1 ? 0 : 12,
+                      ),
+                      child: _reveal(
+                        begin: 0.28 + (entry.key * 0.09),
+                        end: 0.65 + (entry.key * 0.09),
+                        child: _buildLanguageTile(entry.value),
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 30),
-                _reveal(begin: 0.62, end: 0.96, child: _buildContinueButton()),
-                const SizedBox(height: 15),
-                _reveal(
-                  begin: 0.72,
-                  end: 1.0,
-                  child: Text(
-                    'change_language_later'.tr,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 11, color: Colors.black45),
+                  const SizedBox(height: 30),
+                  _reveal(
+                    begin: 0.62,
+                    end: 0.96,
+                    child: _buildContinueButton(),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 15),
+                  _reveal(
+                    begin: 0.72,
+                    end: 1.0,
+                    child: Text(
+                      'change_language_later'.tr,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 11, color: Colors.black45),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

@@ -5,6 +5,7 @@ import '../widgets/common/app_loading.dart';
 import '../models/emi_schedule_model.dart';
 import '../providers/loan_dashboard_provider.dart';
 import '../utils/app_colors.dart';
+import '../utils/app_responsive.dart';
 import '../widgets/app_background.dart';
 import '../widgets/common/screen_content_exit.dart';
 import '../widgets/common/screen_transition.dart';
@@ -519,7 +520,7 @@ class _EmiScheduleScreenState extends State<EmiScheduleScreen> {
                   borderRadius: BorderRadius.circular(100),
                 ),
                 child: Text(
-                    (emi.daysOverdue == 1 ? 'day_overdue' : 'days_overdue')
+                  (emi.daysOverdue == 1 ? 'day_overdue' : 'days_overdue')
                       .trParams({'count': emi.daysOverdue.toString()}),
                   style: const TextStyle(
                     fontSize: 8.5,
@@ -556,7 +557,10 @@ class _EmiScheduleScreenState extends State<EmiScheduleScreen> {
           value: _formatAmount(emi.principalOutstanding),
         ),
       // _buildInfoRow(label: 'LPC Due', value: _formatAmount(emi.lpcDue)),
-      _buildInfoRow(label: 'total_paid'.tr, value: _formatAmount(emi.totalPaid)),
+      _buildInfoRow(
+        label: 'total_paid'.tr,
+        value: _formatAmount(emi.totalPaid),
+      ),
       _buildInfoRow(
         label: 'remaining'.tr,
         value: _formatAmount(emi.remainingAmount),
@@ -845,8 +849,14 @@ class _EmiScheduleScreenState extends State<EmiScheduleScreen> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _summaryMetric(value: '${schedule.totalCount}', label: 'total_metric'.tr),
-              _summaryMetric(value: '${schedule.paidCount}', label: 'paid_metric'.tr),
+              _summaryMetric(
+                value: '${schedule.totalCount}',
+                label: 'total_metric'.tr,
+              ),
+              _summaryMetric(
+                value: '${schedule.paidCount}',
+                label: 'paid_metric'.tr,
+              ),
               _summaryMetric(
                 value: '${schedule.upcomingCount}',
                 label: 'upcoming_metric'.tr,
@@ -867,7 +877,7 @@ class _EmiScheduleScreenState extends State<EmiScheduleScreen> {
               ),
               child: Text(
                 (schedule.overdueCount == 1 ? 'emi_overdue' : 'emis_overdue')
-                  .trParams({'count': schedule.overdueCount.toString()}),
+                    .trParams({'count': schedule.overdueCount.toString()}),
                 style: const TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
@@ -915,13 +925,16 @@ class _EmiScheduleScreenState extends State<EmiScheduleScreen> {
     }
 
     final parts = <String>[
-      if (schedule.paidCount > 0) 'paid_summary'.trParams({'count': '${schedule.paidCount}'}),
-      if (schedule.overdueCount > 0) 'overdue_summary'.trParams({'count': '${schedule.overdueCount}'}),
-      if (schedule.upcomingCount > 0) 'upcoming_summary'.trParams({'count': '${schedule.upcomingCount}'}),
+      if (schedule.paidCount > 0)
+        'paid_summary'.trParams({'count': '${schedule.paidCount}'}),
+      if (schedule.overdueCount > 0)
+        'overdue_summary'.trParams({'count': '${schedule.overdueCount}'}),
+      if (schedule.upcomingCount > 0)
+        'upcoming_summary'.trParams({'count': '${schedule.upcomingCount}'}),
     ];
 
     if (parts.isEmpty) {
-        return (schedule.totalCount == 1 ? 'record_summary' : 'records_summary')
+      return (schedule.totalCount == 1 ? 'record_summary' : 'records_summary')
           .trParams({'count': '${schedule.totalCount}'});
     }
 
@@ -976,114 +989,117 @@ class _EmiScheduleScreenState extends State<EmiScheduleScreen> {
                   parent: BouncingScrollPhysics(),
                 ),
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
-                child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // ============================================
-                  // HEADER
-                  // ENTRY LEFT - 0ms
-                  // EXIT RIGHT - 0ms
-                  // ============================================
+                child: AppResponsive.constrainedContent(
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // ============================================
+                      // HEADER
+                      // ENTRY LEFT - 0ms
+                      // EXIT RIGHT - 0ms
+                      // ============================================
 
-                  ScreenContentExit(
-                    isExiting: _isExiting,
-                    direction: ContentExitDirection.toRight,
-                    delay: Duration.zero,
-                    child: ScreenContentTransition(
-                      direction: ContentTransitionDirection.fromLeft,
-                      delay: Duration.zero,
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 42,
-                            height: 42,
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.75),
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.65),
-                              ),
-                            ),
-                            child: IconButton(
-                              padding: EdgeInsets.zero,
-                              onPressed: _goBack,
-                              icon: const Icon(
-                                Icons.arrow_back_rounded,
-                                size: 21,
-                                color: AppColors.lightBlue,
-                              ),
-                            ),
-                          ),
-
-                          const SizedBox(width: 14),
-
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'emi_schedule'.tr,
-                                  style: TextStyle(
-                                    fontSize: 23,
-                                    fontWeight: FontWeight.w700,
+                      ScreenContentExit(
+                        isExiting: _isExiting,
+                        direction: ContentExitDirection.toRight,
+                        delay: Duration.zero,
+                        child: ScreenContentTransition(
+                          direction: ContentTransitionDirection.fromLeft,
+                          delay: Duration.zero,
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 42,
+                                height: 42,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.75),
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Colors.white.withValues(alpha: 0.65),
+                                  ),
+                                ),
+                                child: IconButton(
+                                  padding: EdgeInsets.zero,
+                                  onPressed: _goBack,
+                                  icon: const Icon(
+                                    Icons.arrow_back_rounded,
+                                    size: 21,
                                     color: AppColors.lightBlue,
                                   ),
                                 ),
+                              ),
 
-                                const SizedBox(height: 2),
+                              const SizedBox(width: 14),
 
-                                Text(
-                                  _buildSubtitle(schedule),
-                                  style: const TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.black45,
-                                  ),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'emi_schedule'.tr,
+                                      style: TextStyle(
+                                        fontSize: 23,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.lightBlue,
+                                      ),
+                                    ),
+
+                                    const SizedBox(height: 2),
+
+                                    Text(
+                                      _buildSubtitle(schedule),
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.black45,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ),
 
-                  const SizedBox(height: 24),
+                      const SizedBox(height: 24),
 
-                  // ============================================
-                  // SCHEDULE
-                  // ENTRY LEFT - 80ms
-                  // EXIT RIGHT - 80ms
-                  // ============================================
-                  ScreenContentExit(
-                    isExiting: _isExiting,
-                    direction: ContentExitDirection.toRight,
-                    delay: const Duration(milliseconds: 80),
-                    child: ScreenContentTransition(
-                      direction: ContentTransitionDirection.fromLeft,
-                      delay: const Duration(milliseconds: 80),
-                      child: schedule.isEmpty
-                          ? SizedBox(
-                              height: MediaQuery.of(context).size.height * 0.5,
-                              width: double.infinity,
-                              child: _buildEmptyState(),
-                            )
-                          : Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _buildScheduleSummary(schedule),
-                                ..._buildScheduleSections(
-                                  schedule,
-                                  nextUpcomingIndex: nextUpcomingIndex,
+                      // ============================================
+                      // SCHEDULE
+                      // ENTRY LEFT - 80ms
+                      // EXIT RIGHT - 80ms
+                      // ============================================
+                      ScreenContentExit(
+                        isExiting: _isExiting,
+                        direction: ContentExitDirection.toRight,
+                        delay: const Duration(milliseconds: 80),
+                        child: ScreenContentTransition(
+                          direction: ContentTransitionDirection.fromLeft,
+                          delay: const Duration(milliseconds: 80),
+                          child: schedule.isEmpty
+                              ? SizedBox(
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.5,
+                                  width: double.infinity,
+                                  child: _buildEmptyState(),
+                                )
+                              : Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    _buildScheduleSummary(schedule),
+                                    ..._buildScheduleSections(
+                                      schedule,
+                                      nextUpcomingIndex: nextUpcomingIndex,
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                    ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
-          );
+            );
           }),
         ),
       ),

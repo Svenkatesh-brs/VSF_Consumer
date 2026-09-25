@@ -5,6 +5,7 @@ import '../models/contact_update_model.dart';
 import '../providers/contact_update_provider.dart';
 import '../providers/loan_dashboard_provider.dart';
 import '../utils/app_colors.dart';
+import '../utils/app_responsive.dart';
 import '../widgets/app_background.dart';
 import '../widgets/app_form_card.dart';
 import '../widgets/app_submit_button.dart';
@@ -60,12 +61,10 @@ class ContactUpdateScreen extends StatefulWidget {
   const ContactUpdateScreen({super.key});
 
   @override
-  State<ContactUpdateScreen> createState() =>
-      _ContactUpdateScreenState();
+  State<ContactUpdateScreen> createState() => _ContactUpdateScreenState();
 }
 
-class _ContactUpdateScreenState
-    extends State<ContactUpdateScreen>
+class _ContactUpdateScreenState extends State<ContactUpdateScreen>
     with SingleTickerProviderStateMixin {
   late final ContactUpdateProvider contactController;
 
@@ -119,15 +118,11 @@ class _ContactUpdateScreenState
     // fetched once by the Loan Dashboard route.
     // ----------------------------------------------------------
 
-    contactController =
-        Get.find<ContactUpdateProvider>();
+    contactController = Get.find<ContactUpdateProvider>();
 
     loanController = Get.find<LoanDashboardProvider>();
 
-    _tabController = TabController(
-      length: 2,
-      vsync: this,
-    );
+    _tabController = TabController(length: 2, vsync: this);
 
     _phoneController = TextEditingController();
 
@@ -164,27 +159,20 @@ class _ContactUpdateScreenState
     // state). This complements initState's _prefillAddressFields.
     // ----------------------------------------------------------
 
-    ever(
-      contactController.addressUpdateStatus,
-      (status) {
-        if (status == null) {
-          return;
-        }
+    ever(contactController.addressUpdateStatus, (status) {
+      if (status == null) {
+        return;
+      }
 
-        if (status.status ==
-            ContactUpdateStatusMapping.approved ||
-            status.status ==
-                ContactUpdateStatusMapping.rejected) {
-          WidgetsBinding.instance.addPostFrameCallback(
-            (_) {
-              if (mounted) {
-                _refillAddressFields();
-              }
-            },
-          );
-        }
-      },
-    );
+      if (status.status == ContactUpdateStatusMapping.approved ||
+          status.status == ContactUpdateStatusMapping.rejected) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            _refillAddressFields();
+          }
+        });
+      }
+    });
   }
 
   void _onTabChanged() {
@@ -227,8 +215,7 @@ class _ContactUpdateScreenState
   }
 
   void _prefillAddressFields() {
-    final initial =
-        contactController.initialAddressRequest;
+    final initial = contactController.initialAddressRequest;
 
     _addressLine1Controller = TextEditingController(
       text: initial?.addressLine1 ?? '',
@@ -238,33 +225,19 @@ class _ContactUpdateScreenState
       text: initial?.addressLine2 ?? '',
     );
 
-    _landmarkController = TextEditingController(
-      text: initial?.landmark ?? '',
-    );
+    _landmarkController = TextEditingController(text: initial?.landmark ?? '');
 
-    _pincodeController = TextEditingController(
-      text: initial?.pincode ?? '',
-    );
+    _pincodeController = TextEditingController(text: initial?.pincode ?? '');
 
-    _stateController = TextEditingController(
-      text: initial?.state ?? '',
-    );
+    _stateController = TextEditingController(text: initial?.state ?? '');
 
-    _cityController = TextEditingController(
-      text: initial?.city ?? '',
-    );
+    _cityController = TextEditingController(text: initial?.city ?? '');
 
-    _countryController = TextEditingController(
-      text: initial?.country ?? '',
-    );
+    _countryController = TextEditingController(text: initial?.country ?? '');
 
-    _districtController = TextEditingController(
-      text: initial?.district ?? '',
-    );
+    _districtController = TextEditingController(text: initial?.district ?? '');
 
-    _villageController = TextEditingController(
-      text: initial?.village ?? '',
-    );
+    _villageController = TextEditingController(text: initial?.village ?? '');
 
     _houseNumberController = TextEditingController(
       text: initial?.houseNumber ?? '',
@@ -320,8 +293,7 @@ class _ContactUpdateScreenState
   // ------------------------------------------------------------
 
   void _refillAddressFields() {
-    final initial =
-        contactController.initialAddressRequest;
+    final initial = contactController.initialAddressRequest;
 
     if (initial == null) {
       return;
@@ -385,9 +357,7 @@ class _ContactUpdateScreenState
       _isExiting = true;
     });
 
-    await Future.delayed(
-      const Duration(milliseconds: 400),
-    );
+    await Future.delayed(const Duration(milliseconds: 400));
 
     if (!mounted) {
       return;
@@ -406,8 +376,7 @@ class _ContactUpdateScreenState
   Future<void> _submitPhone() async {
     FocusScope.of(context).unfocus();
 
-    final success =
-        await contactController.beginPhoneUpdate(
+    final success = await contactController.beginPhoneUpdate(
       _phoneController.text,
     );
 
@@ -434,8 +403,7 @@ class _ContactUpdateScreenState
     final step = contactController.phoneUpdateStep.value;
 
     if (step == PhoneUpdateStep.verifyCurrentPhone) {
-      final success =
-          await contactController.verifyCurrentPhoneOtp(
+      final success = await contactController.verifyCurrentPhoneOtp(
         _otpController.text,
       );
 
@@ -450,8 +418,7 @@ class _ContactUpdateScreenState
     }
 
     if (step == PhoneUpdateStep.verifyNewPhone) {
-      final success =
-          await contactController.verifyNewPhoneOtp(
+      final success = await contactController.verifyNewPhoneOtp(
         _otpController.text,
       );
 
@@ -483,8 +450,7 @@ class _ContactUpdateScreenState
   // ============================================================
 
   Future<void> _resendPhoneOtp() async {
-    if (_isExiting ||
-        contactController.isLoading.value) {
+    if (_isExiting || contactController.isLoading.value) {
       return;
     }
 
@@ -527,8 +493,7 @@ class _ContactUpdateScreenState
   Future<void> _submitAddress() async {
     FocusScope.of(context).unfocus();
 
-    final initial =
-        contactController.initialAddressRequest;
+    final initial = contactController.initialAddressRequest;
 
     if (initial == null) {
       return;
@@ -548,15 +513,12 @@ class _ContactUpdateScreenState
       houseNumber: _houseNumberController.text.trim(),
       floorNumber: _floorNumberController.text.trim(),
       streetName: _streetNameController.text.trim(),
-      apartmentName:
-          _apartmentNameController.text.trim(),
-      buildingName:
-          _buildingNameController.text.trim(),
+      apartmentName: _apartmentNameController.text.trim(),
+      buildingName: _buildingNameController.text.trim(),
       addressType: _addressTypeController.text.trim(),
     );
 
-    final success =
-        await contactController.updateAddress(request);
+    final success = await contactController.updateAddress(request);
 
     if (!mounted || !success) {
       return;
@@ -588,9 +550,7 @@ class _ContactUpdateScreenState
       margin: const EdgeInsets.all(16),
       borderRadius: 14,
       backgroundColor: Colors.white,
-      colorText: isError
-          ? AppColors.error
-          : Colors.black87,
+      colorText: isError ? AppColors.error : Colors.black87,
     );
   }
 
@@ -611,45 +571,31 @@ class _ContactUpdateScreenState
         return Dialog(
           backgroundColor: Colors.transparent,
           elevation: 0,
-          insetPadding: const EdgeInsets.symmetric(
-            horizontal: 36,
-          ),
+          insetPadding: const EdgeInsets.symmetric(horizontal: 36),
           child: TweenAnimationBuilder<double>(
             tween: Tween(begin: 0.0, end: 1.0),
-            duration: const Duration(
-              milliseconds: 400,
-            ),
+            duration: const Duration(milliseconds: 400),
             curve: Curves.easeOutBack,
             builder: (context, animValue, child) {
-              return Transform.scale(
-                scale: animValue,
-                child: child,
-              );
+              return Transform.scale(scale: animValue, child: child);
             },
             child: Container(
               width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(
-                24, 28, 24, 22,
-              ),
+              padding: const EdgeInsets.fromLTRB(24, 28, 24, 22),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius:
-                    BorderRadius.circular(22),
+                borderRadius: BorderRadius.circular(22),
                 border: Border.all(
-                  color: AppColors.lightBlue
-                      .withValues(alpha: 0.12),
+                  color: AppColors.lightBlue.withValues(alpha: 0.12),
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.lightBlue
-                        .withValues(alpha: 0.10),
+                    color: AppColors.lightBlue.withValues(alpha: 0.10),
                     blurRadius: 30,
                     offset: const Offset(0, 8),
                   ),
                   BoxShadow(
-                    color: Colors.black.withValues(
-                      alpha: 0.05,
-                    ),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 16,
                     offset: const Offset(0, 4),
                   ),
@@ -659,38 +605,23 @@ class _ContactUpdateScreenState
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   TweenAnimationBuilder<double>(
-                    tween: Tween(
-                      begin: 0.0,
-                      end: 1.0,
-                    ),
-                    duration: const Duration(
-                      milliseconds: 600,
-                    ),
+                    tween: Tween(begin: 0.0, end: 1.0),
+                    duration: const Duration(milliseconds: 600),
                     curve: Curves.elasticOut,
-                    builder:
-                        (
-                          context,
-                          iconValue,
-                          child,
-                        ) {
-                          return Transform.scale(
-                            scale: iconValue,
-                            child: child,
-                          );
-                        },
+                    builder: (context, iconValue, child) {
+                      return Transform.scale(scale: iconValue, child: child);
+                    },
                     child: Container(
                       width: 62,
                       height: 62,
                       decoration: BoxDecoration(
-                        color: AppColors.lightBlue
-                            .withValues(alpha: 0.10),
+                        color: AppColors.lightBlue.withValues(alpha: 0.10),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
                         Icons.check_rounded,
                         size: 30,
-                        color:
-                            AppColors.lightBlue,
+                        color: AppColors.lightBlue,
                       ),
                     ),
                   ),
@@ -715,8 +646,7 @@ class _ContactUpdateScreenState
                     style: TextStyle(
                       fontSize: 13,
                       height: 1.5,
-                      color: Colors.black
-                          .withValues(alpha: 0.60),
+                      color: Colors.black.withValues(alpha: 0.60),
                     ),
                   ),
 
@@ -728,39 +658,27 @@ class _ContactUpdateScreenState
                     style: TextStyle(
                       fontSize: 12.5,
                       height: 1.5,
-                      color: Colors.black
-                          .withValues(alpha: 0.45),
+                      color: Colors.black.withValues(alpha: 0.45),
                     ),
                   ),
 
                   const SizedBox(height: 22),
 
                   GestureDetector(
-                    onTap: () =>
-                        Navigator.of(dialogContext)
-                            .pop(),
+                    onTap: () => Navigator.of(dialogContext).pop(),
                     child: Container(
                       width: double.infinity,
-                      padding:
-                          const EdgeInsets.symmetric(
-                            vertical: 13,
-                          ),
+                      padding: const EdgeInsets.symmetric(vertical: 13),
                       decoration: BoxDecoration(
-                        color:
-                            AppColors.lightBlue,
-                        borderRadius:
-                            BorderRadius.circular(
-                              14,
-                            ),
+                        color: AppColors.lightBlue,
+                        borderRadius: BorderRadius.circular(14),
                       ),
                       child: Text(
                         'got_it'.tr,
-                        textAlign:
-                            TextAlign.center,
+                        textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 14,
-                          fontWeight:
-                              FontWeight.w600,
+                          fontWeight: FontWeight.w600,
                           color: Colors.white,
                         ),
                       ),
@@ -792,45 +710,31 @@ class _ContactUpdateScreenState
         return Dialog(
           backgroundColor: Colors.transparent,
           elevation: 0,
-          insetPadding: const EdgeInsets.symmetric(
-            horizontal: 36,
-          ),
+          insetPadding: const EdgeInsets.symmetric(horizontal: 36),
           child: TweenAnimationBuilder<double>(
             tween: Tween(begin: 0.0, end: 1.0),
-            duration: const Duration(
-              milliseconds: 400,
-            ),
+            duration: const Duration(milliseconds: 400),
             curve: Curves.easeOutBack,
             builder: (context, animValue, child) {
-              return Transform.scale(
-                scale: animValue,
-                child: child,
-              );
+              return Transform.scale(scale: animValue, child: child);
             },
             child: Container(
               width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(
-                24, 28, 24, 22,
-              ),
+              padding: const EdgeInsets.fromLTRB(24, 28, 24, 22),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius:
-                    BorderRadius.circular(22),
+                borderRadius: BorderRadius.circular(22),
                 border: Border.all(
-                  color: AppColors.lightBlue
-                      .withValues(alpha: 0.12),
+                  color: AppColors.lightBlue.withValues(alpha: 0.12),
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.lightBlue
-                        .withValues(alpha: 0.10),
+                    color: AppColors.lightBlue.withValues(alpha: 0.10),
                     blurRadius: 30,
                     offset: const Offset(0, 8),
                   ),
                   BoxShadow(
-                    color: Colors.black.withValues(
-                      alpha: 0.05,
-                    ),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 16,
                     offset: const Offset(0, 4),
                   ),
@@ -840,38 +744,23 @@ class _ContactUpdateScreenState
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   TweenAnimationBuilder<double>(
-                    tween: Tween(
-                      begin: 0.0,
-                      end: 1.0,
-                    ),
-                    duration: const Duration(
-                      milliseconds: 600,
-                    ),
+                    tween: Tween(begin: 0.0, end: 1.0),
+                    duration: const Duration(milliseconds: 600),
                     curve: Curves.elasticOut,
-                    builder:
-                        (
-                          context,
-                          iconValue,
-                          child,
-                        ) {
-                          return Transform.scale(
-                            scale: iconValue,
-                            child: child,
-                          );
-                        },
+                    builder: (context, iconValue, child) {
+                      return Transform.scale(scale: iconValue, child: child);
+                    },
                     child: Container(
                       width: 62,
                       height: 62,
                       decoration: BoxDecoration(
-                        color: AppColors.lightBlue
-                            .withValues(alpha: 0.10),
+                        color: AppColors.lightBlue.withValues(alpha: 0.10),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
                         Icons.phone_android_rounded,
                         size: 30,
-                        color:
-                            AppColors.lightBlue,
+                        color: AppColors.lightBlue,
                       ),
                     ),
                   ),
@@ -896,8 +785,7 @@ class _ContactUpdateScreenState
                     style: TextStyle(
                       fontSize: 13,
                       height: 1.5,
-                      color: Colors.black
-                          .withValues(alpha: 0.60),
+                      color: Colors.black.withValues(alpha: 0.60),
                     ),
                   ),
 
@@ -909,39 +797,27 @@ class _ContactUpdateScreenState
                     style: TextStyle(
                       fontSize: 12.5,
                       height: 1.5,
-                      color: Colors.black
-                          .withValues(alpha: 0.45),
+                      color: Colors.black.withValues(alpha: 0.45),
                     ),
                   ),
 
                   const SizedBox(height: 22),
 
                   GestureDetector(
-                    onTap: () =>
-                        Navigator.of(dialogContext)
-                            .pop(),
+                    onTap: () => Navigator.of(dialogContext).pop(),
                     child: Container(
                       width: double.infinity,
-                      padding:
-                          const EdgeInsets.symmetric(
-                            vertical: 13,
-                          ),
+                      padding: const EdgeInsets.symmetric(vertical: 13),
                       decoration: BoxDecoration(
-                        color:
-                            AppColors.lightBlue,
-                        borderRadius:
-                            BorderRadius.circular(
-                              14,
-                            ),
+                        color: AppColors.lightBlue,
+                        borderRadius: BorderRadius.circular(14),
                       ),
                       child: Text(
                         'got_it'.tr,
-                        textAlign:
-                            TextAlign.center,
+                        textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 14,
-                          fontWeight:
-                              FontWeight.w600,
+                          fontWeight: FontWeight.w600,
                           color: Colors.white,
                         ),
                       ),
@@ -970,8 +846,7 @@ class _ContactUpdateScreenState
             isExiting: _isExiting,
             direction: ContentExitDirection.toRight,
             child: ScreenContentTransition(
-              direction:
-                  ContentTransitionDirection.fromLeft,
+              direction: ContentTransitionDirection.fromLeft,
               child: Column(
                 children: [
                   _buildHeader(),
@@ -981,11 +856,7 @@ class _ContactUpdateScreenState
                   Expanded(
                     child: TabBarView(
                       controller: _tabController,
-                      children: [
-                        _buildPhoneTab(),
-
-                        _buildAddressTab(),
-                      ],
+                      children: [_buildPhoneTab(), _buildAddressTab()],
                     ),
                   ),
                 ],
@@ -1003,19 +874,12 @@ class _ContactUpdateScreenState
 
   Widget _buildHeader() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        16,
-        12,
-        20,
-        12,
-      ),
+      padding: const EdgeInsets.fromLTRB(16, 12, 20, 12),
       child: Row(
         children: [
           IconButton(
             onPressed: _goBack,
-            icon: const Icon(
-              Icons.arrow_back_rounded,
-            ),
+            icon: const Icon(Icons.arrow_back_rounded),
             color: AppColors.lightBlue,
           ),
 
@@ -1042,39 +906,24 @@ class _ContactUpdateScreenState
 
   Widget _buildTabs() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        16,
-        4,
-        16,
-        12,
-      ),
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
       child: Container(
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(
-            alpha: 0.58,
-          ),
+          color: Colors.white.withValues(alpha: 0.58),
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: Colors.black.withValues(
-              alpha: 0.06,
-            ),
-          ),
+          border: Border.all(color: Colors.black.withValues(alpha: 0.06)),
         ),
         child: TabBar(
           controller: _tabController,
           dividerColor: Colors.transparent,
           indicatorSize: TabBarIndicatorSize.tab,
           indicator: BoxDecoration(
-            color: Colors.white.withValues(
-              alpha: 0.92,
-            ),
+            color: Colors.white.withValues(alpha: 0.92),
             borderRadius: BorderRadius.circular(14),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(
-                  alpha: 0.06,
-                ),
+                color: Colors.black.withValues(alpha: 0.06),
                 blurRadius: 8,
               ),
             ],
@@ -1095,13 +944,9 @@ class _ContactUpdateScreenState
               child: FittedBox(
                 fit: BoxFit.scaleDown,
                 child: Row(
-                  mainAxisAlignment:
-                      MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
-                      Icons.phone_outlined,
-                      size: 17,
-                    ),
+                    Icon(Icons.phone_outlined, size: 17),
                     SizedBox(width: 7),
                     Text('phone_number'.tr),
                   ],
@@ -1113,13 +958,9 @@ class _ContactUpdateScreenState
               child: FittedBox(
                 fit: BoxFit.scaleDown,
                 child: Row(
-                  mainAxisAlignment:
-                      MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
-                      Icons.home_outlined,
-                      size: 17,
-                    ),
+                    Icon(Icons.home_outlined, size: 17),
                     SizedBox(width: 7),
                     Text('address'.tr),
                   ],
@@ -1140,31 +981,25 @@ class _ContactUpdateScreenState
     return Obx(() {
       _consumeMessages();
 
-      final isSaving =
-          contactController.isLoading.value;
+      final isSaving = contactController.isLoading.value;
 
-      final step =
-          contactController.phoneUpdateStep.value;
+      final step = contactController.phoneUpdateStep.value;
 
-      final currentPhone = loanController
-              .loanDetails.value?.borrower?.phone ??
-          '';
+      final currentPhone =
+          loanController.loanDetails.value?.borrower?.phone ?? '';
 
-      final hasPhoneStatus =
-          contactController.phoneUpdateStatus.value != null;
+      final hasPhoneStatus = contactController.phoneUpdateStatus.value != null;
 
-      final isPhonePending =
-          contactController.isPhoneUpdateLocked;
+      final isPhonePending = contactController.isPhoneUpdateLocked;
 
       final isPhoneFlowActive =
-          hasPhoneStatus ||
-          step != PhoneUpdateStep.enterNewPhone;
+          hasPhoneStatus || step != PhoneUpdateStep.enterNewPhone;
 
       final phoneForm = step == PhoneUpdateStep.enterNewPhone
           ? _buildNewPhoneForm(isSaving)
           : step == PhoneUpdateStep.verifyCurrentPhone
-              ? _buildCurrentPhoneOtpCard(isSaving)
-              : _buildNewPhoneOtpCard(isSaving);
+          ? _buildCurrentPhoneOtpCard(isSaving)
+          : _buildNewPhoneOtpCard(isSaving);
 
       return RefreshIndicator(
         onRefresh: _refreshPhoneTab,
@@ -1173,42 +1008,36 @@ class _ContactUpdateScreenState
           physics: const AlwaysScrollableScrollPhysics(
             parent: BouncingScrollPhysics(),
           ),
-          padding: const EdgeInsets.fromLTRB(
-            20,
-            8,
-            20,
-            28,
-          ),
-          child: Column(
-            crossAxisAlignment:
-                CrossAxisAlignment.start,
-            children: [
-              _buildCurrentContactCard(
-                icon: Icons.phone_outlined,
-                title: 'registered_phone'.tr,
-                rows: [
-                  _buildInfoRow(
-                    label: 'current_number'.tr,
-                    value: currentPhone,
-                  ),
-                ],
-              ),
-
-              if (isPhoneFlowActive) ...[
-                const SizedBox(height: 16),
-                _buildPhoneStatusCard(),
-              ],
-
-              if (isPhonePending) ...[
-                const SizedBox(height: 16),
-                _buildPendingNotice(
-                    message: 'mobile_update_under_review'.tr,
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
+          child: AppResponsive.constrainedContent(
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildCurrentContactCard(
+                  icon: Icons.phone_outlined,
+                  title: 'registered_phone'.tr,
+                  rows: [
+                    _buildInfoRow(
+                      label: 'current_number'.tr,
+                      value: currentPhone,
+                    ),
+                  ],
                 ),
-              ] else ...[
-                const SizedBox(height: 16),
-                phoneForm,
+
+                if (isPhoneFlowActive) ...[
+                  const SizedBox(height: 16),
+                  _buildPhoneStatusCard(),
+                ],
+
+                if (isPhonePending) ...[
+                  const SizedBox(height: 16),
+                  _buildPendingNotice(message: 'mobile_update_under_review'.tr),
+                ] else ...[
+                  const SizedBox(height: 16),
+                  phoneForm,
+                ],
               ],
-            ],
+            ),
           ),
         ),
       );
@@ -1221,6 +1050,7 @@ class _ContactUpdateScreenState
 
   Widget _buildNewPhoneForm(bool isSaving) {
     return AppFormCard(
+      sf: AppResponsive.scale(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1237,15 +1067,14 @@ class _ContactUpdateScreenState
             textInputAction: TextInputAction.done,
             labelText: 'phone_number'.tr,
             hintText: 'ten_digit_mobile'.tr,
-            prefixIcon: const Icon(
-              Icons.phone_outlined,
-            ),
+            prefixIcon: const Icon(Icons.phone_outlined),
           ),
 
           const SizedBox(height: 24),
 
           AppSubmitButton(
             label: 'update_phone'.tr,
+            sf: AppResponsive.scale(context),
             isLoading: isSaving,
             onTap: _submitPhone,
           ),
@@ -1260,6 +1089,7 @@ class _ContactUpdateScreenState
 
   Widget _buildCurrentPhoneOtpCard(bool isSaving) {
     return AppFormCard(
+      sf: AppResponsive.scale(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1275,8 +1105,7 @@ class _ContactUpdateScreenState
             style: TextStyle(
               fontSize: 13,
               height: 1.5,
-              color: Colors.black
-                  .withValues(alpha: 0.60),
+              color: Colors.black.withValues(alpha: 0.60),
             ),
           ),
 
@@ -1288,6 +1117,7 @@ class _ContactUpdateScreenState
 
           AppSubmitButton(
             label: 'verify_otp'.tr,
+            sf: AppResponsive.scale(context),
             isLoading: isSaving,
             onTap: _submitOtp,
           ),
@@ -1306,6 +1136,7 @@ class _ContactUpdateScreenState
 
   Widget _buildNewPhoneOtpCard(bool isSaving) {
     return AppFormCard(
+      sf: AppResponsive.scale(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1321,8 +1152,7 @@ class _ContactUpdateScreenState
             style: TextStyle(
               fontSize: 13,
               height: 1.5,
-              color: Colors.black
-                  .withValues(alpha: 0.60),
+              color: Colors.black.withValues(alpha: 0.60),
             ),
           ),
 
@@ -1334,6 +1164,7 @@ class _ContactUpdateScreenState
 
           AppSubmitButton(
             label: 'verify_otp'.tr,
+            sf: AppResponsive.scale(context),
             isLoading: isSaving,
             onTap: _submitOtp,
           ),
@@ -1357,9 +1188,7 @@ class _ContactUpdateScreenState
       textInputAction: TextInputAction.done,
       labelText: 'otp'.tr,
       hintText: 'otp_six_digit'.tr,
-      prefixIcon: const Icon(
-        Icons.verified_outlined,
-      ),
+      prefixIcon: const Icon(Icons.verified_outlined),
     );
   }
 
@@ -1369,11 +1198,9 @@ class _ContactUpdateScreenState
 
   Widget _buildResendOtpRow() {
     return Obx(() {
-      final countdown =
-          contactController.otpCountdown.value;
+      final countdown = contactController.otpCountdown.value;
 
-      final canResend =
-          contactController.canResendOtp.value;
+      final canResend = contactController.canResendOtp.value;
 
       return Center(
         child: canResend
@@ -1383,10 +1210,7 @@ class _ContactUpdateScreenState
               )
             : Text(
                 'resend_otp_in'.trParams({'count': countdown.toString()}),
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Colors.black54,
-                ),
+                style: const TextStyle(fontSize: 14, color: Colors.black54),
               ),
       );
     });
@@ -1400,14 +1224,12 @@ class _ContactUpdateScreenState
     return Obx(() {
       _consumeMessages();
 
-      final isSaving =
-          contactController.isLoading.value;
+      final isSaving = contactController.isLoading.value;
 
       final hasAddressStatus =
           contactController.addressUpdateStatus.value != null;
 
-      final isAddressPending =
-          contactController.isAddressUpdateLocked;
+      final isAddressPending = contactController.isAddressUpdateLocked;
 
       return RefreshIndicator(
         onRefresh: _refreshAddressTab,
@@ -1416,36 +1238,32 @@ class _ContactUpdateScreenState
           physics: const AlwaysScrollableScrollPhysics(
             parent: BouncingScrollPhysics(),
           ),
-          padding: const EdgeInsets.fromLTRB(
-            20,
-            8,
-            20,
-            28,
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
+          child: AppResponsive.constrainedContent(
+            contactController.hasAddress
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildSavedAddressCard(),
+
+                      if (hasAddressStatus) ...[
+                        const SizedBox(height: 16),
+                        _buildAddressStatusCard(),
+                      ],
+
+                      if (isAddressPending) ...[
+                        const SizedBox(height: 16),
+                        _buildPendingNotice(
+                          message: 'address_update_under_review'.tr,
+                        ),
+                      ] else ...[
+                        const SizedBox(height: 16),
+                        _buildAddressForm(isSaving),
+                      ],
+                    ],
+                  )
+                : _buildNoAddressCard(),
           ),
-          child: contactController.hasAddress
-            ? Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.start,
-                children: [
-                  _buildSavedAddressCard(),
-
-                  if (hasAddressStatus) ...[
-                    const SizedBox(height: 16),
-                    _buildAddressStatusCard(),
-                  ],
-
-                  if (isAddressPending) ...[
-                    const SizedBox(height: 16),
-                    _buildPendingNotice(
-                        message: 'address_update_under_review'.tr,
-                    ),
-                  ] else ...[
-                    const SizedBox(height: 16),
-                    _buildAddressForm(isSaving),
-                  ],
-                ],
-              )
-            : _buildNoAddressCard(),
         ),
       );
     });
@@ -1464,8 +1282,7 @@ class _ContactUpdateScreenState
   // ============================================================
 
   Widget _buildSavedAddressCard() {
-    final address =
-        contactController.currentAddress;
+    final address = contactController.currentAddress;
 
     final rows = <Widget>[
       _buildInfoRow(
@@ -1484,10 +1301,7 @@ class _ContactUpdateScreenState
         label: 'apartment_name'.tr,
         value: address?.apartmentName ?? '',
       ),
-      _buildInfoRow(
-        label: 'street_name'.tr,
-        value: address?.streetName ?? '',
-      ),
+      _buildInfoRow(label: 'street_name'.tr, value: address?.streetName ?? ''),
       _buildInfoRow(
         label: 'address_line_1'.tr,
         value: address?.addressLine1 ?? '',
@@ -1496,34 +1310,13 @@ class _ContactUpdateScreenState
         label: 'address_line_2'.tr,
         value: address?.addressLine2 ?? '',
       ),
-      _buildInfoRow(
-        label: 'landmark'.tr,
-        value: address?.landmark ?? '',
-      ),
-      _buildInfoRow(
-        label: 'village'.tr,
-        value: address?.village ?? '',
-      ),
-      _buildInfoRow(
-        label: 'district'.tr,
-        value: address?.district ?? '',
-      ),
-      _buildInfoRow(
-        label: 'city'.tr,
-        value: address?.city ?? '',
-      ),
-      _buildInfoRow(
-        label: 'state'.tr,
-        value: address?.state ?? '',
-      ),
-      _buildInfoRow(
-        label: 'country'.tr,
-        value: address?.country ?? '',
-      ),
-      _buildInfoRow(
-        label: 'pincode'.tr,
-        value: address?.pincode ?? '',
-      ),
+      _buildInfoRow(label: 'landmark'.tr, value: address?.landmark ?? ''),
+      _buildInfoRow(label: 'village'.tr, value: address?.village ?? ''),
+      _buildInfoRow(label: 'district'.tr, value: address?.district ?? ''),
+      _buildInfoRow(label: 'city'.tr, value: address?.city ?? ''),
+      _buildInfoRow(label: 'state'.tr, value: address?.state ?? ''),
+      _buildInfoRow(label: 'country'.tr, value: address?.country ?? ''),
+      _buildInfoRow(label: 'pincode'.tr, value: address?.pincode ?? ''),
       _buildInfoRow(
         label: 'address_type'.tr,
         value: address?.addressType ?? '',
@@ -1543,9 +1336,7 @@ class _ContactUpdateScreenState
           ],
         ),
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.60),
-        ),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.60)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.07),
@@ -1568,9 +1359,7 @@ class _ContactUpdateScreenState
                   width: 38,
                   height: 38,
                   decoration: BoxDecoration(
-                    color: AppColors.lightBlue.withValues(
-                      alpha: 0.10,
-                    ),
+                    color: AppColors.lightBlue.withValues(alpha: 0.10),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
@@ -1610,7 +1399,6 @@ class _ContactUpdateScreenState
           ),
 
           // ---- COLLAPSIBLE DETAIL ROWS ----
-
           AnimatedSize(
             duration: const Duration(milliseconds: 250),
             curve: Curves.easeInOut,
@@ -1618,17 +1406,10 @@ class _ContactUpdateScreenState
             child: ClipRect(
               child: _savedAddressExpanded
                   ? Column(
-                      crossAxisAlignment:
-                          CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 16),
-                        ...rows,
-                      ],
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [const SizedBox(height: 16), ...rows],
                     )
-                  : const SizedBox(
-                      width: double.infinity,
-                      height: 0,
-                    ),
+                  : const SizedBox(width: double.infinity, height: 0),
             ),
           ),
         ],
@@ -1650,6 +1431,7 @@ class _ContactUpdateScreenState
 
   Widget _buildAddressForm(bool isSaving) {
     return AppFormCard(
+      sf: AppResponsive.scale(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1716,10 +1498,7 @@ class _ContactUpdateScreenState
 
           const SizedBox(height: 14),
 
-          AppTextField(
-            controller: _villageController,
-            labelText: 'village'.tr,
-          ),
+          AppTextField(controller: _villageController, labelText: 'village'.tr),
 
           const SizedBox(height: 14),
 
@@ -1730,24 +1509,15 @@ class _ContactUpdateScreenState
 
           const SizedBox(height: 14),
 
-          AppTextField(
-            controller: _cityController,
-            labelText: 'city'.tr,
-          ),
+          AppTextField(controller: _cityController, labelText: 'city'.tr),
 
           const SizedBox(height: 14),
 
-          AppTextField(
-            controller: _stateController,
-            labelText: 'state'.tr,
-          ),
+          AppTextField(controller: _stateController, labelText: 'state'.tr),
 
           const SizedBox(height: 14),
 
-          AppTextField(
-            controller: _countryController,
-            labelText: 'country'.tr,
-          ),
+          AppTextField(controller: _countryController, labelText: 'country'.tr),
 
           const SizedBox(height: 14),
 
@@ -1768,6 +1538,7 @@ class _ContactUpdateScreenState
 
           AppSubmitButton(
             label: 'update_address'.tr,
+            sf: AppResponsive.scale(context),
             isLoading: isSaving,
             onTap: _submitAddress,
           ),
@@ -1812,8 +1583,7 @@ class _ContactUpdateScreenState
             width: 54,
             height: 54,
             decoration: BoxDecoration(
-              color: AppColors.lightBlue
-                  .withValues(alpha: 0.08),
+              color: AppColors.lightBlue.withValues(alpha: 0.08),
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -1842,9 +1612,7 @@ class _ContactUpdateScreenState
             style: TextStyle(
               fontSize: 13,
               height: 1.45,
-              color: Colors.black.withValues(
-                alpha: 0.55,
-              ),
+              color: Colors.black.withValues(alpha: 0.55),
             ),
           ),
         ],
@@ -1863,13 +1631,10 @@ class _ContactUpdateScreenState
   // ============================================================
 
   Widget _buildPhoneStatusCard() {
-    final step =
-        contactController.phoneUpdateStep.value;
-    final status =
-        contactController.phoneUpdateStatus.value;
+    final step = contactController.phoneUpdateStep.value;
+    final status = contactController.phoneUpdateStatus.value;
 
-    final otpActive =
-        step != PhoneUpdateStep.enterNewPhone;
+    final otpActive = step != PhoneUpdateStep.enterNewPhone;
 
     if (!otpActive && status == null) {
       return const SizedBox.shrink();
@@ -1877,10 +1642,7 @@ class _ContactUpdateScreenState
 
     final detailRows = <Widget>[
       if (status != null)
-        _buildRequestRow(
-          label: 'requested_number'.tr,
-          value: status.newPhone,
-        )
+        _buildRequestRow(label: 'requested_number'.tr, value: status.newPhone)
       else
         Padding(
           padding: const EdgeInsets.only(bottom: 2),
@@ -1889,9 +1651,7 @@ class _ContactUpdateScreenState
             style: TextStyle(
               fontSize: 12.5,
               height: 1.5,
-              color: Colors.black.withValues(
-                alpha: 0.6,
-              ),
+              color: Colors.black.withValues(alpha: 0.6),
             ),
           ),
         ),
@@ -1901,10 +1661,7 @@ class _ContactUpdateScreenState
       icon: Icons.sms_rounded,
       title: 'mobile_number_update'.tr,
       subtitle: 'update_request'.tr,
-      progress: _PhoneUpdateProgressBar(
-        step: step,
-        status: status,
-      ),
+      progress: _PhoneUpdateProgressBar(step: step, status: status),
       detailRows: detailRows,
       comments: status?.comments ?? '',
       status: status?.status,
@@ -1923,8 +1680,7 @@ class _ContactUpdateScreenState
   // ============================================================
 
   Widget _buildAddressStatusCard() {
-    final status =
-        contactController.addressUpdateStatus.value;
+    final status = contactController.addressUpdateStatus.value;
 
     if (status == null) {
       return const SizedBox.shrink();
@@ -1951,9 +1707,7 @@ class _ContactUpdateScreenState
       icon: Icons.sms_rounded,
       title: 'address_update'.tr,
       subtitle: 'update_request'.tr,
-      progress: _ContactUpdateProgressBar(
-        status: status.status,
-      ),
+      progress: _ContactUpdateProgressBar(status: status.status),
       detailRows: detailRows,
       comments: status.comments,
       status: status.status,
@@ -1991,9 +1745,7 @@ class _ContactUpdateScreenState
           ],
         ),
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.70),
-        ),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.70)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.08),
@@ -2015,24 +1767,17 @@ class _ContactUpdateScreenState
                 width: 38,
                 height: 38,
                 decoration: BoxDecoration(
-                  color: AppColors.lightBlue.withValues(
-                    alpha: 0.10,
-                  ),
+                  color: AppColors.lightBlue.withValues(alpha: 0.10),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
-                  icon,
-                  size: 19,
-                  color: AppColors.lightBlue,
-                ),
+                child: Icon(icon, size: 19, color: AppColors.lightBlue),
               ),
 
               const SizedBox(width: 10),
 
               Expanded(
                 child: Column(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       title,
@@ -2049,9 +1794,7 @@ class _ContactUpdateScreenState
                       subtitle,
                       style: TextStyle(
                         fontSize: 11.5,
-                        color: Colors.black.withValues(
-                          alpha: 0.45,
-                        ),
+                        color: Colors.black.withValues(alpha: 0.45),
                       ),
                     ),
                   ],
@@ -2074,9 +1817,7 @@ class _ContactUpdateScreenState
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: Colors.black.withValues(
-                      alpha: 0.45,
-                    ),
+                    color: Colors.black.withValues(alpha: 0.45),
                   ),
                 ),
 
@@ -2095,9 +1836,7 @@ class _ContactUpdateScreenState
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: Colors.black.withValues(
-                  alpha: 0.45,
-                ),
+                color: Colors.black.withValues(alpha: 0.45),
               ),
             ),
 
@@ -2107,9 +1846,7 @@ class _ContactUpdateScreenState
               width: double.infinity,
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppColors.lightBlue.withValues(
-                  alpha: 0.06,
-                ),
+                color: AppColors.lightBlue.withValues(alpha: 0.06),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
@@ -2117,9 +1854,7 @@ class _ContactUpdateScreenState
                 style: TextStyle(
                   fontSize: 12.5,
                   height: 1.5,
-                  color: Colors.black.withValues(
-                    alpha: 0.65,
-                  ),
+                  color: Colors.black.withValues(alpha: 0.65),
                 ),
               ),
             ),
@@ -2143,11 +1878,7 @@ class _ContactUpdateScreenState
       decoration: BoxDecoration(
         color: AppColors.lightBlue.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: AppColors.lightBlue.withValues(
-            alpha: 0.08,
-          ),
-        ),
+        border: Border.all(color: AppColors.lightBlue.withValues(alpha: 0.08)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -2168,10 +1899,8 @@ class _ContactUpdateScreenState
   Widget _buildStatusBadge(int status) {
     final label = _localizedStatusLabel(status);
 
-    final isPending =
-        status == ContactUpdateStatusMapping.pending;
-    final isRejected =
-        status == ContactUpdateStatusMapping.rejected;
+    final isPending = status == ContactUpdateStatusMapping.pending;
+    final isRejected = status == ContactUpdateStatusMapping.rejected;
 
     final Color color;
     final IconData iconData;
@@ -2188,16 +1917,11 @@ class _ContactUpdateScreenState
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 6,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: color.withValues(alpha: 0.25),
-        ),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -2228,8 +1952,7 @@ class _ContactUpdateScreenState
     required String value,
     Color? valueColor,
   }) {
-    final displayValue =
-        value.trim().isEmpty ? '-' : value.trim();
+    final displayValue = value.trim().isEmpty ? '-' : value.trim();
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
@@ -2258,8 +1981,7 @@ class _ContactUpdateScreenState
               style: TextStyle(
                 fontSize: 12.5,
                 fontWeight: FontWeight.w700,
-                color:
-                    valueColor ?? AppColors.lightBlue,
+                color: valueColor ?? AppColors.lightBlue,
               ),
             ),
           ),
@@ -2276,9 +1998,7 @@ class _ContactUpdateScreenState
   // Each row: "• Label : old → new"
   // ============================================================
 
-  Widget _buildChangedFieldsBlock(
-    List<AddressFieldChange> changes,
-  ) {
+  Widget _buildChangedFieldsBlock(List<AddressFieldChange> changes) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Column(
@@ -2297,28 +2017,22 @@ class _ContactUpdateScreenState
           ),
 
           ...changes.map((change) {
-            final oldText =
-                change.oldValue.trim().isEmpty
-                    ? '—'
-                    : change.oldValue.trim();
+            final oldText = change.oldValue.trim().isEmpty
+                ? '—'
+                : change.oldValue.trim();
 
-            final newText =
-                change.newValue.trim().isEmpty
-                    ? '—'
-                    : change.newValue.trim();
+            final newText = change.newValue.trim().isEmpty
+                ? '—'
+                : change.newValue.trim();
 
             return Padding(
               padding: const EdgeInsets.only(bottom: 6),
               child: Row(
-                crossAxisAlignment:
-                    CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
                     '•',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Colors.black45,
-                    ),
+                    style: TextStyle(fontSize: 11, color: Colors.black45),
                   ),
 
                   const SizedBox(width: 8),
@@ -2341,9 +2055,7 @@ class _ContactUpdateScreenState
                               color: Colors.black87,
                             ),
                           ),
-                          TextSpan(
-                            text: '$oldText → $newText',
-                          ),
+                          TextSpan(text: '$oldText → $newText'),
                         ],
                       ),
                     ),
@@ -2411,9 +2123,7 @@ class _ContactUpdateScreenState
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.68),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: _statusPending.withValues(alpha: 0.20),
-        ),
+        border: Border.all(color: _statusPending.withValues(alpha: 0.20)),
         boxShadow: [
           BoxShadow(
             color: _statusPending.withValues(alpha: 0.06),
@@ -2425,11 +2135,7 @@ class _ContactUpdateScreenState
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            Icons.info_outline_rounded,
-            size: 18,
-            color: _statusPending,
-          ),
+          Icon(Icons.info_outline_rounded, size: 18, color: _statusPending),
 
           const SizedBox(width: 10),
 
@@ -2439,9 +2145,7 @@ class _ContactUpdateScreenState
               style: TextStyle(
                 fontSize: 12.5,
                 height: 1.55,
-                color: Colors.black.withValues(
-                  alpha: 0.60,
-                ),
+                color: Colors.black.withValues(alpha: 0.60),
               ),
             ),
           ),
@@ -2472,9 +2176,7 @@ class _ContactUpdateScreenState
           ],
         ),
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.60),
-        ),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.60)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.07),
@@ -2486,10 +2188,7 @@ class _ContactUpdateScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSectionTitle(
-            icon: icon,
-            title: title,
-          ),
+          _buildSectionTitle(icon: icon, title: title),
 
           const SizedBox(height: 16),
 
@@ -2503,26 +2202,17 @@ class _ContactUpdateScreenState
   // SECTION TITLE
   // ============================================================
 
-  Widget _buildSectionTitle({
-    required IconData icon,
-    required String title,
-  }) {
+  Widget _buildSectionTitle({required IconData icon, required String title}) {
     return Row(
       children: [
         Container(
           width: 38,
           height: 38,
           decoration: BoxDecoration(
-            color: AppColors.lightBlue.withValues(
-              alpha: 0.10,
-            ),
+            color: AppColors.lightBlue.withValues(alpha: 0.10),
             shape: BoxShape.circle,
           ),
-          child: Icon(
-            icon,
-            size: 20,
-            color: AppColors.lightBlue,
-          ),
+          child: Icon(icon, size: 20, color: AppColors.lightBlue),
         ),
 
         const SizedBox(width: 10),
@@ -2545,12 +2235,8 @@ class _ContactUpdateScreenState
   // INFO ROW (read-only label/value pair)
   // ============================================================
 
-  Widget _buildInfoRow({
-    required String label,
-    required String value,
-  }) {
-    final displayValue =
-        value.trim().isEmpty ? '-' : value.trim();
+  Widget _buildInfoRow({required String label, required String value}) {
+    final displayValue = value.trim().isEmpty ? '-' : value.trim();
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
@@ -2595,25 +2281,21 @@ class _ContactUpdateScreenState
   // ============================================================
 
   void _consumeMessages() {
-    final error =
-        contactController.errorMessage.value;
+    final error = contactController.errorMessage.value;
 
     if (error != null && error.isNotEmpty) {
-      WidgetsBinding.instance.addPostFrameCallback(
-        (_) {
-          if (!mounted) {
-            return;
-          }
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) {
+          return;
+        }
 
-          contactController.errorMessage.value = null;
+        contactController.errorMessage.value = null;
 
-          _showSnackbar(error, true);
-        },
-      );
+        _showSnackbar(error, true);
+      });
     }
 
-    final success =
-        contactController.successMessage.value;
+    final success = contactController.successMessage.value;
 
     if (success != null && success.isNotEmpty) {
       if (_addressSuccessHandled) {
@@ -2628,18 +2310,15 @@ class _ContactUpdateScreenState
         return;
       }
 
-      WidgetsBinding.instance.addPostFrameCallback(
-        (_) {
-          if (!mounted) {
-            return;
-          }
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) {
+          return;
+        }
 
-          contactController.successMessage.value =
-              null;
+        contactController.successMessage.value = null;
 
-          _showSnackbar(success, false);
-        },
-      );
+        _showSnackbar(success, false);
+      });
     }
   }
 }
@@ -2675,8 +2354,7 @@ class _ContactUpdateProgressBar extends StatefulWidget {
       _ContactUpdateProgressBarState();
 }
 
-class _ContactUpdateProgressBarState
-    extends State<_ContactUpdateProgressBar>
+class _ContactUpdateProgressBarState extends State<_ContactUpdateProgressBar>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
@@ -2716,9 +2394,7 @@ class _ContactUpdateProgressBarState
   }
 
   @override
-  void didUpdateWidget(
-    covariant _ContactUpdateProgressBar oldWidget,
-  ) {
+  void didUpdateWidget(covariant _ContactUpdateProgressBar oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     if (oldWidget.status != widget.status) {
@@ -2738,14 +2414,11 @@ class _ContactUpdateProgressBarState
   // STATUS DERIVED STATE
   // ----------------------------------------------------------
 
-  bool get _isPending =>
-      widget.status == ContactUpdateStatusMapping.pending;
+  bool get _isPending => widget.status == ContactUpdateStatusMapping.pending;
 
-  bool get _isRejected =>
-      widget.status == ContactUpdateStatusMapping.rejected;
+  bool get _isRejected => widget.status == ContactUpdateStatusMapping.rejected;
 
-  bool get _isApproved =>
-      widget.status == ContactUpdateStatusMapping.approved;
+  bool get _isApproved => widget.status == ContactUpdateStatusMapping.approved;
 
   Color get _green => _statusApproved;
 
@@ -2762,11 +2435,9 @@ class _ContactUpdateProgressBarState
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, _) {
-        final line1Fill =
-            _isPending ? 0.0 : _line1Anim.value;
+        final line1Fill = _isPending ? 0.0 : _line1Anim.value;
 
-        final line1Color =
-            _isRejected ? _red : _green;
+        final line1Color = _isRejected ? _red : _green;
 
         return Column(
           children: [
@@ -2774,8 +2445,7 @@ class _ContactUpdateProgressBarState
 
             LayoutBuilder(
               builder: (context, constraints) {
-                final stepWidth =
-                    constraints.maxWidth / 3.0;
+                final stepWidth = constraints.maxWidth / 3.0;
 
                 return SizedBox(
                   height: 64,
@@ -2784,8 +2454,7 @@ class _ContactUpdateProgressBarState
                     children: [
                       // line 0 (always green)
                       Positioned(
-                        left:
-                            stepWidth / 2.0,
+                        left: stepWidth / 2.0,
                         top: 13,
                         width: stepWidth,
                         height: 4,
@@ -2797,8 +2466,7 @@ class _ContactUpdateProgressBarState
 
                       // line 1
                       Positioned(
-                        left:
-                            stepWidth * 1.5,
+                        left: stepWidth * 1.5,
                         top: 13,
                         width: stepWidth,
                         height: 4,
@@ -2831,16 +2499,12 @@ class _ContactUpdateProgressBarState
                         child: _buildStep(
                           value: _node1Anim.value,
                           filled: true,
-                          color: _isPending
-                              ? _amber
-                              : _green,
+                          color: _isPending ? _amber : _green,
                           icon: _isPending
                               ? Icons.hourglass_top_rounded
                               : Icons.check_rounded,
                           label: 'under_review'.tr,
-                          labelColor: _isPending
-                              ? _amber
-                              : _green,
+                          labelColor: _isPending ? _amber : _green,
                         ),
                       ),
 
@@ -2855,21 +2519,19 @@ class _ContactUpdateProgressBarState
                           color: _isRejected
                               ? _red
                               : _isApproved
-                                  ? _green
-                                  : _statusTrack,
+                              ? _green
+                              : _statusTrack,
                           icon: _isRejected
                               ? Icons.close_rounded
                               : _isApproved
-                                  ? Icons.check_rounded
-                                  : Icons.circle,
-                          label: _isRejected
-                              ? 'rejected'.tr
-                              : 'approved'.tr,
+                              ? Icons.check_rounded
+                              : Icons.circle,
+                          label: _isRejected ? 'rejected'.tr : 'approved'.tr,
                           labelColor: _isRejected
                               ? _red
                               : _isApproved
-                                  ? _green
-                                  : Colors.black38,
+                              ? _green
+                              : Colors.black38,
                           smallDot: _isPending,
                         ),
                       ),
@@ -2899,17 +2561,13 @@ class _ContactUpdateProgressBarState
   }) {
     final t = value.clamp(0.0, 1.0).toDouble();
 
-    final nodeColor = filled
-        ? color
-        : Colors.black.withValues(alpha: 0.12);
+    final nodeColor = filled ? color : Colors.black.withValues(alpha: 0.12);
 
-    final iconColor =
-        filled ? Colors.white : Colors.black38;
+    final iconColor = filled ? Colors.white : Colors.black38;
 
     final iconSize = smallDot ? 6.0 : 15.0;
 
-    final nodeIcon =
-        smallDot ? Icons.circle : icon;
+    final nodeIcon = smallDot ? Icons.circle : icon;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -2926,17 +2584,9 @@ class _ContactUpdateProgressBarState
                 shape: BoxShape.circle,
                 border: filled
                     ? null
-                    : Border.all(
-                        color: color.withValues(
-                          alpha: 0.30,
-                        ),
-                      ),
+                    : Border.all(color: color.withValues(alpha: 0.30)),
               ),
-              child: Icon(
-                nodeIcon,
-                size: iconSize,
-                color: iconColor,
-              ),
+              child: Icon(nodeIcon, size: iconSize, color: iconColor),
             ),
           ),
         ),
@@ -2989,18 +2639,14 @@ class _PhoneUpdateProgressBar extends StatefulWidget {
 
   final PhoneUpdateStatusModel? status;
 
-  const _PhoneUpdateProgressBar({
-    required this.step,
-    this.status,
-  });
+  const _PhoneUpdateProgressBar({required this.step, this.status});
 
   @override
   State<_PhoneUpdateProgressBar> createState() =>
       _PhoneUpdateProgressBarState();
 }
 
-class _PhoneUpdateProgressBarState
-    extends State<_PhoneUpdateProgressBar>
+class _PhoneUpdateProgressBarState extends State<_PhoneUpdateProgressBar>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
@@ -3009,17 +2655,17 @@ class _PhoneUpdateProgressBarState
   late final List<Animation<double>> _lineAnims;
 
   List<String> get _otpLabels => [
-        'otp_sent_current_number'.tr,
-        'verify_otp'.tr,
-        'otp_sent_new_number'.tr,
-        'verify_otp'.tr,
-      ];
+    'otp_sent_current_number'.tr,
+    'verify_otp'.tr,
+    'otp_sent_new_number'.tr,
+    'verify_otp'.tr,
+  ];
 
   List<String> get _requestLabels => [
-        'request_submitted'.tr,
-        'under_review'.tr,
-        'approved_rejected'.tr,
-      ];
+    'request_submitted'.tr,
+    'under_review'.tr,
+    'approved_rejected'.tr,
+  ];
 
   @override
   void initState() {
@@ -3030,18 +2676,11 @@ class _PhoneUpdateProgressBarState
       duration: const Duration(milliseconds: 1500),
     );
 
-    _nodeAnims = List.generate(
-      7,
-      (i) => _stagger(i * 0.13, (i * 0.13) + 0.12),
-    );
+    _nodeAnims = List.generate(7, (i) => _stagger(i * 0.13, (i * 0.13) + 0.12));
 
     _lineAnims = List.generate(
       5,
-      (i) => _stagger(
-        (i * 0.13) + 0.06,
-        (i * 0.13) + 0.20,
-        Curves.easeInOut,
-      ),
+      (i) => _stagger((i * 0.13) + 0.06, (i * 0.13) + 0.20, Curves.easeInOut),
     );
 
     _controller.forward();
@@ -3059,14 +2698,11 @@ class _PhoneUpdateProgressBarState
   }
 
   @override
-  void didUpdateWidget(
-    covariant _PhoneUpdateProgressBar oldWidget,
-  ) {
+  void didUpdateWidget(covariant _PhoneUpdateProgressBar oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     if (oldWidget.step != widget.step ||
-        oldWidget.status?.status !=
-            widget.status?.status) {
+        oldWidget.status?.status != widget.status?.status) {
       _controller
         ..reset()
         ..forward();
@@ -3116,8 +2752,7 @@ class _PhoneUpdateProgressBarState
     // While the OTP flow is still running, request stages 5-7 are
     // deliberately kept "upcoming" so a stale backend approval
     // from a previous request is never shown as current progress.
-    final otpActive =
-        widget.step != PhoneUpdateStep.enterNewPhone;
+    final otpActive = widget.step != PhoneUpdateStep.enterNewPhone;
 
     if (otpActive) {
       return const [
@@ -3169,10 +2804,7 @@ class _PhoneUpdateProgressBarState
   // CONNECTING LINE STATE
   // ----------------------------------------------------------
 
-  double _lineFill(
-    List<_PhoneStageState> stages,
-    int toIndex,
-  ) {
+  double _lineFill(List<_PhoneStageState> stages, int toIndex) {
     if (stages[toIndex] == _PhoneStageState.upcoming) {
       return 0.0;
     }
@@ -3180,10 +2812,7 @@ class _PhoneUpdateProgressBarState
     return 1.0;
   }
 
-  Color _lineColor(
-    List<_PhoneStageState> stages,
-    int toIndex,
-  ) {
+  Color _lineColor(List<_PhoneStageState> stages, int toIndex) {
     if (stages[toIndex] == _PhoneStageState.rejected) {
       return _statusRejected;
     }
@@ -3234,17 +2863,14 @@ class _PhoneUpdateProgressBarState
   }) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final stepWidth =
-            constraints.maxWidth / stages.length;
+        final stepWidth = constraints.maxWidth / stages.length;
 
         return SizedBox(
           height: 64,
           child: Stack(
             clipBehavior: Clip.none,
             children: [
-              for (var i = 0;
-                  i < lineAnims.length;
-                  i++)
+              for (var i = 0; i < lineAnims.length; i++)
                 Positioned(
                   left: stepWidth * (i + 0.5),
                   top: 13,
@@ -3256,9 +2882,7 @@ class _PhoneUpdateProgressBarState
                   ),
                 ),
 
-              for (var i = 0;
-                  i < stages.length;
-                  i++)
+              for (var i = 0; i < stages.length; i++)
                 Positioned(
                   left: stepWidth * i,
                   top: 0,
@@ -3330,17 +2954,11 @@ class _PhoneUpdateProgressBarState
               decoration: BoxDecoration(
                 color: filled
                     ? nodeColor
-                    : Colors.black.withValues(
-                        alpha: 0.12,
-                      ),
+                    : Colors.black.withValues(alpha: 0.12),
                 shape: BoxShape.circle,
                 border: filled
                     ? null
-                    : Border.all(
-                        color: nodeColor.withValues(
-                          alpha: 0.30,
-                        ),
-                      ),
+                    : Border.all(color: nodeColor.withValues(alpha: 0.30)),
               ),
               child: Icon(
                 smallDot ? Icons.circle : icon,
@@ -3384,10 +3002,7 @@ class _ProgressLine extends StatelessWidget {
   final double fill;
   final Color color;
 
-  const _ProgressLine({
-    required this.fill,
-    required this.color,
-  });
+  const _ProgressLine({required this.fill, required this.color});
 
   @override
   Widget build(BuildContext context) {

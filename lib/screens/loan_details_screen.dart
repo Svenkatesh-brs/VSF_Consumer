@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../models/loan_details_model.dart';
 import '../providers/loan_dashboard_provider.dart';
 import '../utils/app_colors.dart';
+import '../utils/app_responsive.dart';
 import '../widgets/app_background.dart';
 import '../widgets/common/screen_content_exit.dart';
 import '../widgets/common/screen_transition.dart';
@@ -628,97 +629,105 @@ class _LoanDetailsScreenState extends State<LoanDetailsScreen> {
           parent: BouncingScrollPhysics(),
         ),
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ==================================================
-            // HEADER
-            // ==================================================
+        child: AppResponsive.constrainedContent(
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ==================================================
+              // HEADER
+              // ==================================================
 
-            _wrapAnimated(
-              delayMs: 0,
-              child: Row(
-                children: [
-                  Container(
-                    width: 42,
-                    height: 42,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.75),
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.65),
+              _wrapAnimated(
+                delayMs: 0,
+                child: Row(
+                  children: [
+                    Container(
+                      width: 42,
+                      height: 42,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.75),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.65),
+                        ),
+                      ),
+                      child: IconButton(
+                        padding: EdgeInsets.zero,
+                        onPressed: _goBack,
+                        icon: const Icon(
+                          Icons.arrow_back_rounded,
+                          size: 21,
+                          color: AppColors.lightBlue,
+                        ),
                       ),
                     ),
-                    child: IconButton(
-                      padding: EdgeInsets.zero,
-                      onPressed: _goBack,
-                      icon: const Icon(
-                        Icons.arrow_back_rounded,
-                        size: 21,
-                        color: AppColors.lightBlue,
+
+                    const SizedBox(width: 14),
+
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'loan_details'.tr,
+                            style: TextStyle(
+                              fontSize: 23,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.lightBlue,
+                            ),
+                          ),
+                          SizedBox(height: 2),
+                          Text(
+                            'loan_details_subtitle'.tr,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black45,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-
-                  const SizedBox(width: 14),
-
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'loan_details'.tr,
-                          style: TextStyle(
-                            fontSize: 23,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.lightBlue,
-                          ),
-                        ),
-                        SizedBox(height: 2),
-                        Text(
-                          'loan_details_subtitle'.tr,
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.black45,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
 
-            const SizedBox(height: 24),
+              const SizedBox(height: 24),
 
-            // ==================================================
-            // SECTIONS
-            // ==================================================
-            _wrapAnimated(
-              delayMs: 80,
-              child: _buildLoanSummarySection(details),
-            ),
+              // ==================================================
+              // SECTIONS
+              // ==================================================
+              _wrapAnimated(
+                delayMs: 80,
+                child: _buildLoanSummarySection(details),
+              ),
 
-            const SizedBox(height: 16),
+              const SizedBox(height: 16),
 
-            _wrapAnimated(delayMs: 160, child: _buildFinancialSection(details)),
+              _wrapAnimated(
+                delayMs: 160,
+                child: _buildFinancialSection(details),
+              ),
 
-            const SizedBox(height: 16),
+              const SizedBox(height: 16),
 
-            _wrapAnimated(delayMs: 240, child: _buildBorrowerSection(details)),
+              _wrapAnimated(
+                delayMs: 240,
+                child: _buildBorrowerSection(details),
+              ),
 
-            const SizedBox(height: 16),
+              const SizedBox(height: 16),
 
-            _wrapAnimated(
-              delayMs: 320,
-              child: _buildGuarantorsSection(details),
-            ),
+              _wrapAnimated(
+                delayMs: 320,
+                child: _buildGuarantorsSection(details),
+              ),
 
-            const SizedBox(height: 16),
+              const SizedBox(height: 16),
 
-            _wrapAnimated(delayMs: 400, child: _buildVehicleSection(details)),
-          ],
+              _wrapAnimated(delayMs: 400, child: _buildVehicleSection(details)),
+            ],
+          ),
         ),
       ),
     );

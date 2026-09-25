@@ -6,6 +6,7 @@ import '../widgets/loan_dashboard/pay_emi_button.dart';
 import '../providers/loan_dashboard_provider.dart';
 import '../routes/app_routes.dart';
 import '../utils/app_colors.dart';
+import '../utils/app_responsive.dart';
 import '../widgets/app_background.dart';
 import '../widgets/common/screen_content_exit.dart';
 import '../widgets/common/screen_transition.dart';
@@ -187,159 +188,170 @@ class _LoanDashboardScreenState extends State<LoanDashboardScreen> {
                       parent: BouncingScrollPhysics(),
                     ),
                     padding: const EdgeInsets.fromLTRB(20, 16, 20, 115),
-                    child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // ==================================================
-                      // HEADER
-                      // ==================================================
+                    child: AppResponsive.constrainedContent(
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // ==================================================
+                          // HEADER
+                          // ==================================================
 
-                      ScreenContentExit(
-                        isExiting: _isExiting,
-                        direction: ContentExitDirection.toRight,
-                        delay: Duration.zero,
-                        child: ScreenContentTransition(
-                          direction: ContentTransitionDirection.fromLeft,
-                          delay: Duration.zero,
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 42,
-                                height: 42,
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withValues(alpha: 0.75),
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: Colors.white.withValues(alpha: 0.65),
-                                  ),
-                                ),
-                                child: IconButton(
-                                  padding: EdgeInsets.zero,
-                                  onPressed: _goBack,
-                                  icon: const Icon(
-                                    Icons.arrow_back_rounded,
-                                    size: 21,
-                                    color: AppColors.lightBlue,
-                                  ),
-                                ),
-                              ),
-
-                              const SizedBox(width: 14),
-
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'loan_dashboard'.tr,
-                                      style: TextStyle(
-                                        fontSize: 23,
-                                        fontWeight: FontWeight.w700,
+                          ScreenContentExit(
+                            isExiting: _isExiting,
+                            direction: ContentExitDirection.toRight,
+                            delay: Duration.zero,
+                            child: ScreenContentTransition(
+                              direction: ContentTransitionDirection.fromLeft,
+                              delay: Duration.zero,
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 42,
+                                    height: 42,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.75,
+                                      ),
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: Colors.white.withValues(
+                                          alpha: 0.65,
+                                        ),
+                                      ),
+                                    ),
+                                    child: IconButton(
+                                      padding: EdgeInsets.zero,
+                                      onPressed: _goBack,
+                                      icon: const Icon(
+                                        Icons.arrow_back_rounded,
+                                        size: 21,
                                         color: AppColors.lightBlue,
                                       ),
                                     ),
-                                    SizedBox(height: 2),
-                                    Text(
-                                      'manage_loan_glance'.tr,
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.black45,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
+                                  ),
 
-                              InkWell(
-                                borderRadius: BorderRadius.circular(100),
-                                onTap: _openProfileDrawer,
-                                child: Container(
-                                  width: 42,
-                                  height: 42,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: Colors.white.withValues(alpha: 0.75),
-                                    border: Border.all(
-                                      color: Colors.white.withValues(
-                                        alpha: 0.65,
+                                  const SizedBox(width: 14),
+
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'loan_dashboard'.tr,
+                                          style: TextStyle(
+                                            fontSize: 23,
+                                            fontWeight: FontWeight.w700,
+                                            color: AppColors.lightBlue,
+                                          ),
+                                        ),
+                                        SizedBox(height: 2),
+                                        Text(
+                                          'manage_loan_glance'.tr,
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w500,
+                                            color: Colors.black45,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+
+                                  InkWell(
+                                    borderRadius: BorderRadius.circular(100),
+                                    onTap: _openProfileDrawer,
+                                    child: Container(
+                                      width: 42,
+                                      height: 42,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: Colors.white.withValues(
+                                          alpha: 0.75,
+                                        ),
+                                        border: Border.all(
+                                          color: Colors.white.withValues(
+                                            alpha: 0.65,
+                                          ),
+                                        ),
+                                      ),
+                                      child: const Icon(
+                                        Icons.person_outline_rounded,
+                                        color: AppColors.lightBlue,
+                                        size: 22,
                                       ),
                                     ),
                                   ),
-                                  child: const Icon(
-                                    Icons.person_outline_rounded,
-                                    color: AppColors.lightBlue,
-                                    size: 22,
-                                  ),
-                                ),
+                                ],
                               ),
-                            ],
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 24),
-
-                      // ==================================================
-                      // LOAN OVERVIEW
-                      // ==================================================
-                      ScreenContentExit(
-                        isExiting: _isExiting,
-                        direction: ContentExitDirection.toRight,
-                        delay: const Duration(milliseconds: 80),
-                        child: ScreenContentTransition(
-                          direction: ContentTransitionDirection.fromLeft,
-                          delay: const Duration(milliseconds: 80),
-                          child: GestureDetector(
-                            onTap: _openLoanDetails,
-                            behavior: HitTestBehavior.opaque,
-                            child: LoanOverviewCard(
-                              status: controller.status,
-                              vehicleNumber: controller.vehicleNumber,
-                              borrowerName: controller.borrowerName,
-                              loanAmount: controller.amount,
-                              outstandingAmount: controller.outstandingAmount,
-                              emiAmount: controller.emiAmount,
-                              nextEmiDate: controller.nextEmiDueDate,
-
-                              totalEmis: controller.totalEmis,
-                              paidEmis: controller.paidEmis,
-                              upcomingEmis: controller.upcomingEmis,
-                              overdueEmis: controller.overdueEmis,
-
-                              repaymentProgress: controller.repaymentProgress,
                             ),
                           ),
-                        ),
-                      ),
 
-                      const SizedBox(height: 24),
+                          const SizedBox(height: 24),
 
-                      // ==================================================
-                      // NEW QUICK ACTIONS
-                      // ==================================================
-                      ScreenContentExit(
-                        isExiting: _isExiting,
-                        direction: ContentExitDirection.toRight,
-                        delay: const Duration(milliseconds: 220),
-                        child: ScreenContentTransition(
-                          direction: ContentTransitionDirection.fromLeft,
-                          delay: const Duration(milliseconds: 220),
-                          child: LoanQuickActions(
-                            onEmiScheduleTap: _openEmiSchedule,
-                            onTransactionsTap: _openTransactions,
-                            onContactUpdateTap: _openContactUpdate,
-                            onComplaintsTap: _openComplaint,
-                            onHelpTap: _openHelp,
+                          // ==================================================
+                          // LOAN OVERVIEW
+                          // ==================================================
+                          ScreenContentExit(
+                            isExiting: _isExiting,
+                            direction: ContentExitDirection.toRight,
+                            delay: const Duration(milliseconds: 80),
+                            child: ScreenContentTransition(
+                              direction: ContentTransitionDirection.fromLeft,
+                              delay: const Duration(milliseconds: 80),
+                              child: GestureDetector(
+                                onTap: _openLoanDetails,
+                                behavior: HitTestBehavior.opaque,
+                                child: LoanOverviewCard(
+                                  status: controller.status,
+                                  vehicleNumber: controller.vehicleNumber,
+                                  borrowerName: controller.borrowerName,
+                                  loanAmount: controller.amount,
+                                  outstandingAmount:
+                                      controller.outstandingAmount,
+                                  emiAmount: controller.emiAmount,
+                                  nextEmiDate: controller.nextEmiDueDate,
+
+                                  totalEmis: controller.totalEmis,
+                                  paidEmis: controller.paidEmis,
+                                  upcomingEmis: controller.upcomingEmis,
+                                  overdueEmis: controller.overdueEmis,
+
+                                  repaymentProgress:
+                                      controller.repaymentProgress,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
 
-                      const SizedBox(height: 20),
-                    ],
+                          const SizedBox(height: 24),
+
+                          // ==================================================
+                          // NEW QUICK ACTIONS
+                          // ==================================================
+                          ScreenContentExit(
+                            isExiting: _isExiting,
+                            direction: ContentExitDirection.toRight,
+                            delay: const Duration(milliseconds: 220),
+                            child: ScreenContentTransition(
+                              direction: ContentTransitionDirection.fromLeft,
+                              delay: const Duration(milliseconds: 220),
+                              child: LoanQuickActions(
+                                onEmiScheduleTap: _openEmiSchedule,
+                                onTransactionsTap: _openTransactions,
+                                onContactUpdateTap: _openContactUpdate,
+                                onComplaintsTap: _openComplaint,
+                                onHelpTap: _openHelp,
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 20),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-              ),
 
                 // ========================================================
                 // PAY EMI BUTTON

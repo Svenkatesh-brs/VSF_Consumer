@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../providers/auth_provider.dart';
 import '../routes/app_routes.dart';
+import '../utils/app_responsive.dart';
 import '../widgets/app_background.dart';
 import '../widgets/app_form_card.dart';
 import '../widgets/app_submit_button.dart';
@@ -46,22 +47,19 @@ class _LoginScreenState extends State<LoginScreen> {
 
     controller.clearError();
 
-    final isValid =
-        controller.validateMobileNumber();
+    final isValid = controller.validateMobileNumber();
 
     if (!isValid) {
       return;
     }
 
-    final phone =
-        controller.mobileController.text.trim();
+    final phone = controller.mobileController.text.trim();
 
     // ----------------------------------------------------------
     // REQUEST OTP FROM BACKEND
     // ----------------------------------------------------------
 
-    final success =
-        await controller.requestOtp(
+    final success = await controller.requestOtp(
       countryCode: '+91',
       phone: phone,
     );
@@ -87,17 +85,13 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     // Give the login exit animation time to complete.
-    await Future.delayed(
-      const Duration(milliseconds: 400),
-    );
+    await Future.delayed(const Duration(milliseconds: 400));
 
     if (!mounted) {
       return;
     }
 
-    await Get.toNamed(
-      AppRoutes.otp,
-    );
+    await Get.toNamed(AppRoutes.otp);
 
     if (!mounted) {
       return;
@@ -129,233 +123,177 @@ class _LoginScreenState extends State<LoginScreen> {
               FocusManager.instance.primaryFocus?.unfocus();
             },
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 20,
-              ),
-              child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+              child: AppResponsive.constrainedContent(
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(height: 20),
 
-                  // ==================================================
-                  // VSF LOGO
-                  // ==================================================
-
-                  ScreenContentTransition(
-                    direction:
-                        ContentTransitionDirection.fromLeft,
-                    duration:
-                        const Duration(milliseconds: 400),
-                    delay: Duration.zero,
-                    child: ScreenContentExit(
-                      isExiting: _isExiting,
-                      direction:
-                          ContentExitDirection.toRight,
-                      duration:
-                          const Duration(milliseconds: 400),
+                    // ==================================================
+                    // VSF LOGO
+                    // ==================================================
+                    ScreenContentTransition(
+                      direction: ContentTransitionDirection.fromLeft,
+                      duration: const Duration(milliseconds: 400),
                       delay: Duration.zero,
-                      child: Center(
-                        child: Container(
-                          width: 120,
-                          height: 120,
-                          decoration:
-                              const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white,
-                          ),
-                          padding:
-                              const EdgeInsets.all(8),
-                          child: ClipOval(
-                            child: Image.asset(
-                              'assets/vsf.png',
-                              width: 120,
-                              height: 120,
-                              fit: BoxFit.cover,
+                      child: ScreenContentExit(
+                        isExiting: _isExiting,
+                        direction: ContentExitDirection.toRight,
+                        duration: const Duration(milliseconds: 400),
+                        delay: Duration.zero,
+                        child: Center(
+                          child: Container(
+                            width: 120,
+                            height: 120,
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white,
                             ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 45),
-
-                  // ==================================================
-                  // WELCOME TEXT
-                  // ==================================================
-
-                  ScreenContentTransition(
-                    direction:
-                        ContentTransitionDirection.fromLeft,
-                    duration:
-                        const Duration(milliseconds: 400),
-                    delay:
-                        const Duration(milliseconds: 80),
-                    child: ScreenContentExit(
-                      isExiting: _isExiting,
-                      direction:
-                          ContentExitDirection.toRight,
-                      duration:
-                          const Duration(milliseconds: 400),
-                      delay:
-                          const Duration(milliseconds: 80),
-                      child: Text(
-                        'welcome_back'.tr,
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight:
-                              FontWeight.w700,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  // ==================================================
-                  // DESCRIPTION
-                  // ==================================================
-
-                  ScreenContentTransition(
-                    direction:
-                        ContentTransitionDirection.fromLeft,
-                    duration:
-                        const Duration(milliseconds: 400),
-                    delay:
-                        const Duration(milliseconds: 140),
-                    child: ScreenContentExit(
-                      isExiting: _isExiting,
-                      direction:
-                          ContentExitDirection.toRight,
-                      duration:
-                          const Duration(milliseconds: 400),
-                      delay:
-                          const Duration(milliseconds: 140),
-                      child: Text(
-                        'login_description'.tr,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.black54,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // ==================================================
-                  // LOGIN CARD
-                  // ==================================================
-
-                  ScreenContentTransition(
-                    direction:
-                        ContentTransitionDirection.fromLeft,
-                    duration:
-                        const Duration(milliseconds: 400),
-                    delay:
-                        const Duration(milliseconds: 200),
-                    child: ScreenContentExit(
-                      isExiting: _isExiting,
-                      direction:
-                          ContentExitDirection.toRight,
-                      duration:
-                          const Duration(milliseconds: 400),
-                      delay:
-                          const Duration(milliseconds: 200),
-                      child: AppFormCard(
-                        child: Column(
-                          crossAxisAlignment:
-                              CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'mobile_number'.tr,
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight:
-                                    FontWeight.w600,
+                            padding: const EdgeInsets.all(8),
+                            child: ClipOval(
+                              child: Image.asset(
+                                'assets/vsf.png',
+                                width: 120,
+                                height: 120,
+                                fit: BoxFit.cover,
                               ),
                             ),
+                          ),
+                        ),
+                      ),
+                    ),
 
-                            const SizedBox(height: 8),
+                    const SizedBox(height: 45),
 
-                            // ========================================
-                            // MOBILE NUMBER
-                            // ========================================
+                    // ==================================================
+                    // WELCOME TEXT
+                    // ==================================================
+                    ScreenContentTransition(
+                      direction: ContentTransitionDirection.fromLeft,
+                      duration: const Duration(milliseconds: 400),
+                      delay: const Duration(milliseconds: 80),
+                      child: ScreenContentExit(
+                        isExiting: _isExiting,
+                        direction: ContentExitDirection.toRight,
+                        duration: const Duration(milliseconds: 400),
+                        delay: const Duration(milliseconds: 80),
+                        child: Text(
+                          'welcome_back'.tr,
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.w700,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
 
-                            Obx(
-                              () => TextField(
-                                controller:
-                                    controller
-                                        .mobileController,
-                                keyboardType:
-                                    TextInputType.phone,
-                                textInputAction:
-                                    TextInputAction.done,
-                                maxLength: 10,
-                                inputFormatters: [
-                                  FilteringTextInputFormatter
-                                      .digitsOnly,
-                                  LengthLimitingTextInputFormatter(
-                                    10,
-                                  ),
-                                ],
-                                onChanged: (_) {
-                                  controller
-                                      .clearError();
-                                },
-                                onSubmitted: (_) {
-                                  _continue();
-                                },
-                                decoration:
-                                    InputDecoration(
-                                  hintText:
-                                      'mobile_number_hint'.tr,
-                                  counterText: '',
-                                  prefixText:
-                                      '+91 ',
-                                  errorText:
-                                      controller
-                                          .errorMessage
-                                          .value,
+                    const SizedBox(height: 8),
+
+                    // ==================================================
+                    // DESCRIPTION
+                    // ==================================================
+                    ScreenContentTransition(
+                      direction: ContentTransitionDirection.fromLeft,
+                      duration: const Duration(milliseconds: 400),
+                      delay: const Duration(milliseconds: 140),
+                      child: ScreenContentExit(
+                        isExiting: _isExiting,
+                        direction: ContentExitDirection.toRight,
+                        duration: const Duration(milliseconds: 400),
+                        delay: const Duration(milliseconds: 140),
+                        child: Text(
+                          'login_description'.tr,
+                          style: TextStyle(fontSize: 14, color: Colors.black54),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // ==================================================
+                    // LOGIN CARD
+                    // ==================================================
+                    ScreenContentTransition(
+                      direction: ContentTransitionDirection.fromLeft,
+                      duration: const Duration(milliseconds: 400),
+                      delay: const Duration(milliseconds: 200),
+                      child: ScreenContentExit(
+                        isExiting: _isExiting,
+                        direction: ContentExitDirection.toRight,
+                        duration: const Duration(milliseconds: 400),
+                        delay: const Duration(milliseconds: 200),
+                        child: AppFormCard(
+                          sf: AppResponsive.scale(context),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'mobile_number'.tr,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
-                            ),
 
-                            const SizedBox(height: 20),
+                              const SizedBox(height: 8),
 
-                            // ========================================
-                            // CONTINUE BUTTON
-                            // ========================================
-
-                            Obx(
-                              () => AppSubmitButton(
-                                label: 'continue'.tr,
-                                isLoading:
-                                    controller
-                                            .isLoading
-                                            .value ||
-                                        _isExiting,
-                                onTap:
-                                    _isExiting ||
-                                            controller
-                                                .isLoading
-                                                .value
-                                        ? null
-                                        : _continue,
+                              // ========================================
+                              // MOBILE NUMBER
+                              // ========================================
+                              Obx(
+                                () => TextField(
+                                  controller: controller.mobileController,
+                                  keyboardType: TextInputType.phone,
+                                  textInputAction: TextInputAction.done,
+                                  maxLength: 10,
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.digitsOnly,
+                                    LengthLimitingTextInputFormatter(10),
+                                  ],
+                                  onChanged: (_) {
+                                    controller.clearError();
+                                  },
+                                  onSubmitted: (_) {
+                                    _continue();
+                                  },
+                                  decoration: InputDecoration(
+                                    hintText: 'mobile_number_hint'.tr,
+                                    counterText: '',
+                                    prefixText: '+91 ',
+                                    errorText: controller.errorMessage.value,
+                                  ),
+                                ),
                               ),
-                            ),
-                          ],
+
+                              const SizedBox(height: 20),
+
+                              // ========================================
+                              // CONTINUE BUTTON
+                              // ========================================
+                              Obx(
+                                () => AppSubmitButton(
+                                  label: 'continue'.tr,
+                                  sf: AppResponsive.scale(context),
+                                  isLoading:
+                                      controller.isLoading.value || _isExiting,
+                                  onTap:
+                                      _isExiting || controller.isLoading.value
+                                      ? null
+                                      : _continue,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
 
-                  const SizedBox(height: 40),
-                ],
+                    const SizedBox(height: 40),
+                  ],
+                ),
               ),
             ),
           ),

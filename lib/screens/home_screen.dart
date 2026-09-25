@@ -6,6 +6,7 @@ import '../providers/home_provider.dart';
 import '../models/home_model.dart';
 import '../routes/app_routes.dart';
 import '../utils/app_colors.dart';
+import '../utils/app_responsive.dart';
 import '../widgets/app_background.dart';
 import '../widgets/footer_version.dart';
 import '../widgets/home/loan_card.dart';
@@ -317,666 +318,675 @@ class _HomeScreenState extends State<HomeScreen> {
                 parent: BouncingScrollPhysics(),
               ),
               padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // ==================================================
-                  // APPBAR-STYLE HEADER
-                  // LEFT: VSF Logo + "Home" | RIGHT: Notification + Logout
-                  // ==================================================
+              child: AppResponsive.constrainedContent(
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // ==================================================
+                    // APPBAR-STYLE HEADER
+                    // LEFT: VSF Logo + "Home" | RIGHT: Notification + Logout
+                    // ==================================================
 
-                  ScreenContentExit(
-                    isExiting: _isExiting,
-                    direction: ContentExitDirection.toRight,
-                    delay: Duration.zero,
-                    child: ScreenContentTransition(
-                      direction: ContentTransitionDirection.fromLeft,
+                    ScreenContentExit(
+                      isExiting: _isExiting,
+                      direction: ContentExitDirection.toRight,
                       delay: Duration.zero,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 10,
-                        ),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              AppColors.lightBlue.withValues(alpha: 0.06),
-                              AppColors.primary.withValues(alpha: 0.10),
+                      child: ScreenContentTransition(
+                        direction: ContentTransitionDirection.fromLeft,
+                        delay: Duration.zero,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 10,
+                          ),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                AppColors.lightBlue.withValues(alpha: 0.06),
+                                AppColors.primary.withValues(alpha: 0.10),
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(22),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.55),
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.05),
+                                blurRadius: 16,
+                                offset: const Offset(0, 6),
+                              ),
                             ],
                           ),
-                          borderRadius: BorderRadius.circular(22),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.55),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Container(
+                                width: 42,
+                                height: 42,
+                                padding: const EdgeInsets.all(5),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.white.withValues(alpha: 0.85),
+                                  border: Border.all(
+                                    color: Colors.white.withValues(alpha: 0.8),
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(
+                                        alpha: 0.06,
+                                      ),
+                                      blurRadius: 14,
+                                      offset: const Offset(0, 6),
+                                    ),
+                                  ],
+                                ),
+                                child: ClipOval(
+                                  child: Image.asset(
+                                    'assets/vsf.png',
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ),
+
+                              const SizedBox(width: 12),
+
+                              Text(
+                                'home'.tr,
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.lightBlue,
+                                ),
+                              ),
+
+                              const Spacer(),
+
+                              _HeaderIconButton(
+                                tooltip: 'notifications'.tr,
+                                icon: Icons.notifications_none_rounded,
+                                iconSize: 22,
+                                onPressed: () {
+                                  Get.toNamed(AppRoutes.inAppNotifications);
+                                },
+                              ),
+
+                              const SizedBox(width: 6),
+
+                              _HeaderIconButton(
+                                tooltip: 'logout'.tr,
+                                icon: Icons.logout_rounded,
+                                iconSize: 20,
+                                onPressed: _showLogoutConfirmation,
+                              ),
+                            ],
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.05),
-                              blurRadius: 16,
-                              offset: const Offset(0, 6),
-                            ),
-                          ],
                         ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // ==================================================
+                    // GREETING CARD
+                    // ==================================================
+                    ScreenContentExit(
+                      isExiting: _isExiting,
+                      direction: ContentExitDirection.toRight,
+                      delay: Duration.zero,
+                      child: ScreenContentTransition(
+                        direction: ContentTransitionDirection.fromLeft,
+                        delay: Duration.zero,
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 22,
+                          ),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                AppColors.lightBlue.withValues(alpha: 0.92),
+                                AppColors.primary.withValues(alpha: 0.82),
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(22),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.lightBlue.withValues(
+                                  alpha: 0.30,
+                                ),
+                                blurRadius: 20,
+                                offset: const Offset(0, 8),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 46,
+                                height: 46,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.white.withValues(alpha: 0.20),
+                                ),
+                                child: const Icon(
+                                  Icons.waving_hand_rounded,
+                                  size: 26,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Obx(
+                                  () => Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        _greetingForNow(),
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        _greetingName(),
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        'quick_overview'.tr,
+                                        style: TextStyle(
+                                          color: Colors.white.withValues(
+                                            alpha: 0.90,
+                                          ),
+                                          fontSize: 12,
+                                          height: 1.4,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // ==================================================
+                    // LOAN OVERVIEW
+                    // ENTRY LEFT - 80ms
+                    // EXIT RIGHT - 80ms
+                    // ==================================================
+                    ScreenContentExit(
+                      isExiting: _isExiting,
+                      direction: ContentExitDirection.toRight,
+                      delay: const Duration(milliseconds: 80),
+                      child: ScreenContentTransition(
+                        direction: ContentTransitionDirection.fromLeft,
+                        delay: const Duration(milliseconds: 80),
+                        child: Text(
+                          'loan_overview'.tr,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.lightBlue,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 14),
+
+                    // ==================================================
+                    // SUMMARY CARDS
+                    // ENTRY LEFT - 160ms
+                    // EXIT RIGHT - 160ms
+                    // ==================================================
+                    ScreenContentExit(
+                      isExiting: _isExiting,
+                      direction: ContentExitDirection.toRight,
+                      delay: const Duration(milliseconds: 160),
+                      child: ScreenContentTransition(
+                        direction: ContentTransitionDirection.fromLeft,
+                        delay: const Duration(milliseconds: 160),
+                        child: Obx(
+                          () => Row(
+                            children: [
+                              Expanded(
+                                child: HomeSummaryCard(
+                                  title: 'total'.tr,
+                                  value: controller.totalLoans.value,
+                                  icon: Icons.account_balance_wallet_outlined,
+                                  iconColor: AppColors.secondary,
+                                ),
+                              ),
+
+                              const SizedBox(width: 10),
+
+                              Expanded(
+                                child: HomeSummaryCard(
+                                  title: 'active'.tr,
+                                  value: controller.activeLoans.value,
+                                  icon: Icons.pending_actions_outlined,
+                                  iconColor: AppColors.buttonEnd,
+                                ),
+                              ),
+
+                              const SizedBox(width: 10),
+
+                              Expanded(
+                                child: HomeSummaryCard(
+                                  title: 'inactive'.tr,
+                                  value: controller.inactiveLoans.value,
+                                  icon: Icons.check_circle_outline,
+                                  iconColor: AppColors.primary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 30),
+
+                    _buildLoanTypeSelector(),
+
+                    const SizedBox(height: 20),
+
+                    // ==================================================
+                    // MY LOANS HEADER
+                    // ENTRY LEFT - 240ms
+                    // EXIT RIGHT - 240ms
+                    // ==================================================
+                    ScreenContentExit(
+                      isExiting: _isExiting,
+                      direction: ContentExitDirection.toRight,
+                      delay: const Duration(milliseconds: 240),
+                      child: ScreenContentTransition(
+                        direction: ContentTransitionDirection.fromLeft,
+                        delay: const Duration(milliseconds: 240),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Container(
-                              width: 42,
-                              height: 42,
-                              padding: const EdgeInsets.all(5),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.white.withValues(alpha: 0.85),
-                                border: Border.all(
-                                  color: Colors.white.withValues(alpha: 0.8),
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.06),
-                                    blurRadius: 14,
-                                    offset: const Offset(0, 6),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Obx(
+                                    () => Text(
+                                      controller.selectedLoanType.value ==
+                                              'guarantor_loans'
+                                          ? 'guarantor_loans'.tr
+                                          : 'my_loans'.tr,
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.lightBlue,
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(height: 3),
+                                  Text(
+                                    'track_your_vehicle_loans'.tr,
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.black45,
+                                    ),
                                   ),
                                 ],
                               ),
-                              child: ClipOval(
-                                child: Image.asset(
-                                  'assets/vsf.png',
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
                             ),
 
-                            const SizedBox(width: 12),
-
-                            Text(
-                              'home'.tr,
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.lightBlue,
-                              ),
-                            ),
-
-                            const Spacer(),
-
-                            _HeaderIconButton(
-                              tooltip: 'notifications'.tr,
-                              icon: Icons.notifications_none_rounded,
-                              iconSize: 22,
-                              onPressed: () {
-                                Get.toNamed(AppRoutes.inAppNotifications);
-                              },
-                            ),
-
-                            const SizedBox(width: 6),
-
-                            _HeaderIconButton(
-                              tooltip: 'logout'.tr,
-                              icon: Icons.logout_rounded,
-                              iconSize: 20,
-                              onPressed: _showLogoutConfirmation,
+                            Obx(
+                              () =>
+                                  controller.selectedLoanType.value ==
+                                      'my_loans'
+                                  ? PopupMenuButton<String>(
+                                      initialValue:
+                                          controller.selectedFilter.value,
+                                      onSelected: controller.setLoanFilter,
+                                      offset: const Offset(0, 42),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(14),
+                                      ),
+                                      itemBuilder: (context) => [
+                                        PopupMenuItem<String>(
+                                          value: 'Total',
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                Icons.all_inclusive_rounded,
+                                                size: 18,
+                                                color: AppColors.lightBlue,
+                                              ),
+                                              SizedBox(width: 10),
+                                              Text(
+                                                'total_loans'.tr,
+                                                style: const TextStyle(
+                                                  fontSize: 13,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        PopupMenuItem<String>(
+                                          value: 'Active',
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                Icons.pending_actions_outlined,
+                                                size: 18,
+                                                color: AppColors.buttonEnd,
+                                              ),
+                                              SizedBox(width: 10),
+                                              Text(
+                                                'active'.tr,
+                                                style: const TextStyle(
+                                                  fontSize: 13,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        PopupMenuItem<String>(
+                                          value: 'Inactive',
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                Icons.check_circle_outline,
+                                                size: 18,
+                                                color: AppColors.primary,
+                                              ),
+                                              SizedBox(width: 10),
+                                              Text(
+                                                'inactive'.tr,
+                                                style: const TextStyle(
+                                                  fontSize: 13,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 11,
+                                          vertical: 7,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.lightBlue.withValues(
+                                            alpha: 0.08,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            100,
+                                          ),
+                                          border: Border.all(
+                                            color: AppColors.lightBlue
+                                                .withValues(alpha: 0.12),
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            const Icon(
+                                              Icons.filter_list_rounded,
+                                              size: 14,
+                                              color: AppColors.lightBlue,
+                                            ),
+                                            const SizedBox(width: 5),
+                                            Text(
+                                              _filterLabel(
+                                                controller.selectedFilter.value,
+                                              ),
+                                              style: const TextStyle(
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w600,
+                                                color: AppColors.lightBlue,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 3),
+                                            const Icon(
+                                              Icons.keyboard_arrow_down_rounded,
+                                              size: 16,
+                                              color: AppColors.lightBlue,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    )
+                                  : const SizedBox.shrink(),
                             ),
                           ],
                         ),
                       ),
                     ),
-                  ),
 
-                  const SizedBox(height: 20),
+                    const SizedBox(height: 16),
 
-                  // ==================================================
-                  // GREETING CARD
-                  // ==================================================
-                  ScreenContentExit(
-                    isExiting: _isExiting,
-                    direction: ContentExitDirection.toRight,
-                    delay: Duration.zero,
-                    child: ScreenContentTransition(
-                      direction: ContentTransitionDirection.fromLeft,
-                      delay: Duration.zero,
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 22,
-                        ),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              AppColors.lightBlue.withValues(alpha: 0.92),
-                              AppColors.primary.withValues(alpha: 0.82),
-                            ],
+                    // ==================================================
+                    // LOANS
+                    // ==================================================
+                    Obx(() {
+                      if (controller.selectedLoanType.value ==
+                          'guarantor_loans') {
+                        return _buildGuarantorLoansContent();
+                      }
+
+                      if (controller.isLoading.value) {
+                        return ScreenContentExit(
+                          isExiting: _isExiting,
+                          direction: ContentExitDirection.toRight,
+                          delay: const Duration(milliseconds: 320),
+                          child: ScreenContentTransition(
+                            direction: ContentTransitionDirection.fromLeft,
+                            delay: const Duration(milliseconds: 320),
+                            child: const Center(
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(vertical: 40),
+                                child: CircularProgressIndicator(
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ),
                           ),
-                          borderRadius: BorderRadius.circular(22),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.lightBlue.withValues(
-                                alpha: 0.30,
-                              ),
-                              blurRadius: 20,
-                              offset: const Offset(0, 8),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 46,
-                              height: 46,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.white.withValues(alpha: 0.20),
-                              ),
-                              child: const Icon(
-                                Icons.waving_hand_rounded,
-                                size: 26,
-                                color: Colors.white,
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Obx(
-                                () => Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                        );
+                      }
+
+                      if (controller.errorMessage.value != null) {
+                        return ScreenContentExit(
+                          isExiting: _isExiting,
+                          direction: ContentExitDirection.toRight,
+                          delay: const Duration(milliseconds: 320),
+                          child: ScreenContentTransition(
+                            direction: ContentTransitionDirection.fromLeft,
+                            delay: const Duration(milliseconds: 320),
+                            child: Center(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 30,
+                                ),
+                                child: Column(
                                   children: [
-                                    Text(
-                                      _greetingForNow(),
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
+                                    const Icon(
+                                      Icons.error_outline_rounded,
+                                      size: 42,
+                                      color: AppColors.error,
                                     ),
-                                    const SizedBox(height: 6),
+                                    const SizedBox(height: 10),
                                     Text(
-                                      _greetingName(),
+                                      controller.errorMessage.value!.tr,
+                                      textAlign: TextAlign.center,
                                       style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w600,
+                                        fontSize: 13,
+                                        color: AppColors.error,
                                       ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      'quick_overview'.tr,
-                                      style: TextStyle(
-                                        color: Colors.white.withValues(
-                                          alpha: 0.90,
-                                        ),
-                                        fontSize: 12,
-                                        height: 1.4,
-                                      ),
+                                    const SizedBox(height: 14),
+                                    TextButton(
+                                      onPressed: controller.retry,
+                                      child: Text('try_again'.tr),
                                     ),
                                   ],
                                 ),
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // ==================================================
-                  // LOAN OVERVIEW
-                  // ENTRY LEFT - 80ms
-                  // EXIT RIGHT - 80ms
-                  // ==================================================
-                  ScreenContentExit(
-                    isExiting: _isExiting,
-                    direction: ContentExitDirection.toRight,
-                    delay: const Duration(milliseconds: 80),
-                    child: ScreenContentTransition(
-                      direction: ContentTransitionDirection.fromLeft,
-                      delay: const Duration(milliseconds: 80),
-                      child: Text(
-                        'loan_overview'.tr,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.lightBlue,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 14),
-
-                  // ==================================================
-                  // SUMMARY CARDS
-                  // ENTRY LEFT - 160ms
-                  // EXIT RIGHT - 160ms
-                  // ==================================================
-                  ScreenContentExit(
-                    isExiting: _isExiting,
-                    direction: ContentExitDirection.toRight,
-                    delay: const Duration(milliseconds: 160),
-                    child: ScreenContentTransition(
-                      direction: ContentTransitionDirection.fromLeft,
-                      delay: const Duration(milliseconds: 160),
-                      child: Obx(
-                        () => Row(
-                          children: [
-                            Expanded(
-                              child: HomeSummaryCard(
-                                title: 'total'.tr,
-                                value: controller.totalLoans.value,
-                                icon: Icons.account_balance_wallet_outlined,
-                                iconColor: AppColors.secondary,
-                              ),
-                            ),
-
-                            const SizedBox(width: 10),
-
-                            Expanded(
-                              child: HomeSummaryCard(
-                                title: 'active'.tr,
-                                value: controller.activeLoans.value,
-                                icon: Icons.pending_actions_outlined,
-                                iconColor: AppColors.buttonEnd,
-                              ),
-                            ),
-
-                            const SizedBox(width: 10),
-
-                            Expanded(
-                              child: HomeSummaryCard(
-                                title: 'inactive'.tr,
-                                value: controller.inactiveLoans.value,
-                                icon: Icons.check_circle_outline,
-                                iconColor: AppColors.primary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 30),
-
-                  _buildLoanTypeSelector(),
-
-                  const SizedBox(height: 20),
-
-                  // ==================================================
-                  // MY LOANS HEADER
-                  // ENTRY LEFT - 240ms
-                  // EXIT RIGHT - 240ms
-                  // ==================================================
-                  ScreenContentExit(
-                    isExiting: _isExiting,
-                    direction: ContentExitDirection.toRight,
-                    delay: const Duration(milliseconds: 240),
-                    child: ScreenContentTransition(
-                      direction: ContentTransitionDirection.fromLeft,
-                      delay: const Duration(milliseconds: 240),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Obx(
-                                  () => Text(
-                                    controller.selectedLoanType.value ==
-                                            'guarantor_loans'
-                                        ? 'guarantor_loans'.tr
-                                        : 'my_loans'.tr,
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w700,
-                                      color: AppColors.lightBlue,
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(height: 3),
-                                Text(
-                                  'track_your_vehicle_loans'.tr,
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.black45,
-                                  ),
-                                ),
-                              ],
-                            ),
                           ),
+                        );
+                      }
 
-                          Obx(
-                            () =>
-                                controller.selectedLoanType.value == 'my_loans'
-                                ? PopupMenuButton<String>(
-                                    initialValue:
-                                        controller.selectedFilter.value,
-                                    onSelected: controller.setLoanFilter,
-                                    offset: const Offset(0, 42),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(14),
-                                    ),
-                                    itemBuilder: (context) => [
-                                      PopupMenuItem<String>(
-                                        value: 'Total',
-                                        child: Row(
-                                          children: [
-                                            Icon(
-                                              Icons.all_inclusive_rounded,
-                                              size: 18,
-                                              color: AppColors.lightBlue,
-                                            ),
-                                            SizedBox(width: 10),
-                                            Text(
-                                              'total_loans'.tr,
-                                              style: const TextStyle(
-                                                fontSize: 13,
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      PopupMenuItem<String>(
-                                        value: 'Active',
-                                        child: Row(
-                                          children: [
-                                            Icon(
-                                              Icons.pending_actions_outlined,
-                                              size: 18,
-                                              color: AppColors.buttonEnd,
-                                            ),
-                                            SizedBox(width: 10),
-                                            Text(
-                                              'active'.tr,
-                                              style: const TextStyle(
-                                                fontSize: 13,
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      PopupMenuItem<String>(
-                                        value: 'Inactive',
-                                        child: Row(
-                                          children: [
-                                            Icon(
-                                              Icons.check_circle_outline,
-                                              size: 18,
-                                              color: AppColors.primary,
-                                            ),
-                                            SizedBox(width: 10),
-                                            Text(
-                                              'inactive'.tr,
-                                              style: const TextStyle(
-                                                fontSize: 13,
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 11,
-                                        vertical: 7,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.lightBlue.withValues(
-                                          alpha: 0.08,
-                                        ),
-                                        borderRadius: BorderRadius.circular(
-                                          100,
-                                        ),
-                                        border: Border.all(
-                                          color: AppColors.lightBlue.withValues(
-                                            alpha: 0.12,
-                                          ),
-                                        ),
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          const Icon(
-                                            Icons.filter_list_rounded,
-                                            size: 14,
-                                            color: AppColors.lightBlue,
-                                          ),
-                                          const SizedBox(width: 5),
-                                          Text(
-                                            _filterLabel(
-                                              controller.selectedFilter.value,
-                                            ),
-                                            style: const TextStyle(
-                                              fontSize: 11,
-                                              fontWeight: FontWeight.w600,
-                                              color: AppColors.lightBlue,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 3),
-                                          const Icon(
-                                            Icons.keyboard_arrow_down_rounded,
-                                            size: 16,
-                                            color: AppColors.lightBlue,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  )
-                                : const SizedBox.shrink(),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // ==================================================
-                  // LOANS
-                  // ==================================================
-                  Obx(() {
-                    if (controller.selectedLoanType.value ==
-                        'guarantor_loans') {
-                      return _buildGuarantorLoansContent();
-                    }
-
-                    if (controller.isLoading.value) {
-                      return ScreenContentExit(
-                        isExiting: _isExiting,
-                        direction: ContentExitDirection.toRight,
-                        delay: const Duration(milliseconds: 320),
-                        child: ScreenContentTransition(
-                          direction: ContentTransitionDirection.fromLeft,
+                      if (controller.filteredLoans.isEmpty) {
+                        return ScreenContentExit(
+                          isExiting: _isExiting,
+                          direction: ContentExitDirection.toRight,
                           delay: const Duration(milliseconds: 320),
-                          child: const Center(
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(vertical: 40),
-                              child: CircularProgressIndicator(
-                                color: AppColors.primary,
+                          child: ScreenContentTransition(
+                            direction: ContentTransitionDirection.fromLeft,
+                            delay: const Duration(milliseconds: 320),
+                            child: Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 30,
                               ),
-                            ),
-                          ),
-                        ),
-                      );
-                    }
-
-                    if (controller.errorMessage.value != null) {
-                      return ScreenContentExit(
-                        isExiting: _isExiting,
-                        direction: ContentExitDirection.toRight,
-                        delay: const Duration(milliseconds: 320),
-                        child: ScreenContentTransition(
-                          direction: ContentTransitionDirection.fromLeft,
-                          delay: const Duration(milliseconds: 320),
-                          child: Center(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 30),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.55),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: Colors.white.withValues(alpha: 0.55),
+                                ),
+                              ),
                               child: Column(
                                 children: [
-                                  const Icon(
-                                    Icons.error_outline_rounded,
+                                  Icon(
+                                    Icons.account_balance_wallet_outlined,
                                     size: 42,
-                                    color: AppColors.error,
-                                  ),
-                                  const SizedBox(height: 10),
-                                  Text(
-                                    controller.errorMessage.value!.tr,
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(
-                                      fontSize: 13,
-                                      color: AppColors.error,
+                                    color: AppColors.secondary.withValues(
+                                      alpha: 0.65,
                                     ),
                                   ),
-                                  const SizedBox(height: 14),
-                                  TextButton(
-                                    onPressed: controller.retry,
-                                    child: Text('try_again'.tr),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    controller.selectedFilter.value == 'Total'
+                                        ? 'no_loans_available'.tr
+                                        : 'no_filter_loans'.trParams({
+                                            'filter': _filterLabel(
+                                              controller.selectedFilter.value,
+                                            ),
+                                          }),
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.lightBlue,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Text(
+                                    controller.selectedFilter.value == 'Total'
+                                        ? 'loan_information_placeholder'.tr
+                                        : 'no_loans_at_moment'.trParams({
+                                            'filter': _filterLabel(
+                                              controller.selectedFilter.value,
+                                            ),
+                                          }),
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.black54,
+                                    ),
+                                    textAlign: TextAlign.center,
                                   ),
                                 ],
                               ),
                             ),
                           ),
-                        ),
-                      );
-                    }
-
-                    if (controller.filteredLoans.isEmpty) {
-                      return ScreenContentExit(
-                        isExiting: _isExiting,
-                        direction: ContentExitDirection.toRight,
-                        delay: const Duration(milliseconds: 320),
-                        child: ScreenContentTransition(
-                          direction: ContentTransitionDirection.fromLeft,
-                          delay: const Duration(milliseconds: 320),
-                          child: Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 30,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.55),
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.55),
-                              ),
-                            ),
-                            child: Column(
-                              children: [
-                                Icon(
-                                  Icons.account_balance_wallet_outlined,
-                                  size: 42,
-                                  color: AppColors.secondary.withValues(
-                                    alpha: 0.65,
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                                Text(
-                                  controller.selectedFilter.value == 'Total'
-                                      ? 'no_loans_available'.tr
-                                      : 'no_filter_loans'.trParams({
-                                          'filter': _filterLabel(
-                                            controller.selectedFilter.value,
-                                          ),
-                                        }),
-                                  style: const TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.lightBlue,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                                const SizedBox(height: 5),
-                                Text(
-                                  controller.selectedFilter.value == 'Total'
-                                      ? 'loan_information_placeholder'.tr
-                                      : 'no_loans_at_moment'.trParams({
-                                          'filter': _filterLabel(
-                                            controller.selectedFilter.value,
-                                          ),
-                                        }),
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.black54,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    }
-
-                    return Column(
-                      children: controller.filteredLoans.asMap().entries.map((
-                        entry,
-                      ) {
-                        final index = entry.key;
-                        final loan = entry.value;
-
-                        // ------------------------------------------------
-                        // Selected card exits first.
-                        // Other cards follow behind it.
-                        // ------------------------------------------------
-
-                        final exitDelay = _selectedLoanIndex == index
-                            ? 0
-                            : 80 + (index * 60);
-
-                        return ScreenContentExit(
-                          isExiting: _isExiting,
-                          direction: ContentExitDirection.toRight,
-                          delay: Duration(milliseconds: exitDelay),
-                          resetDelay: Duration(
-                            milliseconds: 320 + (index * 80),
-                          ),
-                          child: ScreenContentTransition(
-                            direction: ContentTransitionDirection.fromLeft,
-                            delay: Duration(milliseconds: 320 + (index * 80)),
-                            child: HomeLoanCard(
-                              loanNumber: loan['loanNumber']?.toString() ?? '',
-                              borrowers: List<String>.from(
-                                loan['borrowers'] as List? ?? const <String>[],
-                              ),
-                              amount: (loan['amount'] as num).toDouble(),
-                              status: loan['status']?.toString() ?? '',
-                              onTap: () =>
-                                  _openLoanDetails(loan: loan, index: index),
-                            ),
-                          ),
                         );
-                      }).toList(),
-                    );
-                  }),
+                      }
 
-                  // ==================================================
-                  // FOOTER
-                  // ENTRY LEFT - 420ms
-                  // EXIT RIGHT - 420ms
-                  // ==================================================
-                  ScreenContentExit(
-                    isExiting: _isExiting,
-                    direction: ContentExitDirection.toRight,
-                    delay: const Duration(milliseconds: 420),
-                    child: ScreenContentTransition(
-                      direction: ContentTransitionDirection.fromLeft,
+                      return Column(
+                        children: controller.filteredLoans.asMap().entries.map((
+                          entry,
+                        ) {
+                          final index = entry.key;
+                          final loan = entry.value;
+
+                          // ------------------------------------------------
+                          // Selected card exits first.
+                          // Other cards follow behind it.
+                          // ------------------------------------------------
+
+                          final exitDelay = _selectedLoanIndex == index
+                              ? 0
+                              : 80 + (index * 60);
+
+                          return ScreenContentExit(
+                            isExiting: _isExiting,
+                            direction: ContentExitDirection.toRight,
+                            delay: Duration(milliseconds: exitDelay),
+                            resetDelay: Duration(
+                              milliseconds: 320 + (index * 80),
+                            ),
+                            child: ScreenContentTransition(
+                              direction: ContentTransitionDirection.fromLeft,
+                              delay: Duration(milliseconds: 320 + (index * 80)),
+                              child: HomeLoanCard(
+                                loanNumber:
+                                    loan['loanNumber']?.toString() ?? '',
+                                borrowers: List<String>.from(
+                                  loan['borrowers'] as List? ??
+                                      const <String>[],
+                                ),
+                                amount: (loan['amount'] as num).toDouble(),
+                                status: loan['status']?.toString() ?? '',
+                                onTap: () =>
+                                    _openLoanDetails(loan: loan, index: index),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      );
+                    }),
+
+                    // ==================================================
+                    // FOOTER
+                    // ENTRY LEFT - 420ms
+                    // EXIT RIGHT - 420ms
+                    // ==================================================
+                    ScreenContentExit(
+                      isExiting: _isExiting,
+                      direction: ContentExitDirection.toRight,
                       delay: const Duration(milliseconds: 420),
-                      child: const FooterVersion(),
+                      child: ScreenContentTransition(
+                        direction: ContentTransitionDirection.fromLeft,
+                        delay: const Duration(milliseconds: 420),
+                        child: const FooterVersion(),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
