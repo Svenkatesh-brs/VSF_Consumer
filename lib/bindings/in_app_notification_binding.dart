@@ -7,18 +7,20 @@ import '../services/in_app_notification_service.dart';
 class InAppNotificationBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut<InAppNotificationService>(
-      () => InAppNotificationService(
-        apiService: Get.find<ApiService>(),
-      ),
-      fenix: true,
-    );
+    if (!Get.isRegistered<InAppNotificationService>()) {
+      Get.lazyPut<InAppNotificationService>(
+        () => InAppNotificationService(apiService: Get.find<ApiService>()),
+        fenix: true,
+      );
+    }
 
-    Get.lazyPut<InAppNotificationProvider>(
-      () => InAppNotificationProvider(
-        service: Get.find<InAppNotificationService>(),
-      ),
-      fenix: true,
-    );
+    if (!Get.isRegistered<InAppNotificationProvider>()) {
+      Get.lazyPut<InAppNotificationProvider>(
+        () => InAppNotificationProvider(
+          service: Get.find<InAppNotificationService>(),
+        ),
+        fenix: true,
+      );
+    }
   }
 }

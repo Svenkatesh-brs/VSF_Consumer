@@ -10,6 +10,8 @@ import '../services/auth_service.dart';
 import '../services/notification_service.dart';
 import '../services/storage_service.dart';
 import '../services/otp_autofill_service.dart';
+import '../providers/in_app_notification_provider.dart';
+import '../services/in_app_notification_service.dart';
 import '../utils/app_constants.dart';
 
 class AppBinding extends Bindings {
@@ -50,6 +52,18 @@ class AppBinding extends Bindings {
       () => ApiService(
         baseUrl: AppConstants.baseUrl,
         storageService: Get.find<StorageService>(),
+      ),
+      fenix: true,
+    );
+
+    Get.lazyPut<InAppNotificationService>(
+      () => InAppNotificationService(apiService: Get.find<ApiService>()),
+      fenix: true,
+    );
+
+    Get.lazyPut<InAppNotificationProvider>(
+      () => InAppNotificationProvider(
+        service: Get.find<InAppNotificationService>(),
       ),
       fenix: true,
     );

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../providers/auth_provider.dart';
 import '../providers/home_provider.dart';
+import '../providers/in_app_notification_provider.dart';
 import '../models/home_model.dart';
 import '../routes/app_routes.dart';
 import '../utils/app_colors.dart';
@@ -25,6 +26,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late final HomeProvider controller;
+  late final InAppNotificationProvider notificationController;
 
   bool _isExiting = false;
   int? _selectedLoanIndex;
@@ -34,6 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
 
     controller = Get.find<HomeProvider>();
+    notificationController = Get.find<InAppNotificationProvider>();
   }
 
   // ------------------------------------------------------------
@@ -117,6 +120,11 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> _refreshHome() async {
+    await controller.refreshDashboard();
+    await notificationController.refreshNotifications();
   }
 
   // ------------------------------------------------------------
@@ -311,7 +319,7 @@ class _HomeScreenState extends State<HomeScreen> {
         showBottomImage: false,
         child: SafeArea(
           child: RefreshIndicator(
-            onRefresh: controller.refreshDashboard,
+            onRefresh: _refreshHome,
             color: AppColors.lightBlue,
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(
@@ -404,13 +412,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
                               const Spacer(),
 
-                              _HeaderIconButton(
-                                tooltip: 'notifications'.tr,
-                                icon: Icons.notifications_none_rounded,
-                                iconSize: 22,
-                                onPressed: () {
-                                  Get.toNamed(AppRoutes.inAppNotifications);
-                                },
+                              Obx(
+                                () => _HeaderIconButton(
+                                  tooltip: 'notifications'.tr,
+                                  icon: Icons.notifications_none_rounded,
+                                  iconSize: 22,
+                                  badgeCount:
+                                      notificationController.unreadCount,
+                                  onPressed: () {
+                                    Get.toNamed(AppRoutes.inAppNotifications);
+                                  },
+                                ),
                               ),
 
                               const SizedBox(width: 6),
@@ -1012,6 +1024,7 @@ class _HeaderIconButton extends StatelessWidget {
   final String tooltip;
   final IconData icon;
   final double iconSize;
+  final int badgeCount;
   final VoidCallback onPressed;
 
   const _HeaderIconButton({
@@ -1019,6 +1032,7 @@ class _HeaderIconButton extends StatelessWidget {
     required this.icon,
     required this.onPressed,
     this.iconSize = 22,
+    this.badgeCount = 0,
   });
 
   @override
@@ -1026,29 +1040,59 @@ class _HeaderIconButton extends StatelessWidget {
     return SizedBox(
       width: 42,
       height: 42,
-      child: IconButton(
-        padding: EdgeInsets.zero,
-        tooltip: tooltip,
-        onPressed: onPressed,
-        icon: Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.white.withValues(alpha: 0.85),
-            border: Border.all(
-              color: AppColors.lightBlue.withValues(alpha: 0.12),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 12,
-                offset: const Offset(0, 5),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          IconButton(
+            padding: EdgeInsets.zero,
+            tooltip: tooltip,
+            onPressed: onPressed,
+            icon: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: 0.85),
+                border: Border.all(
+                  color: AppColors.lightBlue.withValues(alpha: 0.12),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 12,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
               ),
-            ],
+              child: Icon(icon, size: iconSize, color: AppColors.lightBlue),
+            ),
           ),
-          child: Icon(icon, size: iconSize, color: AppColors.lightBlue),
-        ),
+          if (badgeCount > 0)
+            Positioned(
+              top: -3,
+              right: -3,
+              child: Container(
+                constraints: const BoxConstraints(minWidth: 18),
+                height: 18,
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.error,
+                  borderRadius: BorderRadius.circular(100),
+                  border: Border.all(color: Colors.white, width: 1.5),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  badgeCount > 99 ? '99+' : '$badgeCount',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 9,
+                    fontWeight: FontWeight.w700,
+                    height: 1,
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
