@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 
 import '../providers/home_provider.dart';
+import '../providers/network_provider.dart';
 import '../services/api_service.dart';
 import '../services/home_service.dart';
 
@@ -12,9 +13,7 @@ class HomeBinding extends Bindings {
     // ============================================================
 
     Get.lazyPut<HomeService>(
-      () => HomeService(
-        apiService: Get.find<ApiService>(),
-      ),
+      () => HomeService(apiService: Get.find<ApiService>()),
       fenix: true,
     );
 
@@ -25,6 +24,7 @@ class HomeBinding extends Bindings {
     Get.lazyPut<HomeProvider>(
       () => HomeProvider(
         homeService: Get.find<HomeService>(),
+        networkProvider: Get.find<NetworkProvider>(),
       ),
       fenix: true,
     );

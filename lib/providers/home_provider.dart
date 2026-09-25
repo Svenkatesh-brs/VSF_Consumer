@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:get/get.dart';
 
 import '../models/home_model.dart';
+import '../providers/network_provider.dart';
 import '../services/home_service.dart';
 
 class HomeProvider extends GetxController {
@@ -10,7 +13,15 @@ class HomeProvider extends GetxController {
 
   final HomeService _homeService;
 
-  HomeProvider({required HomeService homeService}) : _homeService = homeService;
+  final NetworkProvider _networkProvider;
+
+  HomeProvider({
+    required HomeService homeService,
+    required NetworkProvider networkProvider,
+  }) : _homeService = homeService,
+       _networkProvider = networkProvider;
+
+  StreamSubscription<void>? _internetRestoredSubscription;
 
   // ============================================================
   // LOAN DATA
@@ -369,6 +380,26 @@ class HomeProvider extends GetxController {
   }
 
   // ============================================================
+  // CONNECTIVITY RECOVERY
+  // ============================================================
+
+  /// Called automatically when connectivity is restored after being
+  /// unavailable. Reuses the existing load/refresh methods and their
+  /// internal loading guards, so Home data is fetched exactly once
+  /// per recovery and never in duplicate.
+  Future<void> _handleConnectivityRestored() async {
+    if (isLoading.value) {
+      return;
+    }
+
+    if (errorMessage.value != null || loans.isEmpty) {
+      await loadDashboard();
+    } else {
+      await refreshDashboard();
+    }
+  }
+
+  // ============================================================
   // LIFECYCLE
   // ============================================================
 
@@ -376,6 +407,16 @@ class HomeProvider extends GetxController {
   void onReady() {
     super.onReady();
 
+    _internetRestoredSubscription = _networkProvider.internetRestored.listen(
+      (_) => _handleConnectivityRestored(),
+    );
+
     loadDashboard();
+  }
+
+  @override
+  void onClose() {
+    _internetRestoredSubscription?.cancel();
+    super.onClose();
   }
 }

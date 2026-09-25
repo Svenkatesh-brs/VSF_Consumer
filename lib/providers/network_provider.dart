@@ -1,11 +1,11 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 
 import '../services/network_service.dart';
 
-class NetworkProvider extends ChangeNotifier {
+class NetworkProvider extends ChangeNotifier with WidgetsBindingObserver {
   final NetworkService networkService;
 
   NetworkProvider({required this.networkService});
@@ -15,24 +15,50 @@ class NetworkProvider extends ChangeNotifier {
 
   StreamSubscription<InternetStatus>? _subscription;
 
+  final StreamController<void> _internetRestoredController =
+      StreamController<void>.broadcast();
+
   bool get hasInternet => _hasInternet;
   bool get isChecking => _isChecking;
 
+  /// Fires only when connectivity transitions from unavailable to available.
+  Stream<void> get internetRestored => _internetRestoredController.stream;
+
   void initialize() {
+    WidgetsBinding.instance.addObserver(this);
+
     _subscription?.cancel();
 
     _subscription = networkService.onStatusChange.listen(
       (status) {
-        _hasInternet = status == InternetStatus.connected;
-        notifyListeners();
+        _updateInternetStatus(status == InternetStatus.connected);
       },
       onError: (_) {
-        _hasInternet = false;
-        notifyListeners();
+        _updateInternetStatus(false);
       },
     );
 
     checkConnection();
+  }
+
+  /// Central place for updating the internet state.
+  ///
+  /// Notifies widgets and emits [internetRestored] only on the
+  /// offline -> online transition, so data reloads happen exactly
+  /// once per connectivity recovery.
+  void _updateInternetStatus(bool hasInternet) {
+    if (hasInternet == _hasInternet) {
+      return;
+    }
+
+    final wasOffline = !_hasInternet;
+
+    _hasInternet = hasInternet;
+    notifyListeners();
+
+    if (wasOffline && hasInternet) {
+      _internetRestoredController.add(null);
+    }
   }
 
   Future<void> checkConnection() async {
@@ -42,9 +68,9 @@ class NetworkProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _hasInternet = await networkService.hasInternetAccess();
+      _updateInternetStatus(await networkService.hasInternetAccess());
     } catch (_) {
-      _hasInternet = false;
+      _updateInternetStatus(false);
     } finally {
       _isChecking = false;
       notifyListeners();
@@ -52,8 +78,17 @@ class NetworkProvider extends ChangeNotifier {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      checkConnection();
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _subscription?.cancel();
+    _internetRestoredController.close();
     super.dispose();
   }
 }
