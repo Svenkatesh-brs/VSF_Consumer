@@ -298,44 +298,17 @@ class PayEmiScreen extends GetView<PayEmiProvider> {
               ),
             ],
           ),
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: image == null || image.isEmpty
-                      ? _buildQrUnavailable()
-                      : Image.memory(
-                          image,
-                          width: double.infinity,
-                          height: double.infinity,
-                          fit: BoxFit.contain,
-                          errorBuilder: (_, _, _) => _buildQrUnavailable(),
-                        ),
-                ),
-              ),
-              if (image != null && image.isNotEmpty)
-                Positioned(
-                  top: 0,
-                  right: 0,
-                  child: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: AppColors.tintColor.withValues(alpha: 0.9),
-                      borderRadius: BorderRadius.circular(9),
-                      border: Border.all(
-                        color: AppColors.primary.withValues(alpha: 0.25),
-                        width: 1,
-                      ),
-                    ),
-                    child: const Icon(
-                      Icons.fullscreen_rounded,
-                      color: AppColors.lightBlue,
-                      size: 16,
-                    ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: image == null || image.isEmpty
+                ? _buildQrUnavailable()
+                : Image.memory(
+                    image,
+                    width: double.infinity,
+                    height: double.infinity,
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, _, _) => _buildQrUnavailable(),
                   ),
-                ),
-            ],
           ),
         ),
       ),

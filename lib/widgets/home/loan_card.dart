@@ -200,25 +200,7 @@ class HomeLoanCard extends StatelessWidget {
             // ------------------------------------------------------
             // VIEW DETAILS
             // ------------------------------------------------------
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Text(
-                  'view_details'.tr,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.buttonEnd,
-                  ),
-                ),
-                const SizedBox(width: 4),
-                Icon(
-                  Icons.arrow_forward_rounded,
-                  size: 17,
-                  color: AppColors.buttonEnd,
-                ),
-              ],
-            ),
+            HomeLoanDetailsButton(onTap: onTap),
           ],
         ),
       ),
@@ -283,6 +265,165 @@ class _InfoItem extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class HomeLoanDetailsButton extends StatefulWidget {
+  const HomeLoanDetailsButton({super.key, required this.onTap});
+
+  final VoidCallback? onTap;
+
+  @override
+  State<HomeLoanDetailsButton> createState() => _HomeLoanDetailsButtonState();
+}
+
+class _HomeLoanDetailsButtonState extends State<HomeLoanDetailsButton>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _animationController;
+  bool _isPressed = false;
+  bool _isHovered = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 180),
+      reverseDuration: const Duration(milliseconds: 240),
+    );
+  }
+
+  void _syncAnimation() {
+    if (_isPressed || _isHovered) {
+      _animationController.forward();
+    } else {
+      _animationController.reverse();
+    }
+  }
+
+  void _setPressed(bool value) {
+    if (!mounted) return;
+    setState(() {
+      _isPressed = value;
+    });
+    _syncAnimation();
+  }
+
+  void _setHovered(bool value) {
+    if (!mounted) return;
+    setState(() {
+      _isHovered = value;
+    });
+    _syncAnimation();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final enabled = widget.onTap != null;
+
+    return Align(
+      alignment: Alignment.centerRight,
+      child: AnimatedBuilder(
+        animation: _animationController,
+        builder: (context, child) {
+          final progress = Curves.easeOut.transform(_animationController.value);
+          final activeScale = _isPressed ? 0.96 : (_isHovered ? 1.02 : 1.0);
+          final scale = 1 + ((activeScale - 1) * progress);
+          final startColor = Color.lerp(
+            AppColors.buttonStart,
+            AppColors.secondary,
+            progress,
+          )!;
+          final textColor = enabled
+              ? Colors.white
+              : Colors.white.withValues(alpha: 0.80);
+
+          return Transform.scale(
+            scale: enabled ? scale : 1,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: enabled
+                    ? LinearGradient(
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                        colors: [startColor, AppColors.buttonEnd],
+                      )
+                    : null,
+                color: enabled ? null : Colors.grey.shade400,
+                borderRadius: BorderRadius.circular(100),
+                border: Border.all(
+                  color: enabled
+                      ? Colors.white.withValues(alpha: 0.28)
+                      : Colors.white.withValues(alpha: 0.18),
+                ),
+                boxShadow: enabled
+                    ? [
+                        BoxShadow(
+                          color: AppColors.buttonShadow.withValues(
+                            alpha: 0.35 + (progress * 0.25),
+                          ),
+                          blurRadius: 12 + (progress * 8),
+                          offset: const Offset(0, 5),
+                        ),
+                      ]
+                    : null,
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: widget.onTap,
+                  onTapDown: enabled ? (_) => _setPressed(true) : null,
+                  onTapUp: enabled ? (_) => _setPressed(false) : null,
+                  onTapCancel: enabled ? () => _setPressed(false) : null,
+                  onHover: enabled ? _setHovered : null,
+                  borderRadius: BorderRadius.circular(100),
+                  splashColor: Colors.white.withValues(alpha: 0.18),
+                  hoverColor: Colors.white.withValues(alpha: 0.08),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(minHeight: 40),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 10,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'view_details'.tr,
+                            style: TextStyle(
+                              color: textColor,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.2,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Transform.translate(
+                            offset: Offset(progress * 3, 0),
+                            child: Icon(
+                              Icons.arrow_forward_rounded,
+                              size: 17,
+                              color: textColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 }

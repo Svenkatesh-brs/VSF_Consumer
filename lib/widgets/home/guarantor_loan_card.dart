@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import 'loan_card.dart';
+
 import '../../models/home_model.dart';
 import '../../utils/app_colors.dart';
 
@@ -186,25 +188,7 @@ class GuarantorLoanCard extends StatelessWidget {
             // --------------------------------------------------
             // VIEW DETAILS
             // --------------------------------------------------
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Text(
-                  'view_details'.tr,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.buttonEnd,
-                  ),
-                ),
-                const SizedBox(width: 4),
-                Icon(
-                  Icons.arrow_forward_rounded,
-                  size: 17,
-                  color: AppColors.buttonEnd,
-                ),
-              ],
-            ),
+            HomeLoanDetailsButton(onTap: onTap),
           ],
         ),
       ),
