@@ -47,8 +47,8 @@ abstract class AppConstants {
   // ============================================================
 
   static const String baseUrl = 
-  // 'https://vsf-api-development.up.railway.app';
-  'http://10.90.90.45:4000';
+  'https://vsf-api-development.up.railway.app';
+  // 'http://10.90.90.45:4000';
 
   // ============================================================
   // AUTH API

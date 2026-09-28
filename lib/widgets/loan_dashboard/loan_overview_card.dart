@@ -682,7 +682,7 @@ class _LoanOverviewCardState extends State<LoanOverviewCard>
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
                                         fontSize: 11,
-                                        fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w700,
                                         color: Colors.white.withValues(
                                           alpha: 0.62,
                                         ),

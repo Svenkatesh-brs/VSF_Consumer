@@ -505,7 +505,7 @@ class _FloatingActionItemState extends State<_FloatingActionItem> {
                         style: TextStyle(
                           fontSize: 9.5,
                           height: 1.15,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w700,
                           color: isDisabled
                               ? AppColors.lightBlue.withValues(alpha: 0.40)
                               : AppColors.lightBlue,
