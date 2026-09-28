@@ -1,6 +1,8 @@
 import 'package:get/get.dart';
 
+import '../bindings/loan_dashboard_binding.dart';
 import '../providers/contact_update_provider.dart';
+import '../providers/loan_dashboard_provider.dart';
 import '../services/api_service.dart';
 import '../services/contact_update_service.dart';
 
@@ -26,6 +28,9 @@ import '../services/contact_update_service.dart';
 class ContactUpdateBinding extends Bindings {
   @override
   void dependencies() {
+    if (!Get.isRegistered<LoanDashboardProvider>()) {
+      LoanDashboardBinding().dependencies();
+    }
     // ============================================================
     // CONTACT UPDATE SERVICE
     //

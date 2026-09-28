@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 
+import '../bindings/loan_dashboard_binding.dart';
 import '../providers/home_provider.dart';
 import '../providers/network_provider.dart';
 import '../services/api_service.dart';
@@ -28,5 +29,11 @@ class HomeBinding extends Bindings {
       ),
       fenix: true,
     );
+
+    // ============================================================
+    // LOAN DASHBOARD DEPENDENCIES (for Profile Drawer & its actions)
+    // ============================================================
+
+    LoanDashboardBinding().dependencies();
   }
 }

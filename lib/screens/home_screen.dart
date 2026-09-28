@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../providers/auth_provider.dart';
 import '../providers/home_provider.dart';
 import '../providers/in_app_notification_provider.dart';
+import '../widgets/loan_dashboard/profile_drawer.dart';
 import '../models/home_model.dart';
 import '../routes/app_routes.dart';
 import '../utils/app_colors.dart';
@@ -64,62 +64,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   // ------------------------------------------------------------
-  // LOGOUT CONFIRMATION
+  // PROFILE DRAWER
   // ------------------------------------------------------------
 
-  void _showLogoutConfirmation() {
-    if (_isExiting) {
-      return;
-    }
-
-    Get.dialog(
-      AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
-        title: Row(
-          children: [
-            Icon(Icons.logout_rounded, color: AppColors.lightBlue),
-            SizedBox(width: 10),
-            Text(
-              'logout_confirmation_title'.tr,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: AppColors.lightBlue,
-              ),
-            ),
-          ],
-        ),
-        content: Text(
-          'logout_confirmation_message'.tr,
-          style: const TextStyle(fontSize: 14, color: Colors.black54),
-        ),
-        actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        actions: [
-          TextButton(
-            onPressed: Get.back,
-            child: Text('cancel'.tr, style: TextStyle(color: Colors.black54)),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Get.back();
-              Get.find<AuthProvider>().logout();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.error,
-              foregroundColor: Colors.white,
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(100),
-              ),
-            ),
-            child: Text(
-              'logout'.tr,
-              style: const TextStyle(fontWeight: FontWeight.w600),
-            ),
-          ),
-        ],
-      ),
-    );
+  void _openProfileDrawer() {
+    ProfileDrawer.show(context);
   }
 
   Future<void> _refreshHome() async {
@@ -428,10 +377,10 @@ class _HomeScreenState extends State<HomeScreen> {
                               const SizedBox(width: 6),
 
                               _HeaderIconButton(
-                                tooltip: 'logout'.tr,
-                                icon: Icons.logout_rounded,
-                                iconSize: 20,
-                                onPressed: _showLogoutConfirmation,
+                                tooltip: 'profile'.tr,
+                                icon: Icons.person_outline_rounded,
+                                iconSize: 22,
+                                onPressed: _openProfileDrawer,
                               ),
                             ],
                           ),

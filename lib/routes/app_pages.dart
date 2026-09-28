@@ -68,7 +68,11 @@ abstract class AppPages {
       binding: LoanDashboardBinding(),
     ),
 
-    GetPage(name: AppRoutes.profile, page: () => const ProfileScreen()),
+    GetPage(
+      name: AppRoutes.profile,
+      page: () => const ProfileScreen(),
+      binding: LoanDashboardBinding(),
+    ),
 
     // ==========================================================
     // LOAN DETAILS

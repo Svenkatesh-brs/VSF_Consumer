@@ -2,18 +2,35 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../models/loan_details_model.dart';
+import '../providers/home_provider.dart';
 import '../providers/loan_dashboard_provider.dart';
 import '../utils/app_colors.dart';
 import '../utils/app_responsive.dart';
 import '../widgets/app_background.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final controller = Get.find<LoanDashboardProvider>();
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
 
+class _ProfileScreenState extends State<ProfileScreen> {
+  late final LoanDashboardProvider controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.find<LoanDashboardProvider>();
+    if (controller.loanDetails.value == null && !controller.isLoading.value) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        controller.loadLoanDetails();
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       body: AppBackground(
         showWatermark: true,
@@ -21,7 +38,12 @@ class ProfileScreen extends StatelessWidget {
         child: SafeArea(
           child: Obx(() {
             final borrower = controller.loanDetails.value?.borrower;
-            final fallbackName = controller.dashboard.value?.borrowerName ?? '';
+            final fallbackName =
+                (controller.dashboard.value?.borrowerName.isNotEmpty ?? false)
+                    ? controller.dashboard.value!.borrowerName
+                    : (Get.isRegistered<HomeProvider>()
+                        ? Get.find<HomeProvider>().loggedInUserName.value
+                        : '');
             final hasProfile = borrower != null || fallbackName.isNotEmpty;
 
             return Column(

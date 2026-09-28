@@ -5,6 +5,7 @@ import '../models/home_model.dart';
 import '../models/loan_dashboard_model.dart';
 import '../models/loan_details_model.dart';
 import '../models/transactions_model.dart';
+import 'home_provider.dart';
 import '../services/loan_dashboard_service.dart';
 
 class LoanDashboardProvider extends GetxController {
@@ -198,6 +199,17 @@ class LoanDashboardProvider extends GetxController {
 
     if (loanId.isEmpty) {
       loanId = _loanIdFromArguments(selectedLoan.value);
+    }
+
+    if (loanId.isEmpty && Get.isRegistered<HomeProvider>()) {
+      final homeProvider = Get.find<HomeProvider>();
+      if (homeProvider.loans.isNotEmpty) {
+        final firstLoan = homeProvider.loans.first;
+        loanId = _loanIdFromArguments(firstLoan);
+        if (selectedLoan.value == null) {
+          selectedLoan.value = _selectedLoanFromArguments(firstLoan);
+        }
+      }
     }
 
     return loanId;
