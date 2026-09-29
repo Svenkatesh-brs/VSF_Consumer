@@ -2,10 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../providers/auth_provider.dart';
+import '../../providers/home_provider.dart';
 import '../../providers/language_selection_provider.dart';
+import '../../providers/loan_dashboard_provider.dart';
 import '../../models/language_selection_model.dart';
 import '../../routes/app_routes.dart';
 import '../../utils/app_colors.dart';
+import 'loan_picker_dialog.dart';
+
 
 class ProfileDrawer extends StatelessWidget {
   final String avatarAsset;
@@ -229,6 +233,82 @@ class ProfileDrawer extends StatelessWidget {
   }
 
   // ============================================================
+  // SELECTED LOAN PROVIDER
+  //
+  // The drawer is opened from Home and from the Loan Dashboard. In
+  // both cases LoanDashboardProvider is already registered (Home via
+  // HomeBinding, the dashboard via LoanDashboardBinding) and it is
+  // the app's single owner of the selected loan, so no extra
+  // loan-management state is introduced here.
+  // ============================================================
+
+  LoanDashboardProvider? get _loanProvider {
+    if (!Get.isRegistered<LoanDashboardProvider>()) {
+      return null;
+    }
+
+    return Get.find<LoanDashboardProvider>();
+  }
+
+  // ============================================================
+  // LOAN PICKER
+  //
+  // Opens the compact picker over the drawer and, once a loan is
+  // chosen, loads it through LoanDashboardProvider.selectLoan so the
+  // EMI schedule, transactions and contact details shown afterwards
+  // belong to exactly that loan.
+  //
+  // Returns true when a loan is ready to use.
+  // ============================================================
+
+  Future<bool> _showLoanPicker(BuildContext context) async {
+    final loanProvider = _loanProvider;
+
+    if (loanProvider == null) {
+      _showStyledSnackbar(
+        title: 'error'.tr,
+        message: 'error_unable_load'.tr,
+        backgroundColor: Colors.red.shade700,
+        icon: Icons.error_rounded,
+      );
+
+      return false;
+    }
+
+    // "My Loans" is already in memory from Home; the picker only
+    // reads it, so opening it never triggers an extra request.
+    final homeProvider = Get.isRegistered<HomeProvider>()
+        ? Get.find<HomeProvider>()
+        : null;
+
+    final picked = await LoanPickerDialog.show(
+      context,
+      loans: homeProvider?.loans ?? const <Map<String, dynamic>>[],
+      selectedLoanNumber: loanProvider.loanNumber,
+      isLoading: homeProvider?.isLoading.value ?? false,
+    );
+
+    if (picked == null) {
+      return false;
+    }
+
+    final loaded = await loanProvider.selectLoan(picked);
+
+    if (!loaded) {
+      _showStyledSnackbar(
+        title: 'error'.tr,
+        message: loanProvider.errorMessage.value ?? 'error_unable_load'.tr,
+        backgroundColor: Colors.red.shade700,
+        icon: Icons.error_rounded,
+      );
+
+      return false;
+    }
+
+    return true;
+  }
+
+  // ============================================================
   // BUILD
   // ============================================================
 
@@ -316,10 +396,27 @@ class ProfileDrawer extends StatelessWidget {
               },
             ),
 
-            _QuickActionsDropdown(onNavigate: (route) {
-              Navigator.pop(context);
-              Get.toNamed(route);
-            }),
+            // ------------------------------------------------------------
+            // QUICK ACTIONS
+            //
+            // Wrapped in Obx so the selected-loan chip reacts to the
+            // shared LoanDashboardProvider state on both entry points:
+            // empty on Home, already filled on the Loan Dashboard.
+            // ------------------------------------------------------------
+
+            if (_loanProvider case final loanProvider?)
+              Obx(
+                () => _QuickActionsDropdown(
+                  selectedLoanNumber: loanProvider.loanNumber,
+                  isSelectingLoan: loanProvider.isLoading.value,
+                  onNavigate: (route) {
+                    Navigator.pop(context);
+                    Get.toNamed(route);
+                  },
+                  onRequestLoan: _showLoanPicker,
+                ),
+              ),
+
 
             _buildDrawerItem(
               icon: Icons.language_rounded,
@@ -391,10 +488,68 @@ class ProfileDrawer extends StatelessWidget {
   }
 }
 
+// ============================================================
+// QUICK ACTIONS
+//
+// The same section is used from Home and from the Loan Dashboard;
+// the entry point is what makes it behave differently, and that
+// difference is expressed entirely through the shared selected-loan
+// state (see LoanDashboardProvider):
+//
+//   * Loan Dashboard -> a loan is already selected, so the chip is
+//     filled in and every action runs on that loan immediately.
+//   * Home           -> no loan is selected, so the label is plain
+//     and the first loan-specific tap opens the loan picker.
+//
+// There is deliberately no "opened from" flag: the drawer reads the
+// one selected loan that the whole loan feature already uses.
+// ============================================================
+
 class _QuickActionsDropdown extends StatelessWidget {
+  final String selectedLoanNumber;
+
+  final bool isSelectingLoan;
+
   final ValueChanged<String> onNavigate;
 
-  const _QuickActionsDropdown({required this.onNavigate});
+  final Future<bool> Function(BuildContext) onRequestLoan;
+
+  const _QuickActionsDropdown({
+    required this.selectedLoanNumber,
+    required this.isSelectingLoan,
+    required this.onNavigate,
+    required this.onRequestLoan,
+  });
+
+  // ============================================================
+  // LOAN-SPECIFIC ACTIONS
+  //
+  // These read loan data from LoanDashboardProvider, so a loan must
+  // be selected before they can open. Help & Support is purely
+  // informational and always opens directly.
+  // ============================================================
+
+  static const Set<String> _loanSpecificRoutes = <String>{
+    AppRoutes.emiSchedule,
+    AppRoutes.transactions,
+    AppRoutes.contactUpdate,
+    AppRoutes.complaint,
+  };
+
+  Future<void> _handleTap(BuildContext context, String route) async {
+    if (_loanSpecificRoutes.contains(route) &&
+        selectedLoanNumber.isEmpty) {
+      // Home: no loan yet — ask for one first, then continue to the
+      // action the customer originally tapped.
+      final hasLoan = await onRequestLoan(context);
+
+      if (!hasLoan) {
+        return;
+      }
+    }
+
+    onNavigate(route);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -416,13 +571,39 @@ class _QuickActionsDropdown extends StatelessWidget {
             color: AppColors.lightBlue,
           ),
         ),
-        title: Text(
-          'quick_actions'.tr,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: AppColors.lightBlue,
-          ),
+        title: Row(
+          children: [
+            Flexible(
+              child: Text(
+                'quick_actions'.tr,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.lightBlue,
+                ),
+              ),
+            ),
+
+            if (isSelectingLoan) ...[
+              const SizedBox(width: 8),
+              const SizedBox(
+                width: 13,
+                height: 13,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: AppColors.lightBlue,
+                ),
+              ),
+            ] else if (selectedLoanNumber.isNotEmpty) ...[
+              const SizedBox(width: 8),
+              _LoanNumberChip(
+                loanNumber: selectedLoanNumber,
+                onTap: () => onRequestLoan(context),
+              ),
+            ],
+          ],
         ),
         iconColor: AppColors.lightBlue,
         collapsedIconColor: Colors.black26,
@@ -430,33 +611,99 @@ class _QuickActionsDropdown extends StatelessWidget {
           _QuickActionItem(
             icon: Icons.event_note_outlined,
             title: 'emi_schedule'.tr,
-            onTap: () => onNavigate(AppRoutes.emiSchedule),
+            onTap: () => _handleTap(context, AppRoutes.emiSchedule),
           ),
           _QuickActionItem(
             icon: Icons.swap_vert_rounded,
             title: 'transactions'.tr,
-            onTap: () => onNavigate(AppRoutes.transactions),
+            onTap: () => _handleTap(context, AppRoutes.transactions),
           ),
           _QuickActionItem(
             icon: Icons.contact_phone_outlined,
             title: 'contact_update'.tr,
-            onTap: () => onNavigate(AppRoutes.contactUpdate),
+            onTap: () => _handleTap(context, AppRoutes.contactUpdate),
           ),
           _QuickActionItem(
             icon: Icons.report_problem_outlined,
             title: 'complaints'.tr,
-            onTap: () => onNavigate(AppRoutes.complaint),
+            onTap: () => _handleTap(context, AppRoutes.complaint),
           ),
           _QuickActionItem(
             icon: Icons.help_outline_rounded,
             title: 'help'.tr,
-            onTap: () => onNavigate(AppRoutes.help),
+            onTap: () => _handleTap(context, AppRoutes.help),
           ),
         ],
       ),
     );
   }
 }
+
+// ============================================================
+// LOAN NUMBER CHIP
+//
+// Rendered next to the Quick Actions label as
+// "Quick Actions • LN123456". Tapping it reopens the loan picker so
+// the customer can switch to another loan.
+//
+// The number is Flexible with a single ellipsised line so the row
+// never overflows on small devices or with long loan numbers.
+// ============================================================
+
+class _LoanNumberChip extends StatelessWidget {
+  final String loanNumber;
+
+  final VoidCallback onTap;
+
+  const _LoanNumberChip({required this.loanNumber, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Flexible(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(100),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+            decoration: BoxDecoration(
+              color: AppColors.lightBlue.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(100),
+              border: Border.all(
+                color: AppColors.lightBlue.withValues(alpha: 0.14),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  child: Text(
+                    loanNumber,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.lightBlue,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 3),
+                const Icon(
+                  Icons.unfold_more_rounded,
+                  size: 12,
+                  color: AppColors.lightBlue,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 
 class _QuickActionItem extends StatelessWidget {
   final IconData icon;

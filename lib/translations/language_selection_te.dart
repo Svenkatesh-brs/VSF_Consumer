@@ -3,6 +3,7 @@ const Map<String, String> languageSelectionTe = {
 
   'language': 'భాష',
   'select_language': 'భాషను ఎంచుకోండి',
+  'select_loan': 'లోన్‌ని ఎంచుకోండి',
   'english': 'English',
   'telugu': 'తెలుగు',
   'hindi': 'हिन्दी',

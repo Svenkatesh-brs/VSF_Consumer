@@ -2,6 +2,7 @@ const Map<String, String> languageSelectionHi = {
   'app_name': 'VSF Consumer',
   'language': 'भाषा',
   'select_language': 'भाषा चुनें',
+  'select_loan': 'लोन चुनें',
   'english': 'English',
   'telugu': 'తెలుగు',
   'hindi': 'हिन्दी',

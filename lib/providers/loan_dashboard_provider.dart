@@ -261,6 +261,40 @@ class LoanDashboardProvider extends GetxController {
   // CONVENIENCE GETTERS
   // ============================================================
 
+  /// Complete loan number of the currently selected loan, or an
+  /// empty string when no loan has been selected yet.
+  ///
+  /// This is the single "selected loan" of the whole loan feature:
+  /// the Dashboard, EMI Schedule, Transactions, Contact Update,
+  /// Complaints and the Profile Drawer's Quick Actions all resolve
+  /// it from here, so none of them can drift onto another loan.
+  String get loanNumber {
+    final fromSelected =
+        selectedLoan.value?['loanNumber']?.toString().trim() ?? '';
+
+    if (fromSelected.isNotEmpty) {
+      return fromSelected;
+    }
+
+    return dashboard.value?.loanNo.trim() ?? '';
+  }
+
+  /// True only once a loan has actually been selected (either by
+  /// opening the Loan Dashboard or through the Quick Actions loan
+  /// picker). Home intentionally has no selected loan.
+  bool get hasSelectedLoan => loanNumber.isNotEmpty;
+
+  /// Backend id of the selected loan; empty when none is selected.
+  String get loanId {
+    final fromDashboard = dashboard.value?.loanId.trim() ?? '';
+
+    if (fromDashboard.isNotEmpty) {
+      return fromDashboard;
+    }
+
+    return selectedLoan.value?['loanId']?.toString().trim() ?? '';
+  }
+
   String get vehicleNumber =>
       selectedLoan.value?['loanNumber']?.toString() ?? '';
 
@@ -360,6 +394,105 @@ class LoanDashboardProvider extends GetxController {
   }
 
   // ============================================================
+  // SELECT A SPECIFIC LOAN
+  //
+  //   GET /api/v1/consumer/loan/{loanId}
+  //
+  // Used by the Profile Drawer's Quick Actions when the customer
+  // picks a loan from the "My Loans" list. It reuses the exact same
+  // endpoint, service and models as [loadLoanDetails] — there is no
+  // second loan store anywhere in the app.
+  //
+  // DATA ISOLATION: the previously selected loan's models are
+  // cleared BEFORE the request starts, so EMI Schedule, Transactions
+  // and Contact Update can never render another loan's data while
+  // this one is loading (or after a failure).
+  //
+  // Returns false when the loan could not be loaded; the caller then
+  // keeps the user where they are instead of navigating.
+  // ============================================================
+
+  Future<bool> selectLoan(Map<String, dynamic> loan) async {
+    final loanId = _loanIdFromArguments(loan);
+
+    if (loanId.isEmpty) {
+      errorMessage.value = 'No loan information was found.';
+      return false;
+    }
+
+    // A loan request is already running. Returning early keeps the
+    // drawer from firing duplicate requests for the same loan.
+    if (isLoading.value) {
+      return false;
+    }
+
+    try {
+      isLoading.value = true;
+      errorMessage.value = null;
+
+      // --------------------------------------------------------
+      // DROP THE PREVIOUS LOAN
+      // --------------------------------------------------------
+
+      selectedLoan.value = <String, dynamic>{...loan, 'loanId': loanId};
+
+      dashboard.value = null;
+      loanDetails.value = null;
+      transactions.value = null;
+      emiSchedule.value = null;
+
+      // --------------------------------------------------------
+      // API CALL
+      // --------------------------------------------------------
+
+      final response = await _loanDashboardService.getLoanById(loanId);
+
+      if (!response.success || response.dashboard == null) {
+        errorMessage.value = response.message.isNotEmpty
+            ? response.message
+            : 'Unable to load your loan information.';
+
+        return false;
+      }
+
+      final dashboardData = response.dashboard!;
+
+      dashboard.value = dashboardData;
+
+      loanDetails.value = response.details;
+
+      transactions.value = response.transactions;
+
+      emiSchedule.value = response.emiSchedule;
+
+      // --------------------------------------------------------
+      // MAP TO THE EXISTING VIEW-MODEL SHAPE
+      // --------------------------------------------------------
+
+      selectedLoan.value = {
+        ...loan,
+        'loanId': dashboardData.loanId,
+        'loanNumber': dashboardData.loanNo,
+        'amount': dashboardData.loanAmount,
+        'status': dashboardData.displayStatus,
+        'borrowers': <String>[
+          if (dashboardData.borrowerName.isNotEmpty)
+            dashboardData.borrowerName,
+        ],
+        'loan': dashboardData,
+      };
+
+      return true;
+    } catch (e) {
+      errorMessage.value = _getErrorMessage(e);
+
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // ============================================================
   // API ERROR MESSAGE
   // ============================================================
 
@@ -389,12 +522,26 @@ class LoanDashboardProvider extends GetxController {
 
   // ============================================================
   // LIFECYCLE
+  //
+  // Auto-load ONLY when the route that created this controller
+  // supplied a loan through the navigation arguments:
+  //
+  //   * Loan Dashboard  -> Home passes the tapped "My Loans" card
+  //   * EMI Schedule /
+  //     Transactions   -> notification deep links pass a loan id
+  //
+  // The Profile Drawer on Home resolves the very same controller,
+  // but Home has no selected loan. Nothing is loaded there, so
+  // Quick Actions asks the customer to pick a loan from the picker
+  // instead of silently falling back to the first loan.
   // ============================================================
 
   @override
   void onReady() {
     super.onReady();
 
-    loadLoanDetails();
+    if (_loanIdFromArguments(Get.arguments).isNotEmpty) {
+      loadLoanDetails();
+    }
   }
 }
